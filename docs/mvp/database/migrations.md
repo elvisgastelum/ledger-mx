@@ -1,0 +1,64 @@
+# Database Migrations
+
+Drizzle Kit for PostgreSQL and PGlite migrations.
+
+## Development Workflow
+
+### Push Changes (Dev)
+
+```bash
+pnpm --filter @ledger-mx/database drizzle:push
+```
+
+Introspects DB, compares schema, applies changes.
+
+### Generate Migrations (Production)
+
+```bash
+pnpm --filter @ledger-mx/database drizzle:generate
+```
+
+Output: `libs/database/drizzle/migrations/0001_initial.sql`
+
+### Apply Migrations
+
+```bash
+pnpm --filter @ledger-mx/database drizzle:migrate
+```
+
+## Migration Structure
+
+```
+libs/database/drizzle/
+├── schema/         # Table definitions
+├── migrations/     # SQL migration files
+└── index.ts       # Main export
+```
+
+## PGlite Migrations
+
+Same Drizzle ORM, same migrations:
+
+```typescript
+import { migrate } from 'drizzle-orm/pglite/migrator';
+await migrate(db, { migrationsFolder: './drizzle/migrations' });
+```
+
+## Migration Tests
+
+Test with Testcontainers:
+
+```typescript
+test('migrations apply cleanly', async () => {
+  const container = await new TestcontainersPostgreSQLContainer().start();
+  await runMigrations(container.getConnectionUri());
+  // Verify tables exist
+});
+```
+
+## Best Practices
+
+1. Never edit existing migrations
+2. Test migrations on fresh DB
+3. Keep migrations small
+4. Use transactions
