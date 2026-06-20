@@ -2,25 +2,13 @@
 
 Initial account setup for LedgerMx MVP. Users can modify, add, or remove.
 
-## Required Initial Accounts
+## Canonical MVP Accounts
 
-### Debit Accounts
+The following four accounts are the core, required example accounts for the MVP:
 - **BBVA Debit** - Primary checking account
-- **Cash** - Physical cash on hand
-
-### Credit Cards
 - **BBVA Credit** - Primary credit card
 - **Nu Credit** - Digital credit card
-- **Plata Credit** - Additional credit line
-- **Coppel** - Store credit card
-
-### Loans
-- **Long-term land loan** - Mortgage/land payment
-
-### Savings and Investments
-- **Emergency Fund** - Protected emergency savings
-- **GBM Trading MX** - Investment account (future tracking)
-- **CETES** - Government bonds (future tracking)
+- **Cash** - Physical cash on hand
 
 ## Account Properties
 
@@ -41,45 +29,19 @@ accounts:
   - name: BBVA Debit
     type: debit
     currency: MXN
-    
+
   - name: BBVA Credit
     type: credit
     currency: MXN
     credit_limit_cents: 500000  # $5,000 MXN
-    
+
   - name: Nu Credit
     type: credit
     currency: MXN
     credit_limit_cents: 300000  # $3,000 MXN
-    
-  - name: Plata Credit
-    type: credit
-    currency: MXN
-    credit_limit_cents: 200000  # $2,000 MXN
-    
-  - name: Coppel
-    type: credit
-    currency: MXN
-    credit_limit_cents: 150000  # $1,500 MXN
-    
-  - name: Long-term land loan
-    type: loan
-    currency: MXN
-    
+
   - name: Cash
     type: cash
-    currency: MXN
-    
-  - name: Emergency Fund
-    type: savings
-    currency: MXN
-    
-  - name: GBM Trading MX
-    type: investment
-    currency: MXN
-    
-  - name: CETES
-    type: investment
     currency: MXN
 ```
 

@@ -1,6 +1,6 @@
 # Story: Product Foundations
 
-**Status**: Todo
+**Status**: Done
 **Priority**: P0
 **Estimated**: 2 days
 
@@ -17,10 +17,10 @@ Define product vision, MVP scope, example accounts, and locales.
 
 ## Acceptance Criteria
 
-- [ ] Vision document explains irregular income problem
-- [ ] MVP scope lists all features
-- [ ] Example accounts match user's real accounts
-- [ ] Locales defined for i18n
+- [x] Vision document explains irregular income problem
+- [x] MVP scope lists all features
+- [x] Example accounts include BBVA Debit, BBVA Credit, Nu Credit, Cash
+- [x] Locales defined for i18n
 
 ## Technical Notes
 
@@ -36,5 +36,5 @@ None
 
 ## Done Checklist
 
-- [ ] All acceptance criteria met
-- [ ] Documentation complete
+- [x] All acceptance criteria met
+- [x] Documentation complete
