@@ -1,0 +1,21 @@
+{
+  "name": "@ledger-mx/testing",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "build": "tsc --build tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "clean": "rm -rf dist tsconfig.tsbuildinfo"
+  },
+  "dependencies": {
+    "@ledger-mx/domain": "workspace:*",
+    "vitest": "^2.1.8"
+  },
+  "devDependencies": {}
+}

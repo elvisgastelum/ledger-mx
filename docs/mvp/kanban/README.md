@@ -14,6 +14,10 @@ Stories are in `todo/`, `doing/`, `done/`, `archive/` folders.
 > Some duplicate numbered files exist in `todo/` from an earlier ordering scheme; these are
 > obsolete leftovers and should be ignored (or removed when file deletion is available).
 
+## DOING Index
+
+- 011-architecture-foundations.md
+
 ## Story Template
 
 See `todo/001-database-model.md` for required headings.

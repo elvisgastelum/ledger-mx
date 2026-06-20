@@ -1,0 +1,24 @@
+{
+  "compilerOptions": {
+    "strict": true,
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "declaration": true,
+    "sourceMap": true,
+    "noEmit": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "paths": {
+      "@ledger-mx/domain": ["./libs/domain/src/index.ts"],
+      "@ledger-mx/application": ["./libs/application/src/index.ts"],
+      "@ledger-mx/database": ["./libs/database/src/index.ts"],
+      "@ledger-mx/contracts": ["./libs/contracts/src/index.ts"],
+      "@ledger-mx/sync": ["./libs/sync/src/index.ts"],
+      "@ledger-mx/ui": ["./libs/ui/src/index.ts"],
+      "@ledger-mx/testing": ["./libs/testing/src/index.ts"]
+    }
+  }
+}

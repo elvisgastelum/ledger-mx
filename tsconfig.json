@@ -1,0 +1,14 @@
+{
+  "files": [],
+  "references": [
+    { "path": "./apps/api" },
+    { "path": "./apps/web" },
+    { "path": "./libs/domain" },
+    { "path": "./libs/application" },
+    { "path": "./libs/database" },
+    { "path": "./libs/contracts" },
+    { "path": "./libs/sync" },
+    { "path": "./libs/ui" },
+    { "path": "./libs/testing" }
+  ]
+}
