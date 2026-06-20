@@ -14,7 +14,7 @@ Offline-first personal finance app for irregular income and paycheck budgeting.
 - [Security](./security/) - Auth, sessions, isolation
 - [Testing](./testing/) - TDD, invariants, coverage
 - [Deployment](./deployment/) - Homelab, Docker, env
-- [Export](./export/) - CSV/ZIP audit export
+- [Export](./export/) - CSV audit export (ZIP post-MVP)
 - [Seeds](./seeds/) - Demo and personal data
 - [Kanban](./kanban/) - Implementation stories
 

@@ -21,7 +21,7 @@ Design API boundaries and OpenAPI specification.
 - [ ] API boundaries document all endpoints
 - [ ] OpenAPI spec generated from code
 - [ ] Reports: spendable balance, expenses by category, debt progress
-- [ ] Export: CSV/ZIP download
+- [ ] Export: CSV download (ZIP post-MVP)
 - [ ] Health: readiness and liveness probes
 
 ## Technical Notes

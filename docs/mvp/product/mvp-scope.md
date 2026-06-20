@@ -23,7 +23,7 @@
 - REST + OpenAPI documentation
 - JWT authentication with refresh tokens
 - Session/device management
-- CSV/ZIP export for audit
+- CSV export for audit (ZIP post-MVP)
 - Financial calendar events
 - Reports (spendable balance, expenses by category, debt progress)
 

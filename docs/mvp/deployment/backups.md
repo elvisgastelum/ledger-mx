@@ -6,12 +6,12 @@ MVP defines a **manual backup strategy**. Automation is post-MVP.
 
 ## MVP: Manual Backup Procedure
 
-### CSV/Export Backup
+### CSV Export Backup
 
 Users should regularly export their data as a manual backup:
 
 1. Navigate to **Settings → Export Data**
-2. Select **Export Format**: CSV (per table) or ZIP (full backup)
+2. Select **Export Format**: CSV (per table) - ZIP full backup is post-MVP
 3. Choose data range: All data / Current year / Custom range
 4. Click **Export** → file downloads to device
 5. Store backup in a secure location (cloud storage, external drive)

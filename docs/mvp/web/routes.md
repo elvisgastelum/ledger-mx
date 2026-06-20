@@ -20,7 +20,7 @@
 - `/envelopes/new` - Create envelope
 - `/reports` - Reports (spendable balance, categories)
 - `/calendar` - Financial calendar
-- `/export` - Export CSV/ZIP
+- `/export` - Export CSV (ZIP future)
 - `/settings` - User settings
 
 ## Route Guards

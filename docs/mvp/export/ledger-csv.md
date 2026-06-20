@@ -2,34 +2,37 @@
 
 ## Specification
 
-CSV format for LedgerMx export.
+CSV format for LedgerMx export (simple transaction CSV).
+
+**Note**: For detailed audit CSV with transaction metadata, see [csv-zip.md](./csv-zip.md).
 
 ## Columns
 
 | Column | Type | Description |
 |--------|------|-------------|
 | Date | YYYY-MM-DD | Transaction date |
-| Amount | integer | Amount in cents (negative for income) |
-| Category | string | Category name |
-| Note | string | Transaction note |
+| Amount_Cents | integer | Amount in cents (always positive) |
+| Debit_Credit | string | "debit" (money out) or "credit" (money in) |
 | Account | string | Account name |
 | Envelope | string | Envelope name (optional) |
+| Category | string | Category name (optional) |
+| Note | string | Transaction note |
 | Type | enum | expense/income/transfer/debt_payment |
 
 ## Example
 
 ```csv
-Date,Amount,Category,Note,Account,Envelope,Type
-2024-01-15,10050,Groceries,Weekly shopping,BBVA Debit,Food,expense
-2024-01-20,-500000,Paycheck,Monthly income,BBVA Debit,,income
-2024-01-25,30000,Credit Card Payment,Paying off BBVA Credit,BBVA Debit,,debt_payment
+Date,Amount_Cents,Debit_Credit,Account,Envelope,Category,Note,Type
+2024-01-15,10050,debit,BBVA Debit,Food,Groceries,Weekly shopping,expense
+2024-01-20,500000,credit,BBVA Debit,,Paycheck,Monthly income,income
+2024-01-25,30000,debit,BBVA Debit,,Credit Card Payment,Paying off BBVA Credit,debt_payment
 ```
 
 ## Parsing Rules
 
-1. Amount is in cents (divide by 100 for display)
-2. Negative amount = money in (income)
-3. Positive amount = money out (expense)
+1. Amount_Cents is in cents (divide by 100 for display)
+2. Debit_Credit: "debit" = money out, "credit" = money in
+3. Amount_Cents always positive (sign encoded in Debit_Credit)
 4. Empty envelope = no envelope allocation
 5. Date format: ISO 8601 (YYYY-MM-DD)
 
