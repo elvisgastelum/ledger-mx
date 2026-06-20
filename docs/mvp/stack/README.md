@@ -14,6 +14,7 @@ Technology stack decisions for LedgerMx MVP.
 ## Technology Stack
 
 ### Frontend (apps/web)
+
 - React 18+
 - Vite (build tool)
 - TypeScript
@@ -25,17 +26,22 @@ Technology stack decisions for LedgerMx MVP.
 - Electric (sync client)
 - Tailwind CSS
 - shadcn/ui (component library)
+- @ts-rest/react-query/v5 (type-safe API client, integrates with TanStack Query)
 
 ### Backend (apps/api)
+
 - NestJS (framework)
 - PostgreSQL (database)
 - Drizzle ORM (type-safe queries)
 - Electric (sync server)
 - Passport/JWT (authentication)
-- OpenAPI/Swagger (API docs)
-- Class Validator (DTO validation)
+- ts-rest (API contracts in `libs/contracts`)
+- OpenAPI/Swagger (generated from ts-rest contracts)
+- Zod (request/response schema validation)
+- @ts-rest/nest (contract implementation)
 
 ### Testing
+
 - Vitest (unit/integration tests)
 - Testing Library (React components)
 - Playwright (E2E tests)
@@ -43,6 +49,7 @@ Technology stack decisions for LedgerMx MVP.
 - Testcontainers (PostgreSQL in tests)
 
 ### Monorepo
+
 - pnpm workspaces
 - TypeScript project references
 - Shared configs (ESLint, Prettier, tsconfig)
@@ -55,7 +62,7 @@ Technology stack decisions for LedgerMx MVP.
 4. **UI**: shadcn/ui (not custom design system)
 5. **Testing**: Strict TDD with Testcontainers
 
-> **Version pinning**: See [versions.md](./versions.md) for exact dependency versions.  
+> **Version pinning**: See [versions.md](./versions.md) for exact dependency versions.
 > **Alpha dependencies**: See [alpha-dependencies.md](./alpha-dependencies.md) for TanStack DB and Electric risk mitigation.
 
 ## Future Considerations

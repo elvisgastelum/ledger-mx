@@ -10,7 +10,7 @@ Stories are in `todo/`, `doing/`, `done/`, `archive/` folders.
 
 ## TODO Index (Canonical Order)
 
-> **Note:** The 13 files listed below are the canonical current order for the MVP backlog.
+> **Note:** The 14 files listed below are the canonical current order for the MVP backlog.
 > Some duplicate numbered files exist in `todo/` from an earlier ordering scheme; these are
 > obsolete leftovers and should be ignored (or removed when file deletion is available).
 
@@ -44,3 +44,4 @@ See `todo/001-database-model.md` for required headings.
 
 - 012-mvp-validation.md
 - 013-web-ux-model.md
+- 014-ts-rest-contracts.md

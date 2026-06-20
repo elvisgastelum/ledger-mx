@@ -1,6 +1,6 @@
 # API Documentation
 
-REST API for LedgerMx (NestJS + PostgreSQL + Drizzle).
+REST API for LedgerMx, built with contract-first ts-rest boundaries and OpenAPI generation from contracts (NestJS + PostgreSQL + Drizzle).
 
 ## Base URL
 
@@ -51,6 +51,13 @@ JWT access + refresh tokens. Bearer token in header:
 
 Success: `{ data: {...}, meta: {...} }`
 Error (RFC 7807): `{ type, title, status, detail }`
+
+## Related Documentation
+
+- [API Contracts](./contracts.md) - ts-rest contract definitions and rules
+- [API Boundaries](./boundaries.md) - Contract-first endpoint design guidelines
+- [Authentication](./auth.md) - Auth endpoint contracts and JWT strategy
+- [OpenAPI](./openapi.md) - Generating OpenAPI from ts-rest contracts
 
 ## Pagination
 

@@ -1,8 +1,10 @@
 # Authentication
 
-JWT access + refresh tokens with revocable sessions.
+JWT access + refresh tokens with revocable sessions. Auth endpoints are defined as an `auth` router in `libs/contracts`.
 
-## Endpoints
+## Contract Endpoints
+
+All auth endpoints are part of the `auth` router in `libs/contracts`, with the following routes:
 
 ### POST /auth/register
 
@@ -45,16 +47,21 @@ Revoke session.
 
 Sessions table tracks active sessions. Logout revokes session.
 
+## Protected Route Requirements
+
+All non-auth endpoints must reference auth requirements consistently in their contracts, either via `headers` definitions for Bearer tokens or contract metadata. Auth guards in `apps/api` enforce these requirements, but contracts only define transport shapes (no JWT implementation details).
+
 ## Implementation
 
+Auth endpoint handlers in `apps/api` implement the `auth` router contract defined in `libs/contracts`. The contract defines Zod schemas for request bodies (email, password, rememberMe). Handlers map contract inputs to application use cases without class-validator DTOs:
+
 ```typescript
-async login(dto: LoginDto) {
-  const user = await this.userRepo.findByEmail(dto.email);
-  const valid = await bcrypt.compare(dto.password, user.passwordHash);
-  if (!valid) throw new UnauthorizedException();
-  
-  const tokens = await this.generateTokens(user);
-  await this.sessionRepo.create({ userId: user.id, ... });
-  return tokens;
+// apps/api/src/auth/auth.controller.ts
+@TsRestHandler(contract.auth.login)
+async login() {
+  return async ({ body }) => {
+    const result = await this.authService.login(body.email, body.password, body.rememberMe);
+    return { status: 200 as const, body: result };
+  };
 }
 ```

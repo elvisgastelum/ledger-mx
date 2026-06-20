@@ -27,18 +27,13 @@ Download all data as ZIP with multiple CSVs.
 
 ## Implementation
 
+Define the export endpoint contract in `libs/contracts` using ts-rest with Zod schemas for query parameters. Implement the handler in `apps/api` using `@ts-rest/nest`, mapping to application use cases while preserving authorization and user scope:
+
 ```typescript
-@Get('export/csv')
-async exportCsv(@Query() dto: ExportDto, @Request() req) {
-  const txs = await this.transactionService.findByDateRange(
-    req.user.userId, dto.startDate, dto.endDate
-  );
-  
-  const csv = this.csvService.generate(txs);
-  
-  res.header('Content-Type', 'text/csv');
-  res.attachment(`ledger-mx-${dto.startDate}-${dto.endDate}.csv`);
-  res.send(csv);
+// apps/api/src/export/export.controller.ts
+@TsRestHandler(contract.export.csv)
+async exportCsv(@User() user: UserEntity) {
+  return this.exportService.generateCsv(user.id, this.query);
 }
 ```
 

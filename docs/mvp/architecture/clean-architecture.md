@@ -6,7 +6,7 @@
 libs/domain              # Innermost: Entities, Value Objects, Rules
 libs/application         # Use Cases, Application Services, DTOs
 libs/database           # Repository Implementations (Drizzle)
-libs/contracts          # API Types, OpenAPI Specs
+libs/contracts          # ts-rest API Contracts (outer boundary)
 libs/sync              # Electric Client, Shape Definitions
 apps/api               # NestJS Controllers, Modules (Frameworks)
 apps/web               # React Components, Routes (Frameworks)
@@ -31,16 +31,19 @@ Web/API → Application → Domain
 ## Domain Layer (libs/domain)
 
 ### Entities
+
 - Transaction: id, amountCents, type, accountId, categoryId, date, lines (double-entry)
 - Account: id, name, type, balanceCents, userId
 - Envelope: id, name, allocatedCents, spentCents, userId
 
 ### Value Objects
+
 - `Money`: amountCents, currency (no floats)
 - `UserId`: UUID v4 wrapper
 - `DateRange`: start, end
 
 ### Repository Interfaces
+
 - TransactionRepository: save, findById, findByUserId
 - AccountRepository: save, findById, findByUserId
 - EnvelopeRepository: save, findById, findByUserId
@@ -48,11 +51,13 @@ Web/API → Application → Domain
 ## Application Layer (libs/application)
 
 ### Use Cases
+
 - `CreateTransactionUseCase`
 - `CalculateSpendableBalanceUseCase`
 - `SyncPendingTransactionsUseCase`
 
 ### Application Services
+
 - Orchestrate domain objects
 - Handle cross-entity operations
 - No framework dependencies
@@ -60,12 +65,29 @@ Web/API → Application → Domain
 ## Infrastructure Layer
 
 ### Repository Implementations
+
 - `DrizzleTransactionRepository` implements `TransactionRepository`
 - `PGliteTransactionRepository` implements `TransactionRepository`
 
 ### Framework Adapters
+
 - NestJS controllers call use cases
 - React components call hooks → use cases
+
+## API Contract Boundary Rule
+
+`libs/contracts` is a transport-layer API boundary package, not part of core business logic:
+
+### Allowed Dependencies
+
+- `apps/api` may import and implement `libs/contracts` using `@ts-rest/nest`
+- `apps/web` may import and consume `libs/contracts` using `@ts-rest/react-query/v5`
+- OpenAPI generation tools may import `libs/contracts` to generate specs
+
+### Forbidden Dependencies
+
+- `libs/domain` must never import `libs/contracts` or any `@ts-rest/*` packages
+- `libs/application` must never import `libs/contracts` or any `@ts-rest/*` packages
 
 ## Testing Strategy
 

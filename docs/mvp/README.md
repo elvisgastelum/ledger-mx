@@ -32,7 +32,7 @@ apps/web          - React + Vite + PWA + TanStack
 libs/domain       - Entities, value objects, rules
 libs/application  - Use cases, services
 libs/database     - Drizzle schemas, migrations
-libs/contracts    - OpenAPI, shared types
+libs/contracts    - ts-rest API contracts, OpenAPI generation, shared API types
 libs/sync         - Electric client, shapes
 libs/ui           - shadcn/ui components
 libs/testing      - Test utilities, fixtures
@@ -42,9 +42,10 @@ docs/mvp          - This documentation
 ## Core Financial Model
 
 Real account balance
+
 - Protected envelopes
 - Upcoming required payments
-= Real spendable balance
+  = Real spendable balance
 
 ## Constraints
 

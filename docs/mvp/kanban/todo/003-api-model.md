@@ -18,15 +18,20 @@ Design API boundaries and OpenAPI specification.
 
 ## Acceptance Criteria
 
-- [ ] API boundaries document all endpoints
-- [ ] OpenAPI spec generated from code
+- [ ] API boundaries document all ts-rest contract-defined endpoints
+- [ ] OpenAPI spec generated from ts-rest contracts
+- [ ] ts-rest contracts define all endpoint methods, paths, schemas, and responses
 - [ ] Reports: spendable balance, expenses by category, debt progress
 - [ ] Export: CSV download (ZIP post-MVP)
 - [ ] Health: readiness and liveness probes
 
 ## Technical Notes
 
-Use NestJS Swagger module to generate OpenAPI. All endpoints require JWT auth except login/register.
+- API contracts use ts-rest in `libs/contracts` as single source of truth
+- OpenAPI spec generated from ts-rest contracts using `@ts-rest/open-api`, not NestJS Swagger decorators
+- Backend controllers implement contracts using `@ts-rest/nest`
+- Frontend consumes contracts using `@ts-rest/react-query/v5`
+- All endpoints require JWT auth except login/register
 
 ## Tests Required
 

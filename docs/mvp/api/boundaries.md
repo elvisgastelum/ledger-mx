@@ -1,50 +1,32 @@
 # API Boundaries
 
-Layered architecture: Controller → Use Case → Repository.
+Contract-first API design using ts-rest. All endpoints are defined as ts-rest contracts in `libs/contracts` before implementation.
 
-## Layers
+## Contract Structure
 
-### Controller (NestJS)
+Each endpoint contract must define:
 
-- Parse request
-- Validate DTOs
-- Call use case
-- Return HTTP response
+- HTTP method (GET, POST, PUT, DELETE, etc.)
+- Path (with `pathPrefix: '/api/v1'` for versioning)
+- Path parameters, query parameters, request body, headers
+- Success response schema and status code
+- Error response schemas (RFC 7807) and status codes
+- Summary and description metadata for OpenAPI generation
 
-### Use Case (Application)
+## Schema Rules
 
-- Business logic
-- Orchestrate domain objects
-- Transaction management
+All request/response schemas must enforce MVP conventions:
 
-### Repository (Domain Interface)
+- Money values: integer `amountCents` (no floats)
+- IDs: UUID v4 strings
+- User-scoped routes: all endpoints must validate user ownership of resources
 
-```typescript
-interface TransactionRepository {
-  save(tx: Transaction): Promise<Transaction>;
-  findByUserId(userId: string): Promise<Transaction[]>;
-}
-```
+## Implementation Alignment
 
-### Repository Implementation (Infrastructure)
-
-Drizzle ORM database access.
-
-## DTOs
-
-```typescript
-export class CreateTransactionDto {
-  @IsUUID() id: string;
-  @IsInt() amountCents: number;
-  @IsEnum(TransactionType) type: TransactionType;
-}
-```
-
-## Validation
-
-- DTO: class-validator
-- Domain: invariants (ledger balance, etc.)
+- **Backend**: Controllers implement contracts using `@ts-rest/nest`, mapping contract inputs to application use case inputs
+- **Frontend**: Client consumes same contracts using `@ts-rest/react-query/v5`
+- **OpenAPI**: Generated from contracts using `@ts-rest/open-api`, no manual Swagger decorators
 
 ## Error Handling
 
-Global exception filter, RFC 7807 format.
+Contracts define standardized RFC 7807 error responses. Global exception filters map application errors to contract-defined error schemas.
