@@ -67,3 +67,10 @@ transactions (1) ─── (N) transaction_lines
 - user_id on all user-scoped tables
 - transaction_id on transaction_lines
 - date on transactions
+
+## Timestamp Convention
+
+- All timestamp columns store UTC (never local time)
+- User-entered dates converted to UTC before storage
+- Date/time comparisons and sorting performed in UTC
+- Client displays convert UTC to user local timezone

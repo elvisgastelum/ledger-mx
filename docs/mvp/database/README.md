@@ -73,6 +73,12 @@ Database schema, migrations, and financial rules for LedgerMx.
 - Reversals for corrections
 - Audit trail preserved
 
+### UTC Time
+- All timestamps stored as UTC in database
+- Client/local timezone conversion only for display
+- User-entered dates converted to UTC before storage/transmission
+- All date/time comparisons in UTC
+
 ## Drizzle ORM
 
 ### Schema Definition

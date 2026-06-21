@@ -57,3 +57,4 @@ Clean Architecture / Onion Architecture implementation for LedgerMx.
 - Integer minor units for money (no floats)
 - Offline-first: local SQL (PGlite) then sync (Electric)
 - Soft delete with reversal for corrections
+- UTC for all dates/times: database, API, and internal logic; local timezone conversion only for display
