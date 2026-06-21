@@ -1,70 +1,89 @@
 # Reports API
 
-Endpoints for financial reports.
+Planned endpoints for financial reports. All endpoints are defined in the `reports` router of the ts-rest contract (`libs/contracts/src/contract.ts`) and are not yet implemented.
 
 ## Endpoints
 
-### GET /reports/spendable-balance
+### GET /api/v1/reports/spendable-balance (Planned)
 
-Current spendable balance.
+Get spendable balance for an optional date range.
 
-**Response:**
+**Auth Required**: Yes (JWT)
+**Query Parameters**:
+- `startDate` (optional): ISO 8601 datetime (inclusive start of range)
+- `endDate` (optional): ISO 8601 datetime (inclusive end of range)
+
+**Success Response (200)**:
 ```json
 {
-  "data": {
-    "totalBalanceCents": 100000,
-    "protectedEnvelopesCents": 20000,
-    "upcomingPaymentsCents": 15000,
-    "spendableBalanceCents": 65000
+  "totalIncome": 500000,
+  "totalExpenses": 350000,
+  "spendableBalance": 150000
+}
+```
+All values are in cents (integer).
+
+**Error Responses**:
+- 401: Unauthorized (invalid/missing JWT)
+- 501: Not Implemented
+
+---
+
+### GET /api/v1/reports/expenses-by-category (Planned)
+
+Get expenses grouped by category for a required date range.
+
+**Auth Required**: Yes (JWT)
+**Query Parameters**:
+- `startDate` (required): ISO 8601 datetime (inclusive start of range)
+- `endDate` (required): ISO 8601 datetime (inclusive end of range)
+
+**Success Response (200)**:
+```json
+[
+  {
+    "categoryGroupId": "a1b2c3d4-...",
+    "categoryGroupName": "Housing",
+    "totalExpenses": 150000,
+    "percentageOfTotal": 42.86
   }
+]
+```
+
+**Error Responses**:
+- 400: Invalid query parameters
+- 401: Unauthorized
+- 501: Not Implemented
+
+---
+
+### GET /api/v1/reports/debt-progress (Planned)
+
+Get debt payoff progress for an optional date range.
+
+**Auth Required**: Yes (JWT)
+**Query Parameters**:
+- `startDate` (optional): ISO 8601 datetime (inclusive start of range)
+- `endDate` (optional): ISO 8601 datetime (inclusive end of range)
+
+**Success Response (200)**:
+```json
+{
+  "totalDebt": 2500000,
+  "paidDebt": 500000,
+  "remainingDebt": 2000000,
+  "progressPercentage": 20.0
 }
 ```
 
-### GET /reports/expenses-by-category
+**Error Responses**:
+- 401: Unauthorized
+- 501: Not Implemented
 
-Expenses grouped by category.
+## User Scoping
 
-**Query:** startDate, endDate, groupBy
+All report endpoints automatically scope data to the authenticated `user_id` (extracted from JWT). No `userId` query/path parameter is required.
 
-### GET /reports/debt-progress
+## Implementation Notes
 
-Debt payoff progress.
-
-**Response:** Original balance, current balance, progress %, estimated payoff date.
-
-### GET /reports/upcoming-payments
-
-Payments due before next income.
-
-### GET /reports/protected-envelopes
-
-Envelope allocations and targets.
-
-### GET /reports/monthly-net-cashflow
-
-Income minus expenses by month.
-
-### GET /reports/financial-calendar
-
-Calendar events for a month.
-
-## Filters
-
-All reports support: dateRange, accountIds, categoryIds.
-
-## Implementation
-
-```typescript
-async getSpendableBalance(userId: string) {
-  const accounts = await this.accountRepo.findDebitAccounts(userId);
-  const envelopes = await this.envelopeRepo.findActive(userId);
-  const upcoming = await this.getUpcomingPayments(userId);
-  
-  return {
-    totalBalanceCents: sum(accounts, 'balanceCents'),
-    protectedEnvelopesCents: sum(envelopes, 'allocatedCents'),
-    upcomingPaymentsCents: sum(upcoming, 'amountCents'),
-    spendableBalanceCents: /* calculation */,
-  };
-}
-```
+Report logic will reuse existing application use cases for transaction/category group/debt queries. Controllers will map contract inputs to use case inputs and return contract-compliant responses.

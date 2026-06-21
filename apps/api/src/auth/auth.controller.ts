@@ -22,50 +22,26 @@ import {
   InvalidCredentialsError,
   DuplicateEmailError,
 } from "@ledger-mx/domain";
+import {
+  RegisterRequestSchema,
+  LoginRequestSchema,
+  RefreshTokenRequestSchema,
+  LogoutRequestSchema,
+} from "@ledger-mx/contracts";
 import type { AuthRequestContext } from "@ledger-mx/application";
 import { createZodDto, ZodValidationPipe } from "nestjs-zod";
-import { z } from "zod";
 
 export const REFRESH_COOKIE_NAME = "ledger_mx_refresh_token";
 
-// Password complexity: at least one uppercase, one lowercase, one number, and one special character
-const passwordSchema = z
-  .string()
-  .min(8, { message: "password must be at least 8 characters long" })
-  .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/, {
-    message:
-      "password must contain at least one uppercase letter, one lowercase letter, one number, and one special character",
-  });
-
 // Auth routes use explicit ZodValidationPipe on each @Body parameter to avoid
 // metadata inference issues that can occur with global validation pipes.
-export class RegisterDto extends createZodDto(
-  z.object({
-    email: z.string().email({ message: "email must be a valid email address" }),
-    password: passwordSchema,
-    displayName: z.string().max(100).optional(),
-    deviceName: z.string().max(200).optional(),
-    rememberMe: z.boolean().optional(),
-  }).strict()
-) {}
+export class RegisterDto extends createZodDto(RegisterRequestSchema) {}
 
-export class LoginDto extends createZodDto(
-  z.object({
-    email: z.string().email({ message: "email must be a valid email address" }),
-    password: passwordSchema,
-    deviceName: z.string().max(200).optional(),
-    rememberMe: z.boolean().optional(),
-  }).strict()
-) {}
+export class LoginDto extends createZodDto(LoginRequestSchema) {}
 
-// Explicit Zod schemas for refresh/logout that accept omitted body (cookie-only requests)
-const RefreshBodySchema = z.object({
-  refreshToken: z.string().optional(),
-}).strict();
+export class RefreshDto extends createZodDto(RefreshTokenRequestSchema) {}
 
-const LogoutBodySchema = z.object({
-  refreshToken: z.string().optional(),
-}).strict();
+export class LogoutDto extends createZodDto(LogoutRequestSchema) {}
 
 
 
@@ -224,7 +200,7 @@ export class AuthController {
   @Post("refresh")
   @HttpCode(HttpStatus.OK)
   async refresh(
-    @Body(new ZodValidationPipe(RefreshBodySchema.optional().default({}))) dto: z.infer<typeof RefreshBodySchema> | undefined,
+    @Body(new ZodValidationPipe(RefreshTokenRequestSchema.optional().default({}))) dto: RefreshDto | undefined,
     @Req() req: Request,
     @Res({ passthrough: true }) res: Response,
   ) {
@@ -250,7 +226,7 @@ export class AuthController {
   @Post("logout")
   @HttpCode(HttpStatus.OK)
   async logout(
-    @Body(new ZodValidationPipe(LogoutBodySchema.optional().default({}))) dto: z.infer<typeof LogoutBodySchema> | undefined,
+    @Body(new ZodValidationPipe(LogoutRequestSchema.optional().default({}))) dto: LogoutDto | undefined,
     @Req() req: Request,
     @Res({ passthrough: true }) res: Response,
   ) {

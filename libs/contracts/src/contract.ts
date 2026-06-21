@@ -1,0 +1,254 @@
+import { initContract } from "@ts-rest/core";
+import { z } from "zod";
+import {
+  ErrorResponseSchema,
+  UuidSchema,
+  MoneySchema,
+  DateRangeQuerySchema,
+  PaginationQuerySchema,
+} from "./common.schemas";
+import {
+  CreateCategoryGroupRequestSchema,
+  UpdateCategoryGroupRequestSchema,
+  ListCategoryGroupsResponseSchema,
+  CategoryGroupResponseSchema,
+} from "./category-groups/category-group.schemas";
+import { ApplyLayoutRequestSchema, ApplyLayoutResponseSchema } from "./onboarding/onboarding.schemas";
+import {
+  RegisterRequestSchema,
+  LoginRequestSchema,
+  RefreshTokenRequestSchema,
+  LogoutRequestSchema,
+  AuthSuccessResponseSchema,
+  LogoutResponseSchema,
+} from "./auth";
+
+const c = initContract();
+
+/**
+ * Root API contract (single source of truth for API shape)
+ * All implemented endpoints are fully typed; planned endpoints are marked as such.
+ */
+export const contract = c.router({
+  // AUTH ENDPOINTS (implemented, matches actual /auth/* routes)
+  auth: c.router({
+    register: {
+      method: "POST",
+      path: "/auth/register",
+      body: RegisterRequestSchema,
+      responses: {
+        201: AuthSuccessResponseSchema,
+        400: ErrorResponseSchema,
+        409: ErrorResponseSchema.describe("Email already registered"),
+      },
+      summary: "Register a new user and return auth tokens",
+      metadata: { implemented: true, auth: false },
+    },
+    login: {
+      method: "POST",
+      path: "/auth/login",
+      body: LoginRequestSchema,
+      responses: {
+        200: AuthSuccessResponseSchema,
+        400: ErrorResponseSchema,
+        401: ErrorResponseSchema.describe("Invalid email or password"),
+      },
+      summary: "Login with email and password, return auth tokens",
+      metadata: { implemented: true, auth: false },
+    },
+    refresh: {
+      method: "POST",
+      path: "/auth/refresh",
+      body: RefreshTokenRequestSchema,
+      responses: {
+        200: AuthSuccessResponseSchema,
+        401: ErrorResponseSchema.describe("Invalid or expired refresh token"),
+      },
+      summary: "Refresh access token using a valid refresh token",
+      metadata: { implemented: true, auth: false },
+    },
+    logout: {
+      method: "POST",
+      path: "/auth/logout",
+      body: LogoutRequestSchema,
+      responses: {
+        200: LogoutResponseSchema.describe("Logout successful"),
+        401: ErrorResponseSchema.describe("Invalid refresh token"),
+      },
+      summary: "Invalidate a refresh token (logout)",
+      metadata: { implemented: true, auth: false },
+    },
+  }),
+
+  // CATEGORY GROUPS ENDPOINTS (implemented, matches actual /category-groups routes)
+  categoryGroups: c.router({
+    list: {
+      method: "GET",
+      path: "/category-groups",
+      query: PaginationQuerySchema.optional(),
+      responses: {
+        200: ListCategoryGroupsResponseSchema,
+        401: ErrorResponseSchema,
+      },
+      summary: "List all category groups for the authenticated user",
+      metadata: { implemented: true, auth: true, scopes: ["user:read"] },
+    },
+    create: {
+      method: "POST",
+      path: "/category-groups",
+      body: CreateCategoryGroupRequestSchema,
+      responses: {
+        201: CategoryGroupResponseSchema,
+        400: ErrorResponseSchema,
+        401: ErrorResponseSchema,
+      },
+      summary: "Create a new category group for the authenticated user",
+      metadata: { implemented: true, auth: true, scopes: ["user:write"] },
+    },
+    update: {
+      method: "PATCH",
+      path: "/category-groups/:id",
+      pathParams: z.object({ id: UuidSchema }),
+      body: UpdateCategoryGroupRequestSchema,
+      responses: {
+        200: CategoryGroupResponseSchema,
+        400: ErrorResponseSchema,
+        401: ErrorResponseSchema,
+        404: ErrorResponseSchema.describe("Category group not found or not owned by user") },
+      summary: "Update an existing category group by ID",
+      metadata: { implemented: true, auth: true, scopes: ["user:write"] },
+    },
+    delete: {
+      method: "DELETE",
+      path: "/category-groups/:id",
+      pathParams: z.object({ id: UuidSchema }),
+      responses: {
+        204: c.noBody(),
+        401: ErrorResponseSchema,
+        404: ErrorResponseSchema.describe("Category group not found or not owned by user") },
+      summary: "Delete a category group by ID",
+      metadata: { implemented: true, auth: true, scopes: ["user:write"] },
+    },
+  }),
+
+  // ONBOARDING ENDPOINTS (implemented, matches actual /api/v1/onboarding/layout route)
+  onboarding: c.router({
+    applyLayout: {
+      method: "POST",
+      path: "/api/v1/onboarding/layout",
+      body: ApplyLayoutRequestSchema,
+      responses: {
+        200: ApplyLayoutResponseSchema,
+        400: ErrorResponseSchema,
+        401: ErrorResponseSchema,
+      },
+      summary: "Apply a default category group layout during user onboarding",
+      metadata: { implemented: true, auth: true, scopes: ["user:write"] },
+    },
+  }),
+
+  // REPORTS ENDPOINTS (planned, not yet implemented)
+  reports: c.router({
+    getSpendableBalance: {
+      method: "GET",
+      path: "/api/v1/reports/spendable-balance",
+      query: DateRangeQuerySchema.optional(),
+      responses: {
+        200: z.object({
+          totalIncome: MoneySchema,
+          totalExpenses: MoneySchema,
+          spendableBalance: MoneySchema,
+        }).describe("Spendable balance calculation"),
+        401: ErrorResponseSchema,
+        501: ErrorResponseSchema.describe("Endpoint not yet implemented"),
+      },
+      summary: "Get spendable balance for a date range",
+      metadata: { implemented: false, auth: true, scopes: ["user:read"], planned: true },
+    },
+    getExpensesByCategory: {
+      method: "GET",
+      path: "/api/v1/reports/expenses-by-category",
+      query: DateRangeQuerySchema,
+      responses: {
+        200: z.array(z.object({
+          categoryGroupId: UuidSchema,
+          categoryGroupName: z.string(),
+          totalExpenses: MoneySchema,
+          percentageOfTotal: z.number().min(0).max(100),
+        })).describe("Expenses grouped by category"),
+        401: ErrorResponseSchema,
+        501: ErrorResponseSchema.describe("Endpoint not yet implemented"),
+      },
+      summary: "Get expenses grouped by category for a date range",
+      metadata: { implemented: false, auth: true, scopes: ["user:read"], planned: true },
+    },
+    getDebtProgress: {
+      method: "GET",
+      path: "/api/v1/reports/debt-progress",
+      query: DateRangeQuerySchema.optional(),
+      responses: {
+        200: z.object({
+          totalDebt: MoneySchema,
+          paidDebt: MoneySchema,
+          remainingDebt: MoneySchema,
+          progressPercentage: z.number().min(0).max(100),
+        }).describe("Debt payoff progress"),
+        401: ErrorResponseSchema,
+        501: ErrorResponseSchema.describe("Endpoint not yet implemented"),
+      },
+      summary: "Get debt payoff progress for a date range",
+      metadata: { implemented: false, auth: true, scopes: ["user:read"], planned: true },
+    },
+  }),
+
+  // EXPORT ENDPOINTS (planned, not yet implemented)
+  export: c.router({
+    downloadCsv: {
+      method: "GET",
+      path: "/api/v1/export/csv",
+      query: z.object({
+        ...DateRangeQuerySchema.shape,
+        type: z.enum(["transactions", "category-groups", "reports"]).describe("Type of data to export"),
+      }),
+      responses: {
+         200: c.otherResponse({ contentType: "text/csv", body: z.string().min(1) }),
+        401: ErrorResponseSchema,
+        501: ErrorResponseSchema.describe("Endpoint not yet implemented"),
+      },
+      summary: "Download filtered data as a CSV file",
+      metadata: { implemented: false, auth: true, scopes: ["user:read"], planned: true },
+    },
+  }),
+
+  // HEALTH ENDPOINTS (planned, not yet implemented)
+  health: c.router({
+    liveness: {
+      method: "GET",
+      path: "/health/liveness",
+      responses: {
+        200: z.object({ status: z.literal("ok") }).describe("Liveness check passed"),
+        503: ErrorResponseSchema.describe("Service unavailable"),
+      },
+      summary: "Kubernetes liveness probe endpoint",
+      metadata: { implemented: false, auth: false, planned: true },
+    },
+    readiness: {
+      method: "GET",
+      path: "/health/readiness",
+      responses: {
+        200: z.object({
+          status: z.literal("ok"),
+          checks: z.object({
+            database: z.boolean(),
+            redis: z.boolean().optional(),
+          }),
+        }).describe("Readiness check passed"),
+        503: ErrorResponseSchema.describe("Service not ready (dependent systems down)"),
+      },
+      summary: "Kubernetes readiness probe endpoint",
+      metadata: { implemented: false, auth: false, planned: true },
+    },
+  }),
+});
+
+export type Contract = typeof contract;

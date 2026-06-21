@@ -1,60 +1,72 @@
-# Health Check
+# Health Check API
 
-Endpoint: `GET /health` (no auth required).
+Planned endpoints for Kubernetes liveness and readiness probes. Defined in the `health` router of the ts-rest contract (`libs/contracts/src/contract.ts`), not yet implemented.
 
-## Response
+## Endpoints
 
-### Healthy (200)
+### GET /health/liveness (Planned)
 
+Kubernetes liveness probe: confirms the application process is running.
+
+**Auth Required**: No
+**Success Response (200)**:
+```json
+{ "status": "ok" }
+```
+**Error Response (503)**:
+```json
+{ "error": "SERVICE_UNAVAILABLE", "message": "Application process is unresponsive", "statusCode": 503 }
+```
+
+---
+
+### GET /health/readiness (Planned)
+
+Kubernetes readiness probe: confirms the application can handle traffic (dependent services are available).
+
+**Auth Required**: No
+**Success Response (200)**:
 ```json
 {
   "status": "ok",
-  "timestamp": "2026-06-19T12:00:00.000Z",
   "checks": {
-    "database": { "status": "ok", "responseTimeMs": 5 }
+    "database": true
   }
 }
 ```
-
-### Unhealthy (503)
-
+**Error Response (503)**:
 ```json
 {
-  "status": "error",
+  "error": "SERVICE_UNAVAILABLE",
+  "message": "Dependent services are unavailable",
+  "statusCode": 503,
   "checks": {
-    "database": { "status": "error", "message": "Timeout" }
+    "database": false
   }
 }
 ```
 
-## Checks
+## Checks (Planned)
 
-- **Database**: `SELECT 1`, measure response time
-- **Electric**: Connectivity check (future)
+| Check       | Description                                  | Required for Readiness |
+|-------------|----------------------------------------------|------------------------|
+| Database    | Execute simple query (e.g., `SELECT 1`)      | Yes                    |
+| Redis       | Ping Redis cache (if enabled)                 | No (optional)          |
 
-## Implementation
+## Implementation Notes
 
-```typescript
-@Get('health')
-async check() {
-  const dbCheck = await this.checkDatabase();
-  const allHealthy = dbCheck.status === 'ok';
-  
-  return {
-    status: allHealthy ? 'ok' : 'error',
-    timestamp: new Date().toISOString(),
-    checks: { database: dbCheck },
-  };
-}
-```
+- Liveness probe should never fail unless the process is crashed (no dependency checks).
+- Readiness probe fails if any required dependency is unavailable.
+- No auth is required for either endpoint (Kubernetes probes cannot authenticate).
 
-## Docker Health Check
+## Docker/Kubernetes Configuration
 
+Once implemented, update Dockerfile and Kubernetes manifests to use the correct probe endpoints:
 ```dockerfile
 HEALTHCHECK --interval=30s --timeout=3s \
-  CMD curl -f http://localhost:3000/health || exit 1
+  CMD curl -f http://localhost:3000/health/liveness || exit 1
 ```
 
 ## Monitoring (Future)
 
-Prometheus metrics at `/metrics`.
+Prometheus metrics endpoint at `/metrics` (separate from health probes).

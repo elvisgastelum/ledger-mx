@@ -1,0 +1,1961 @@
+{
+  "openapi": "3.0.0",
+  "paths": {
+    "/auth/register": {
+      "post": {
+        "summary": "Register a new user and return auth tokens",
+        "tags": [
+          "auth"
+        ],
+        "parameters": [],
+        "requestBody": {
+          "description": "Body",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "format": "email",
+                    "description": "User's email address (used for login)"
+                  },
+                  "password": {
+                    "type": "string",
+                    "minLength": 8,
+                    "pattern": "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]",
+                    "description": "User's password (min 8 chars, uppercase, lowercase, number, special char)"
+                  },
+                  "displayName": {
+                    "type": "string",
+                    "maxLength": 100,
+                    "description": "Optional display name for the user"
+                  },
+                  "deviceName": {
+                    "type": "string",
+                    "maxLength": 200,
+                    "description": "Optional device name for session tracking"
+                  },
+                  "rememberMe": {
+                    "type": "boolean",
+                    "description": "If true, extends refresh token expiry to 30 days"
+                  }
+                },
+                "required": [
+                  "email",
+                  "password"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "201",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "accessToken": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "JWT access token (short-lived)"
+                    },
+                    "sessionId": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Session ID for the active session"
+                    },
+                    "user": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "format": "uuid",
+                          "description": "UUID v4 identifier"
+                        },
+                        "email": {
+                          "type": "string",
+                          "format": "email"
+                        },
+                        "displayName": {
+                          "type": "string",
+                          "description": "User's display name, if set"
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "email"
+                      ],
+                      "description": "Authenticated user summary"
+                    }
+                  },
+                  "required": [
+                    "accessToken",
+                    "sessionId",
+                    "user"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "400",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Error type identifier (e.g., 'VALIDATION_ERROR', 'UNAUTHORIZED')"
+                    },
+                    "message": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Human-readable error description"
+                    },
+                    "statusCode": {
+                      "type": "integer",
+                      "minimum": 100,
+                      "maximum": 599,
+                      "description": "HTTP status code matching the response"
+                    }
+                  },
+                  "required": [
+                    "error",
+                    "message",
+                    "statusCode"
+                  ]
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Email already registered",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Error type identifier (e.g., 'VALIDATION_ERROR', 'UNAUTHORIZED')"
+                    },
+                    "message": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Human-readable error description"
+                    },
+                    "statusCode": {
+                      "type": "integer",
+                      "minimum": 100,
+                      "maximum": 599,
+                      "description": "HTTP status code matching the response"
+                    }
+                  },
+                  "required": [
+                    "error",
+                    "message",
+                    "statusCode"
+                  ],
+                  "description": "Email already registered"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "summary": "Login with email and password, return auth tokens",
+        "tags": [
+          "auth"
+        ],
+        "parameters": [],
+        "requestBody": {
+          "description": "Body",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "format": "email",
+                    "description": "User's email address"
+                  },
+                  "password": {
+                    "type": "string",
+                    "minLength": 8,
+                    "pattern": "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]",
+                    "description": "User's password"
+                  },
+                  "deviceName": {
+                    "type": "string",
+                    "maxLength": 200,
+                    "description": "Optional device name for session tracking"
+                  },
+                  "rememberMe": {
+                    "type": "boolean",
+                    "description": "If true, extends refresh token expiry to 30 days"
+                  }
+                },
+                "required": [
+                  "email",
+                  "password"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "200",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "accessToken": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "JWT access token (short-lived)"
+                    },
+                    "sessionId": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Session ID for the active session"
+                    },
+                    "user": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "format": "uuid",
+                          "description": "UUID v4 identifier"
+                        },
+                        "email": {
+                          "type": "string",
+                          "format": "email"
+                        },
+                        "displayName": {
+                          "type": "string",
+                          "description": "User's display name, if set"
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "email"
+                      ],
+                      "description": "Authenticated user summary"
+                    }
+                  },
+                  "required": [
+                    "accessToken",
+                    "sessionId",
+                    "user"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "400",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Error type identifier (e.g., 'VALIDATION_ERROR', 'UNAUTHORIZED')"
+                    },
+                    "message": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Human-readable error description"
+                    },
+                    "statusCode": {
+                      "type": "integer",
+                      "minimum": 100,
+                      "maximum": 599,
+                      "description": "HTTP status code matching the response"
+                    }
+                  },
+                  "required": [
+                    "error",
+                    "message",
+                    "statusCode"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid email or password",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Error type identifier (e.g., 'VALIDATION_ERROR', 'UNAUTHORIZED')"
+                    },
+                    "message": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Human-readable error description"
+                    },
+                    "statusCode": {
+                      "type": "integer",
+                      "minimum": 100,
+                      "maximum": 599,
+                      "description": "HTTP status code matching the response"
+                    }
+                  },
+                  "required": [
+                    "error",
+                    "message",
+                    "statusCode"
+                  ],
+                  "description": "Invalid email or password"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/refresh": {
+      "post": {
+        "summary": "Refresh access token using a valid refresh token",
+        "tags": [
+          "auth"
+        ],
+        "parameters": [],
+        "requestBody": {
+          "description": "Body",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "refreshToken": {
+                    "type": "string",
+                    "description": "Refresh token (can also be provided via httpOnly cookie)"
+                  }
+                },
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "200",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "accessToken": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "JWT access token (short-lived)"
+                    },
+                    "sessionId": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Session ID for the active session"
+                    },
+                    "user": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "format": "uuid",
+                          "description": "UUID v4 identifier"
+                        },
+                        "email": {
+                          "type": "string",
+                          "format": "email"
+                        },
+                        "displayName": {
+                          "type": "string",
+                          "description": "User's display name, if set"
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "email"
+                      ],
+                      "description": "Authenticated user summary"
+                    }
+                  },
+                  "required": [
+                    "accessToken",
+                    "sessionId",
+                    "user"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid or expired refresh token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Error type identifier (e.g., 'VALIDATION_ERROR', 'UNAUTHORIZED')"
+                    },
+                    "message": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Human-readable error description"
+                    },
+                    "statusCode": {
+                      "type": "integer",
+                      "minimum": 100,
+                      "maximum": 599,
+                      "description": "HTTP status code matching the response"
+                    }
+                  },
+                  "required": [
+                    "error",
+                    "message",
+                    "statusCode"
+                  ],
+                  "description": "Invalid or expired refresh token"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/logout": {
+      "post": {
+        "summary": "Invalidate a refresh token (logout)",
+        "tags": [
+          "auth"
+        ],
+        "parameters": [],
+        "requestBody": {
+          "description": "Body",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "refreshToken": {
+                    "type": "string",
+                    "description": "Refresh token to invalidate (can also be provided via httpOnly cookie)"
+                  }
+                },
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Logout successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "enum": [
+                        true
+                      ],
+                      "description": "Indicates logout was successful"
+                    }
+                  },
+                  "required": [
+                    "success"
+                  ],
+                  "description": "Logout successful"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid refresh token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Error type identifier (e.g., 'VALIDATION_ERROR', 'UNAUTHORIZED')"
+                    },
+                    "message": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Human-readable error description"
+                    },
+                    "statusCode": {
+                      "type": "integer",
+                      "minimum": 100,
+                      "maximum": 599,
+                      "description": "HTTP status code matching the response"
+                    }
+                  },
+                  "required": [
+                    "error",
+                    "message",
+                    "statusCode"
+                  ],
+                  "description": "Invalid refresh token"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/category-groups": {
+      "get": {
+        "summary": "List all category groups for the authenticated user",
+        "tags": [
+          "categoryGroups"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "200",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "categoryGroups": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "format": "uuid"
+                          },
+                          "name": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 100
+                          },
+                          "kind": {
+                            "type": "string",
+                            "enum": [
+                              "income",
+                              "expense",
+                              "savings",
+                              "general"
+                            ]
+                          },
+                          "idealPercentageBasisPoints": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 10000,
+                            "nullable": true
+                          },
+                          "sortOrder": {
+                            "type": "integer",
+                            "minimum": 0
+                          },
+                          "isSystem": {
+                            "type": "boolean"
+                          },
+                          "createdAt": {
+                            "type": "string",
+                            "format": "date-time"
+                          },
+                          "updatedAt": {
+                            "type": "string",
+                            "format": "date-time"
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "name",
+                          "kind",
+                          "idealPercentageBasisPoints",
+                          "sortOrder",
+                          "isSystem",
+                          "createdAt",
+                          "updatedAt"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "categoryGroups"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "401",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Error type identifier (e.g., 'VALIDATION_ERROR', 'UNAUTHORIZED')"
+                    },
+                    "message": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Human-readable error description"
+                    },
+                    "statusCode": {
+                      "type": "integer",
+                      "minimum": 100,
+                      "maximum": 599,
+                      "description": "HTTP status code matching the response"
+                    }
+                  },
+                  "required": [
+                    "error",
+                    "message",
+                    "statusCode"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Create a new category group for the authenticated user",
+        "tags": [
+          "categoryGroups"
+        ],
+        "parameters": [],
+        "requestBody": {
+          "description": "Body",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100
+                  },
+                  "kind": {
+                    "type": "string",
+                    "enum": [
+                      "income",
+                      "expense",
+                      "savings",
+                      "general"
+                    ]
+                  },
+                  "idealPercentageBasisPoints": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 10000,
+                    "nullable": true
+                  },
+                  "sortOrder": {
+                    "type": "integer",
+                    "minimum": 0
+                  }
+                },
+                "required": [
+                  "name",
+                  "kind"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "201",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "kind": {
+                      "type": "string",
+                      "enum": [
+                        "income",
+                        "expense",
+                        "savings",
+                        "general"
+                      ]
+                    },
+                    "idealPercentageBasisPoints": {
+                      "type": "integer",
+                      "nullable": true
+                    },
+                    "sortOrder": {
+                      "type": "integer"
+                    },
+                    "isSystem": {
+                      "type": "boolean"
+                    },
+                    "createdAt": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "updatedAt": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "name",
+                    "kind",
+                    "idealPercentageBasisPoints",
+                    "sortOrder",
+                    "isSystem",
+                    "createdAt",
+                    "updatedAt"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "400",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Error type identifier (e.g., 'VALIDATION_ERROR', 'UNAUTHORIZED')"
+                    },
+                    "message": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Human-readable error description"
+                    },
+                    "statusCode": {
+                      "type": "integer",
+                      "minimum": 100,
+                      "maximum": 599,
+                      "description": "HTTP status code matching the response"
+                    }
+                  },
+                  "required": [
+                    "error",
+                    "message",
+                    "statusCode"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "401",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Error type identifier (e.g., 'VALIDATION_ERROR', 'UNAUTHORIZED')"
+                    },
+                    "message": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Human-readable error description"
+                    },
+                    "statusCode": {
+                      "type": "integer",
+                      "minimum": 100,
+                      "maximum": 599,
+                      "description": "HTTP status code matching the response"
+                    }
+                  },
+                  "required": [
+                    "error",
+                    "message",
+                    "statusCode"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/category-groups/{id}": {
+      "patch": {
+        "summary": "Update an existing category group by ID",
+        "tags": [
+          "categoryGroups"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "UUID v4 identifier"
+          }
+        ],
+        "requestBody": {
+          "description": "Body",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100
+                  },
+                  "kind": {
+                    "type": "string",
+                    "enum": [
+                      "income",
+                      "expense",
+                      "savings",
+                      "general"
+                    ]
+                  },
+                  "idealPercentageBasisPoints": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 10000,
+                    "nullable": true
+                  },
+                  "sortOrder": {
+                    "type": "integer",
+                    "minimum": 0
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "200",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "kind": {
+                      "type": "string",
+                      "enum": [
+                        "income",
+                        "expense",
+                        "savings",
+                        "general"
+                      ]
+                    },
+                    "idealPercentageBasisPoints": {
+                      "type": "integer",
+                      "nullable": true
+                    },
+                    "sortOrder": {
+                      "type": "integer"
+                    },
+                    "isSystem": {
+                      "type": "boolean"
+                    },
+                    "createdAt": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "updatedAt": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "name",
+                    "kind",
+                    "idealPercentageBasisPoints",
+                    "sortOrder",
+                    "isSystem",
+                    "createdAt",
+                    "updatedAt"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "400",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Error type identifier (e.g., 'VALIDATION_ERROR', 'UNAUTHORIZED')"
+                    },
+                    "message": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Human-readable error description"
+                    },
+                    "statusCode": {
+                      "type": "integer",
+                      "minimum": 100,
+                      "maximum": 599,
+                      "description": "HTTP status code matching the response"
+                    }
+                  },
+                  "required": [
+                    "error",
+                    "message",
+                    "statusCode"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "401",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Error type identifier (e.g., 'VALIDATION_ERROR', 'UNAUTHORIZED')"
+                    },
+                    "message": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Human-readable error description"
+                    },
+                    "statusCode": {
+                      "type": "integer",
+                      "minimum": 100,
+                      "maximum": 599,
+                      "description": "HTTP status code matching the response"
+                    }
+                  },
+                  "required": [
+                    "error",
+                    "message",
+                    "statusCode"
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Category group not found or not owned by user",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Error type identifier (e.g., 'VALIDATION_ERROR', 'UNAUTHORIZED')"
+                    },
+                    "message": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Human-readable error description"
+                    },
+                    "statusCode": {
+                      "type": "integer",
+                      "minimum": 100,
+                      "maximum": 599,
+                      "description": "HTTP status code matching the response"
+                    }
+                  },
+                  "required": [
+                    "error",
+                    "message",
+                    "statusCode"
+                  ],
+                  "description": "Category group not found or not owned by user"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete a category group by ID",
+        "tags": [
+          "categoryGroups"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "UUID v4 identifier"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "204"
+          },
+          "401": {
+            "description": "401",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Error type identifier (e.g., 'VALIDATION_ERROR', 'UNAUTHORIZED')"
+                    },
+                    "message": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Human-readable error description"
+                    },
+                    "statusCode": {
+                      "type": "integer",
+                      "minimum": 100,
+                      "maximum": 599,
+                      "description": "HTTP status code matching the response"
+                    }
+                  },
+                  "required": [
+                    "error",
+                    "message",
+                    "statusCode"
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Category group not found or not owned by user",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Error type identifier (e.g., 'VALIDATION_ERROR', 'UNAUTHORIZED')"
+                    },
+                    "message": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Human-readable error description"
+                    },
+                    "statusCode": {
+                      "type": "integer",
+                      "minimum": 100,
+                      "maximum": 599,
+                      "description": "HTTP status code matching the response"
+                    }
+                  },
+                  "required": [
+                    "error",
+                    "message",
+                    "statusCode"
+                  ],
+                  "description": "Category group not found or not owned by user"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/onboarding/layout": {
+      "post": {
+        "summary": "Apply a default category group layout during user onboarding",
+        "tags": [
+          "onboarding"
+        ],
+        "parameters": [],
+        "requestBody": {
+          "description": "Body",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "layout": {
+                    "type": "string",
+                    "enum": [
+                      "blank",
+                      "50-30-20"
+                    ]
+                  }
+                },
+                "required": [
+                  "layout"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "200",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "categoryGroups": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "format": "uuid"
+                          },
+                          "name": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 100
+                          },
+                          "kind": {
+                            "type": "string",
+                            "enum": [
+                              "income",
+                              "expense",
+                              "savings",
+                              "general"
+                            ]
+                          },
+                          "idealPercentageBasisPoints": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 10000,
+                            "nullable": true
+                          },
+                          "sortOrder": {
+                            "type": "integer",
+                            "minimum": 0
+                          },
+                          "isSystem": {
+                            "type": "boolean"
+                          },
+                          "createdAt": {
+                            "type": "string",
+                            "format": "date-time"
+                          },
+                          "updatedAt": {
+                            "type": "string",
+                            "format": "date-time"
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "name",
+                          "kind",
+                          "idealPercentageBasisPoints",
+                          "sortOrder",
+                          "isSystem",
+                          "createdAt",
+                          "updatedAt"
+                        ]
+                      }
+                    },
+                    "created": {
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "categoryGroups",
+                    "created"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "400",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Error type identifier (e.g., 'VALIDATION_ERROR', 'UNAUTHORIZED')"
+                    },
+                    "message": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Human-readable error description"
+                    },
+                    "statusCode": {
+                      "type": "integer",
+                      "minimum": 100,
+                      "maximum": 599,
+                      "description": "HTTP status code matching the response"
+                    }
+                  },
+                  "required": [
+                    "error",
+                    "message",
+                    "statusCode"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "401",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Error type identifier (e.g., 'VALIDATION_ERROR', 'UNAUTHORIZED')"
+                    },
+                    "message": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Human-readable error description"
+                    },
+                    "statusCode": {
+                      "type": "integer",
+                      "minimum": 100,
+                      "maximum": 599,
+                      "description": "HTTP status code matching the response"
+                    }
+                  },
+                  "required": [
+                    "error",
+                    "message",
+                    "statusCode"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/reports/spendable-balance": {
+      "get": {
+        "summary": "Get spendable balance for a date range",
+        "tags": [
+          "reports"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Spendable balance calculation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "totalIncome": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "description": "Monetary value in cents (1/100 of currency unit)"
+                    },
+                    "totalExpenses": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "description": "Monetary value in cents (1/100 of currency unit)"
+                    },
+                    "spendableBalance": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "description": "Monetary value in cents (1/100 of currency unit)"
+                    }
+                  },
+                  "required": [
+                    "totalIncome",
+                    "totalExpenses",
+                    "spendableBalance"
+                  ],
+                  "description": "Spendable balance calculation"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "401",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Error type identifier (e.g., 'VALIDATION_ERROR', 'UNAUTHORIZED')"
+                    },
+                    "message": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Human-readable error description"
+                    },
+                    "statusCode": {
+                      "type": "integer",
+                      "minimum": 100,
+                      "maximum": 599,
+                      "description": "HTTP status code matching the response"
+                    }
+                  },
+                  "required": [
+                    "error",
+                    "message",
+                    "statusCode"
+                  ]
+                }
+              }
+            }
+          },
+          "501": {
+            "description": "Endpoint not yet implemented",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Error type identifier (e.g., 'VALIDATION_ERROR', 'UNAUTHORIZED')"
+                    },
+                    "message": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Human-readable error description"
+                    },
+                    "statusCode": {
+                      "type": "integer",
+                      "minimum": 100,
+                      "maximum": 599,
+                      "description": "HTTP status code matching the response"
+                    }
+                  },
+                  "required": [
+                    "error",
+                    "message",
+                    "statusCode"
+                  ],
+                  "description": "Endpoint not yet implemented"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/reports/expenses-by-category": {
+      "get": {
+        "summary": "Get expenses grouped by category for a date range",
+        "tags": [
+          "reports"
+        ],
+        "parameters": [
+          {
+            "name": "startDate",
+            "in": "query",
+            "description": "Inclusive start of date range (ISO 8601)",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "endDate",
+            "in": "query",
+            "description": "Inclusive end of date range (ISO 8601)",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Expenses grouped by category",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "categoryGroupId": {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "UUID v4 identifier"
+                      },
+                      "categoryGroupName": {
+                        "type": "string"
+                      },
+                      "totalExpenses": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "description": "Monetary value in cents (1/100 of currency unit)"
+                      },
+                      "percentageOfTotal": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 100
+                      }
+                    },
+                    "required": [
+                      "categoryGroupId",
+                      "categoryGroupName",
+                      "totalExpenses",
+                      "percentageOfTotal"
+                    ]
+                  },
+                  "description": "Expenses grouped by category"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "401",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Error type identifier (e.g., 'VALIDATION_ERROR', 'UNAUTHORIZED')"
+                    },
+                    "message": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Human-readable error description"
+                    },
+                    "statusCode": {
+                      "type": "integer",
+                      "minimum": 100,
+                      "maximum": 599,
+                      "description": "HTTP status code matching the response"
+                    }
+                  },
+                  "required": [
+                    "error",
+                    "message",
+                    "statusCode"
+                  ]
+                }
+              }
+            }
+          },
+          "501": {
+            "description": "Endpoint not yet implemented",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Error type identifier (e.g., 'VALIDATION_ERROR', 'UNAUTHORIZED')"
+                    },
+                    "message": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Human-readable error description"
+                    },
+                    "statusCode": {
+                      "type": "integer",
+                      "minimum": 100,
+                      "maximum": 599,
+                      "description": "HTTP status code matching the response"
+                    }
+                  },
+                  "required": [
+                    "error",
+                    "message",
+                    "statusCode"
+                  ],
+                  "description": "Endpoint not yet implemented"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/reports/debt-progress": {
+      "get": {
+        "summary": "Get debt payoff progress for a date range",
+        "tags": [
+          "reports"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Debt payoff progress",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "totalDebt": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "description": "Monetary value in cents (1/100 of currency unit)"
+                    },
+                    "paidDebt": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "description": "Monetary value in cents (1/100 of currency unit)"
+                    },
+                    "remainingDebt": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "description": "Monetary value in cents (1/100 of currency unit)"
+                    },
+                    "progressPercentage": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 100
+                    }
+                  },
+                  "required": [
+                    "totalDebt",
+                    "paidDebt",
+                    "remainingDebt",
+                    "progressPercentage"
+                  ],
+                  "description": "Debt payoff progress"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "401",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Error type identifier (e.g., 'VALIDATION_ERROR', 'UNAUTHORIZED')"
+                    },
+                    "message": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Human-readable error description"
+                    },
+                    "statusCode": {
+                      "type": "integer",
+                      "minimum": 100,
+                      "maximum": 599,
+                      "description": "HTTP status code matching the response"
+                    }
+                  },
+                  "required": [
+                    "error",
+                    "message",
+                    "statusCode"
+                  ]
+                }
+              }
+            }
+          },
+          "501": {
+            "description": "Endpoint not yet implemented",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Error type identifier (e.g., 'VALIDATION_ERROR', 'UNAUTHORIZED')"
+                    },
+                    "message": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Human-readable error description"
+                    },
+                    "statusCode": {
+                      "type": "integer",
+                      "minimum": 100,
+                      "maximum": 599,
+                      "description": "HTTP status code matching the response"
+                    }
+                  },
+                  "required": [
+                    "error",
+                    "message",
+                    "statusCode"
+                  ],
+                  "description": "Endpoint not yet implemented"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/export/csv": {
+      "get": {
+        "summary": "Download filtered data as a CSV file",
+        "tags": [
+          "export"
+        ],
+        "parameters": [
+          {
+            "name": "startDate",
+            "in": "query",
+            "description": "Inclusive start of date range (ISO 8601)",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "endDate",
+            "in": "query",
+            "description": "Inclusive end of date range (ISO 8601)",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "type",
+            "in": "query",
+            "description": "Type of data to export",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "transactions",
+                "category-groups",
+                "reports"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "200"
+          },
+          "401": {
+            "description": "401",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Error type identifier (e.g., 'VALIDATION_ERROR', 'UNAUTHORIZED')"
+                    },
+                    "message": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Human-readable error description"
+                    },
+                    "statusCode": {
+                      "type": "integer",
+                      "minimum": 100,
+                      "maximum": 599,
+                      "description": "HTTP status code matching the response"
+                    }
+                  },
+                  "required": [
+                    "error",
+                    "message",
+                    "statusCode"
+                  ]
+                }
+              }
+            }
+          },
+          "501": {
+            "description": "Endpoint not yet implemented",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Error type identifier (e.g., 'VALIDATION_ERROR', 'UNAUTHORIZED')"
+                    },
+                    "message": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Human-readable error description"
+                    },
+                    "statusCode": {
+                      "type": "integer",
+                      "minimum": 100,
+                      "maximum": 599,
+                      "description": "HTTP status code matching the response"
+                    }
+                  },
+                  "required": [
+                    "error",
+                    "message",
+                    "statusCode"
+                  ],
+                  "description": "Endpoint not yet implemented"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/health/liveness": {
+      "get": {
+        "summary": "Kubernetes liveness probe endpoint",
+        "tags": [
+          "health"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Liveness check passed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "ok"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "status"
+                  ],
+                  "description": "Liveness check passed"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Error type identifier (e.g., 'VALIDATION_ERROR', 'UNAUTHORIZED')"
+                    },
+                    "message": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Human-readable error description"
+                    },
+                    "statusCode": {
+                      "type": "integer",
+                      "minimum": 100,
+                      "maximum": 599,
+                      "description": "HTTP status code matching the response"
+                    }
+                  },
+                  "required": [
+                    "error",
+                    "message",
+                    "statusCode"
+                  ],
+                  "description": "Service unavailable"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/health/readiness": {
+      "get": {
+        "summary": "Kubernetes readiness probe endpoint",
+        "tags": [
+          "health"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Readiness check passed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "ok"
+                      ]
+                    },
+                    "checks": {
+                      "type": "object",
+                      "properties": {
+                        "database": {
+                          "type": "boolean"
+                        },
+                        "redis": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": [
+                        "database"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "status",
+                    "checks"
+                  ],
+                  "description": "Readiness check passed"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service not ready (dependent systems down)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Error type identifier (e.g., 'VALIDATION_ERROR', 'UNAUTHORIZED')"
+                    },
+                    "message": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Human-readable error description"
+                    },
+                    "statusCode": {
+                      "type": "integer",
+                      "minimum": 100,
+                      "maximum": 599,
+                      "description": "HTTP status code matching the response"
+                    }
+                  },
+                  "required": [
+                    "error",
+                    "message",
+                    "statusCode"
+                  ],
+                  "description": "Service not ready (dependent systems down)"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "info": {
+    "title": "LedgerMx API",
+    "version": "1.0.0",
+    "description": "LedgerMx API - Personal Finance Management\n\nThis API provides endpoints for:\n- User authentication (register, login, refresh, logout)\n- Category group management (list, create, update, delete)\n- Onboarding (apply default layout)\n- Reports (planned: spendable balance, expenses by category, debt progress)\n- Export (planned: CSV download)\n- Health checks (planned: liveness and readiness probes)\n\n## Authentication\n\nMost endpoints require authentication via JWT access tokens. Include the token in the Authorization header:\n```\nAuthorization: Bearer <access_token>\n```\n\nRefresh tokens are handled via httpOnly cookies (primary) or optional body parameter.\n\n## Implemented Endpoints\n\nEndpoints marked with \"implemented: true\" in the contract metadata are available in the current release.\nPlanned endpoints are included in this spec for documentation purposes but return 501 Not Implemented."
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3000",
+      "description": "Local development server"
+    },
+    {
+      "url": "https://api.ledgermx.com",
+      "description": "Production server"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "description": "JWT access token (obtained from /auth/login or /auth/register)"
+      }
+    }
+  },
+  "security": [
+    {
+      "bearerAuth": []
+    }
+  ]
+}

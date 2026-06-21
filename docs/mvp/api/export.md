@@ -1,50 +1,51 @@
 # Export API
 
-CSV export for audit (ZIP post-MVP).
+Planned endpoint for CSV data export. The endpoint is defined in the `export` router of the ts-rest contract (`libs/contracts/src/contract.ts`) and is not yet implemented.
 
 ## Endpoints
 
-### GET /export/csv
+### GET /api/v1/export/csv (Planned)
 
-Download transactions as CSV (simple transaction format).
+Download filtered financial data as a CSV file.
 
-**Query:** startDate, endDate
+**Auth Required**: Yes (JWT)
+**Query Parameters**:
+- `startDate` (optional): ISO 8601 datetime (inclusive start of range)
+- `endDate` (optional): ISO 8601 datetime (inclusive end of range)
+- `type` (required): Enum of `transactions`, `category-groups`, `reports` (type of data to export)
 
-**Response:** CSV file download.
+**Success Response (200)**:
+- Content-Type: `text/csv`
+- Body: CSV file content (string)
 
-**CSV Format (Simple Transaction):**
+**Error Responses**:
+- 400: Invalid query parameters
+- 401: Unauthorized (invalid/missing JWT)
+- 501: Not Implemented
 
+---
+
+## CSV Format (Transactions)
+
+Planned default format for `type=transactions` exports:
 ```csv
 Date,Amount_Cents,Debit_Credit,Account,Envelope,Category,Note,Type
 2024-01-15,10050,debit,BBVA Debit,Food,Groceries,Weekly shopping,expense
 ```
 
-For detailed audit CSV format, see [csv-zip.md](../export/csv-zip.md).
+### Rules
+- Amounts are in cents (integer, always positive)
+- `Debit_Credit` column indicates transaction direction
+- Column order is fixed as above
 
-### GET /export/csv.zip (Future)
+## Implementation Notes
 
-Download all data as ZIP with multiple CSVs.
-
-## Implementation
-
-Define the export endpoint contract in `libs/contracts` using ts-rest with Zod schemas for query parameters. Implement the handler in `apps/api` using `@ts-rest/nest`, mapping to application use cases while preserving authorization and user scope:
-
-```typescript
-// apps/api/src/export/export.controller.ts
-@TsRestHandler(contract.export.csv)
-async exportCsv(@User() user: UserEntity) {
-  return this.exportService.generateCsv(user.id, this.query);
-}
-```
-
-## CSV Generation
-
-Amount in cents (integer minor units). Always positive. Use `Debit_Credit` column for direction.
-
-**Column order:** Date, Amount_Cents, Debit_Credit, Account, Envelope, Category, Note, Type
+- CSV generation will use a dedicated `ExportService` in the application layer.
+- Controllers will map contract query parameters to service inputs and return the CSV string with the correct `Content-Type` header.
+- `@ts-rest/core` `c.otherResponse` is used in the contract to define the non-JSON CSV response type.
 
 ## Future
 
 - ZIP export with multiple CSVs (post-MVP)
 - JSON export (preserves double-entry)
-- Scheduled exports
+- Scheduled recurring exports

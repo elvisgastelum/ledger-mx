@@ -21,22 +21,16 @@ Define type-safe, contract-first API shapes shared between `apps/api` and `apps/
 ```
 libs/contracts/src/
 ├── index.ts                 # Export all contracts, schemas, types
-├── contract.ts              # Root contract combining all routers
-├── common/
-│   ├── errors.ts            # Shared RFC 7807 error schemas
-│   ├── pagination.ts        # Pagination query/response schemas
-│   ├── money.ts             # Money (amountCents) Zod schema
-│   └── ids.ts               # UUID v4 ID Zod schema
+├── contract.ts              # Single root contract combining all routers (current implementation)
+├── common.schemas.ts        # Shared Zod schemas (ErrorResponse, Uuid, Money, Pagination)
 ├── auth/
-│   ├── contract.ts          # Auth router (register, login, refresh, logout, current session)
 │   └── schemas.ts           # Auth request/response Zod schemas
-├── accounts/
-│   ├── contract.ts          # Accounts router
-│   └── schemas.ts           # Account Zod schemas
-└── transactions/
-    ├── contract.ts          # Transactions router
-    └── schemas.ts           # Transaction Zod schemas
+├── onboarding/              # Planned onboarding schemas/contract
+│   └── schemas.ts
+└── ...                      # Planned per-feature directories (accounts, transactions, etc.)
 ```
+
+> **Note**: Per-router contract files (e.g., `auth/contract.ts`) shown in the original layout are planned for future refactoring. Currently, all routers are defined in the root `contract.ts`, while per-feature schemas (like `auth/schemas.ts`) are already implemented.
 
 ## Rules
 

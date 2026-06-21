@@ -1,5 +1,20 @@
 export const PACKAGE_NAME = "@ledger-mx/contracts";
 
+// Common schemas
+export {
+  ErrorResponseSchema,
+  type ErrorResponse,
+  UuidSchema,
+  MoneySchema,
+  DateRangeQuerySchema,
+  type DateRangeQuery,
+  PaginationQuerySchema,
+  type PaginationQuery,
+} from "./common.schemas";
+
+// Auth schemas
+export * from "./auth";
+
 // Category Groups
 export {
   CATEGORY_GROUP_KINDS,
@@ -30,3 +45,9 @@ export type {
   ApplyLayoutRequest,
   ApplyLayoutResponse,
 } from "./onboarding";
+
+// ts-rest contract (single source of truth for API shape)
+export { contract, type Contract } from "./contract";
+
+// Generated OpenAPI document (single source of truth for API documentation)
+export { openApiDocument, writeOpenApiJson } from "./openapi";

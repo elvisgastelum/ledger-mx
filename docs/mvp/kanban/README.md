@@ -14,25 +14,25 @@ Stories are in `todo/`, `doing/`, `done/`, `archive/` folders.
 > Some duplicate numbered files exist in `todo/` from an earlier ordering scheme; these are
 > obsolete leftovers and should be ignored (or removed when file deletion is available).
 
-1. 003-api-model.md
-2. 005-sync-model.md
-3. 006-testing-strategy.md
-4. 007-seeds.md
-5. 008-export.md
-6. 009-deployment.md
-7. 012-mvp-validation.md
-8. 013-web-ux-model.md
-9. 014-ts-rest-contracts.md
-10. 016-category-layout-onboarding.md
+1. 005-sync-model.md
+2. 006-testing-strategy.md
+3. 007-seeds.md
+4. 008-export.md
+5. 009-deployment.md
+6. 012-mvp-validation.md
+7. 013-web-ux-model.md
+8. 014-ts-rest-contracts.md
+9. 016-category-layout-onboarding.md
 
 ## DOING Index
 
-(empty - no stories currently in progress)
+(empty)
 
 ## DONE Index
 
 - 001-database-model.md
 - 002-ledger-model.md
+- 003-api-model.md
 - 004-auth-session-model.md
 - 010-product-foundations.md
 - 011-architecture-foundations.md
@@ -48,7 +48,7 @@ See `done/001-database-model.md` for required headings.
 
 - 001-database-model.md (done)
 - 002-ledger-model.md (done)
-- 003-api-model.md
+- 003-api-model.md (done)
 - 004-auth-session-model.md (done)
 - 005-sync-model.md
 - 015-category-groups.md (done)
