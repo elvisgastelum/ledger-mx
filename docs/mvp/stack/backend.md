@@ -63,4 +63,39 @@ ts-rest's Nest integration ignores Nest global prefixes, versioning, and control
 
 - `nest start --watch` for hot reload
 - Vitest for tests
-- Testcontainers for PostgreSQL
+- Testcontainers for PostgreSQL integration tests
+
+### Local Database (Docker Compose)
+
+For local development and testing with a real PostgreSQL database:
+
+1. Copy the example environment file to create your local `.env`:
+   ```bash
+   cp .env.example .env
+   ```
+   Edit `.env` to adjust ports, credentials, or other settings if needed. **Do not commit `.env` to version control** (it is ignored by `.gitignore`).
+
+2. Manage the database container:
+   ```bash
+   # Start PostgreSQL container
+   pnpm db:up
+
+   # Stop the container (data persists in named volume)
+   pnpm db:down
+
+   # Stop and remove container + volume (data lost)
+   pnpm db:reset
+   ```
+
+**Connection URL:** Configured via `DATABASE_URL` in `.env`, defaulting to `postgresql://postgres:postgres@localhost:5432/ledger_mx_dev` if using the example values.
+
+**Note:** `POSTGRES_PORT` in `.env` is the **host port** mapped to PostgreSQL's internal port 5432. If you change `POSTGRES_PORT`, you must also update the port in `DATABASE_URL` to match. See `.env.example` for details.
+
+The Docker Compose service uses a named volume (`ledger_mx_postgres_data`) for data persistence. Running `pnpm db:reset` removes the volume entirely. The service includes a healthcheck using `pg_isready` to ensure the database is ready before use.
+
+**Important:** Docker Compose will fail with a clear error message if required environment variables (`POSTGRES_DB`, `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_PORT`) are missing from `.env`. Copy `.env.example` to `.env` before running `pnpm db:up`:
+```bash
+cp .env.example .env
+```
+
+**Note:** Testcontainers (used in integration tests) spins up an isolated PostgreSQL container per test suite and does not require this local database to be running.

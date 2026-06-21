@@ -24,6 +24,10 @@
   "devDependencies": {
     "drizzle-kit": "^0.20.14",
     "@types/pg": "^8.11.0",
-    "dotenv": "^16.4.5"
+    "dotenv": "^16.4.5",
+    "testcontainers": "^10.14.0",
+    "@testcontainers/postgresql": "^10.14.0",
+    "@types/node": "^22.10.0",
+    "vitest": "^2.1.8"
   }
 }

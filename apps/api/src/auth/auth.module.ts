@@ -96,23 +96,18 @@ export class AuthModule {
       !options?.auditLogRepository;
 
     const jwtSecret = process.env.JWT_SECRET;
-    if (process.env.NODE_ENV === "production") {
-      if (!jwtSecret) {
-        throw new Error(
-          "JWT_SECRET environment variable is required in production. " +
-            "Set a strong secret value before starting the application.",
-        );
-      }
+    if (!jwtSecret) {
+      throw new Error(
+        "JWT_SECRET environment variable is required. Copy .env.example to .env and set a secure JWT_SECRET for local development.",
+      );
     }
-    const finalJwtSecret =
-      jwtSecret ?? "dev-only-insecure-secret-do-not-use-in-production";
 
     return {
       module: AuthModule,
       controllers: [AuthController],
       imports: [
         JwtModule.register({
-          secret: finalJwtSecret,
+          secret: jwtSecret,
         }),
       ],
       providers: [

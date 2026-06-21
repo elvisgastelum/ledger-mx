@@ -14,6 +14,13 @@ import type {
   SessionId,
 } from "@ledger-mx/domain";
 
+// Self-contained test setup: provide a safe test-only JWT_SECRET
+// so tests don't depend on external environment variables.
+// This is test-only and set here for fail-fast auth module initialization.
+beforeEach(() => {
+  process.env.JWT_SECRET = "test-jwt-secret-for-unit-tests-only";
+});
+
 /**
  * In-memory fake UserRepository for testing
  */
@@ -81,11 +88,11 @@ class FakeSessionRepository implements SessionRepository {
 
   async revoke(
     sessionId: SessionId,
-    _userId: UserId,
+    userId: UserId,
     revokedAt: Date,
   ): Promise<void> {
     const session = this.sessions.get(sessionId as string);
-    if (session) {
+    if (session && session.userId === userId) {
       session.revokedAt = revokedAt;
       this.sessions.set(sessionId as string, session);
     }
