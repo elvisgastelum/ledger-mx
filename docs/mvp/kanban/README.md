@@ -16,10 +16,11 @@ Stories are in `todo/`, `doing/`, `done/`, `archive/` folders.
 
 ## DOING Index
 
-- 001-database-model.md
+- 004-auth-session-model.md
 
 ## DONE Index
 
+- 001-database-model.md
 - 010-product-foundations.md
 - 011-architecture-foundations.md
 - 002-ledger-model.md

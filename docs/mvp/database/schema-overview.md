@@ -40,12 +40,15 @@ transactions (1) ─── (N) transaction_lines
 
 ### transactions
 
-| Column       | Type    | Notes                                |
-| ------------ | ------- | ------------------------------------ |
-| id           | UUID PK |                                      |
-| user_id      | UUID FK |                                      |
-| amount_cents | integer | Total amount                         |
-| type         | enum    | expense/income/transfer/debt_payment |
+| Column                     | Type    | Notes                                |
+| -------------------------- | ------- | ------------------------------------ |
+| id                         | UUID PK |                                      |
+| user_id                    | UUID FK |                                      |
+| amount_cents               | integer | Total amount                         |
+| type                       | enum    | income/expense/transfer/adjustment/reversal/debt_payment  |
+| reversal_of_transaction_id | UUID FK | Nullable, self-referencing           |
+
+**FK Decision — `reversal_of_transaction_id`:** The default `ON DELETE NO ACTION` is kept intentionally for MVP. Transaction history must not be hard-deleted; reversal links should remain referentially intact. Corrections, reversals, and soft-delete policies are preferred over deleting posted transactions. If a future physical-delete workflow is introduced, revisit whether `ON DELETE SET NULL` is safer.
 
 ### transaction_lines
 
@@ -60,11 +63,17 @@ transactions (1) ─── (N) transaction_lines
 | target_id      | UUID    | References target_type entity                |
 | amount_cents   | integer | Signed (positive = credit, negative = debit) |
 
+### Double-Entry Pattern
+
+`transaction_lines` implements the ledger double-entry pattern: `transactions` is the transaction/header table while `transaction_lines` contains the individual ledger entries. Each transaction must have at least two lines, and the `amount_cents` values across all lines for a transaction must sum to zero. All rows remain user-scoped via the parent `transactions.user_id`.
+
 ## Enums
 
-- transaction_type: income/expense/transfer/adjustment/reversal/debt_payment
-- account_type: debit/credit/loan/savings/investment/cash
-- transaction_line_target_type: account/envelope/category
+| Enum Name                       | Values                                                      |
+| ------------------------------- | ----------------------------------------------------------- |
+| transaction_type                | income/expense/transfer/adjustment/reversal/debt_payment    |
+| account_type                    | debit/credit/loan/savings/cash                              |
+| transaction_line_target_type    | account/envelope/category                                   |
 
 ## Indexes
 
