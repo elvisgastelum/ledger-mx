@@ -1,6 +1,6 @@
 # Story: Architecture Foundations
 
-**Status**: Doing
+**Status**: Done
 **Priority**: P0
 **Estimated**: 3 days
 

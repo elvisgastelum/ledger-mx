@@ -1,0 +1,75 @@
+import { relations } from "drizzle-orm";
+import { users } from "./users";
+import { accounts } from "./accounts";
+import { envelopes } from "./envelopes";
+import { categories } from "./categories";
+import { transactions } from "./transactions";
+import { transactionLines } from "./transaction-lines";
+
+export const usersRelations = relations(users, ({ many }) => ({
+  accounts: many(accounts),
+  envelopes: many(envelopes),
+  categories: many(categories),
+  transactions: many(transactions),
+  transactionLines: many(transactionLines),
+}));
+
+export const accountsRelations = relations(accounts, ({ one, many }) => ({
+  user: one(users, { fields: [accounts.userId], references: [users.id] }),
+  transactionLines: many(transactionLines),
+}));
+
+export const envelopesRelations = relations(envelopes, ({ one, many }) => ({
+  user: one(users, { fields: [envelopes.userId], references: [users.id] }),
+  transactionLines: many(transactionLines),
+}));
+
+export const categoriesRelations = relations(categories, ({ one, many }) => ({
+  user: one(users, { fields: [categories.userId], references: [users.id] }),
+  parent: one(categories, {
+    fields: [categories.parentId],
+    references: [categories.id],
+  }),
+  children: many(categories, { relationName: "parent" }),
+  transactionLines: many(transactionLines),
+}));
+
+export const transactionsRelations = relations(
+  transactions,
+  ({ one, many }) => ({
+    user: one(users, { fields: [transactions.userId], references: [users.id] }),
+    reversalOf: one(transactions, {
+      fields: [transactions.reversalOfTransactionId],
+      references: [transactions.id],
+      relationName: "reversal",
+    }),
+    reversedBy: many(transactions, { relationName: "reversal" }),
+    transactionLines: many(transactionLines),
+  }),
+);
+
+export const transactionLinesRelations = relations(
+  transactionLines,
+  ({ one }) => ({
+    user: one(users, {
+      fields: [transactionLines.userId],
+      references: [users.id],
+    }),
+    transaction: one(transactions, {
+      fields: [transactionLines.transactionId],
+      references: [transactions.id],
+    }),
+    account: one(accounts, {
+      fields: [transactionLines.accountId],
+      references: [accounts.id],
+    }),
+    envelope: one(envelopes, {
+      fields: [transactionLines.envelopeId],
+      references: [envelopes.id],
+    }),
+    category: one(categories, {
+      fields: [transactionLines.categoryId],
+      references: [categories.id],
+    }),
+  }),
+);

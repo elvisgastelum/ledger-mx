@@ -16,11 +16,15 @@ Stories are in `todo/`, `doing/`, `done/`, `archive/` folders.
 
 ## DOING Index
 
+- 001-database-model.md
+
+## DONE Index
+
 - 011-architecture-foundations.md
 
 ## Story Template
 
-See `todo/001-database-model.md` for required headings.
+See `doing/001-database-model.md` for required headings.
 
 ## MVP Stories
 
