@@ -56,7 +56,42 @@ Use NestJS @nestjs/jwt and @nestjs/passport. Store refresh tokens in database wi
 
 **Caveat:** The `password_hash` column is nullable at the DB schema level for migration safety and to support imported users, but application-level local auth flows (registration/login) must require a password hash.
 
-### Application Layer (In Progress)
+### Infrastructure Layer (In Progress)
+
+- [x] Add `@nestjs/jwt`, `bcrypt` dependencies to `apps/api/package.json`
+- [x] Create database connection utility (`libs/database/src/connection.ts`)
+- [x] Implement `DrizzleUserRepository` (implements `UserRepository`)
+- [x] Implement `DrizzleSessionRepository` (implements `SessionRepository`)
+- [x] Implement `DrizzleAuthAuditLogRepository` (implements `AuthAuditLogRepository`)
+- [x] Update `libs/database/src/index.ts` to export new modules
+- [x] Create `JwtTokenService` (implements `TokenService` using `@nestjs/jwt`)
+- [x] Create `BcryptPasswordHasher` (implements `PasswordHasher` using `bcrypt`)
+- [x] Create `UuidIdGenerator` (implements `IdGenerator` using `crypto.randomUUID()`)
+- [x] Add DI tokens (`apps/api/src/auth/auth.tokens.ts`)
+- [x] Create `AuthController` with endpoints: `POST /auth/register`, `/auth/login`, `/auth/refresh`, `/auth/logout`
+- [x] Create `AuthModule` with configurable repository providers for testing
+- [x] Create `AppModule` importing `AuthModule`
+- [x] Update `main.ts` with NestJS bootstrap
+- [x] Add integration tests (`auth.controller.test.ts`) using fake in-memory repositories
+- [x] Add `JwtTokenService` unit tests (`jwt-token.service.test.ts`)
+
+**Design Decisions:**
+
+- Controllers use NestJS `@Controller('auth')` rather than ts-rest for simplicity in this slice
+- `AuthModule.forRoot()` accepts optional repository providers for testability
+- Refresh tokens returned in response body (cookies deferred to later slice)
+- Integration tests use fake repositories (no real database required)
+- `createDatabase()` utility in `libs/database` supports connection string injection
+
+**Remaining:**
+
+- [ ] Wire real Drizzle repositories to `AuthModule` when database is available
+- [ ] Add cookie-based refresh token storage (httpOnly, secure, sameSite)
+- [ ] Add request validation using `class-validator` or Zod
+- [ ] End-to-end tests with real database (Testcontainers)
+- [ ] Move `JWT_SECRET` and `DATABASE_URL` to proper config module
+
+### Application Layer (Completed)
 
 - [x] Define auth error classes (`InvalidCredentialsError`, `SessionRevokedError`, `SessionExpiredError`, `TokenReuseDetectedError`, `DuplicateEmailError`)
 - [x] Define `AuthSession` type, `SessionId` branded type, and session helper functions
@@ -66,19 +101,3 @@ Use NestJS @nestjs/jwt and @nestjs/passport. Store refresh tokens in database wi
 - [x] Create shared DTOs: `AuthRequestContext`, `AuthResult`
 - [x] Implement use cases: `RegisterUserUseCase`, `LoginUserUseCase`, `RefreshTokenUseCase`, `LogoutUseCase`
 - [x] Add unit tests for use cases with in-memory fake repositories/ports
-
-**Design Decisions:**
-
-- JWT signing/verification and password hashing are represented as application ports (infrastructure concerns)
-- Refresh tokens are stored by hash only; use cases accept raw refresh token and call `TokenService.hashRefreshToken()`
-- Refresh token rotation updates existing session rather than creating new DB session
-- Session expiry uses 7 days default, 15 days with `rememberMe`
-- Audit metadata avoids storing raw tokens/passwords
-- Logout is idempotent (missing token returns success)
-
-**Remaining:**
-
-- [ ] Infrastructure JWT adapter implementation (NestJS/JWT)
-- [ ] Infrastructure password hasher implementation (bcrypt)
-- [ ] API endpoints for auth flow
-- [ ] End-to-end tests for auth flow

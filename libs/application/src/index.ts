@@ -6,7 +6,8 @@ export type {
   AccessTokenPayload,
   TokenService,
 } from "./auth/ports/token-service.port";
-export type { Clock, SystemClock } from "./auth/ports/clock.port";
+export type { Clock } from "./auth/ports/clock.port";
+export { SystemClock } from "./auth/ports/clock.port";
 export type { IdGenerator } from "./auth/ports/id-generator.port";
 
 // Auth DTOs
