@@ -8,7 +8,7 @@ Configurable rules, not hardcoded logic.
 
 ```typescript
 interface IncomeRule {
-  type: 'biweekly';
+  type: "biweekly";
   startDate: Date;
   amountCents: number;
   dayOfWeek: 5; // Friday
@@ -22,6 +22,7 @@ Third paycheck reduced (multiplier: 0.5).
 ### Monthly Reserves
 
 Auto-allocate per paycheck:
+
 - Accountant reserve: $200
 - Tax reserve: $300
 - Emergency fund: $100 (optional)
@@ -50,6 +51,19 @@ Reserve envelope funds for recurring charges (2 months ahead).
 ## Emergency Fund Rules
 
 Contribution after debt payoff. Target: 3-6 months expenses.
+
+## Spendable Balance Formula
+
+Exact formula: `Real account balance - Protected envelopes - Upcoming required payments = Real spendable balance`
+
+All values use integer cents (per MVP integer-money rules, matching `amountCents` fields in schema interfaces).
+
+Term explanations:
+
+- **Real account balance**: Total cents in non-envelope liquid accounts (debit, cash, savings) scoped to the user.
+- **Protected envelopes**: Sum of cents allocated to active envelopes reserved for recurring/designated expenses.
+- **Upcoming required payments**: Sum of cents for scheduled mandatory payments (debt minimums, bills) due within the current pay period.
+- **Real spendable balance**: Remaining cents available for discretionary spending.
 
 ## Testing Rules
 

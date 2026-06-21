@@ -7,30 +7,23 @@ Every transaction balances (sum of lines = 0). Uses double-entry bookkeeping.
 ### Header (transactions table)
 
 - `id`, `user_id`, `date`, `note`, `type`
-- `type`: expense | income | transfer | debt_payment
+- `type`: income | expense | transfer | adjustment | reversal | debt_payment
 
 ### Lines (transaction_lines table)
 
 - `id`, `transaction_id`, `account_id`, `envelope_id`, `category_id`
-- `amount_cents`: positive integer (minor units)
-- `debit_credit`: "debit" (money out) or "credit" (money in)
+- `amount_cents`: signed integer (minor units)
 - `person_id`, `responsibility_group_id`
 
 ## Sign Convention
 
-**Recommended (Explicit):**
-- Store `amount_cents` as positive integer
-- Use `debit_credit` column to indicate direction
-- "debit" = money leaving (expenses, payments)
-- "credit" = money entering (income, refunds)
+Store `amount_cents` as **signed integer**:
 
-**Alternative (Signed):**
-- Store `amount_cents` as signed integer
-- Positive = credit (money in)
-- Negative = debit (money out)
-- Less explicit, more error-prone
+- **Positive**: value enters/credits the target (money in, income, increases asset)
+- **Negative**: value leaves/debits the target (money out, expense, decreases asset)
+- All transaction lines must sum to zero
 
-Exports and audit logs MUST use explicit `debit_credit` + positive `amount_cents`.
+This single-column approach is explicit when reading the sign and avoids a separate `debit_credit` column.
 
 ## Examples
 
@@ -39,8 +32,8 @@ Exports and audit logs MUST use explicit `debit_credit` + positive `amount_cents
 ```
 Transaction: type=expense
 Lines:
-  1. account_id: bbva-debit, amount_cents: 10000, debit_credit: debit
-  2. category_id: groceries, amount_cents: 10000, debit_credit: credit
+  1. account_id: bbva-debit, amount_cents: -10000  (money leaves account)
+  2. category_id: groceries, amount_cents: 10000   (expense allocation)
   Sum: 0 ✓
 ```
 
@@ -49,8 +42,8 @@ Lines:
 ```
 Transaction: type=income
 Lines:
-  1. account_id: bbva-debit, amount_cents: 500000, debit_credit: debit
-  2. amount_cents: 500000, debit_credit: credit (income)
+  1. account_id: bbva-debit, amount_cents: 500000  (money enters account)
+  2. amount_cents: -500000                         (income source)
   Sum: 0 ✓
 ```
 
@@ -58,8 +51,8 @@ Lines:
 
 ```
 Lines:
-  1. account_id: bbva-debit, amount_cents: 20000, debit_credit: debit
-  2. account_id: cash, amount_cents: 20000, debit_credit: credit
+  1. account_id: bbva-debit, amount_cents: -20000  (money leaves BBVA)
+  2. account_id: cash, amount_cents: 20000         (money enters Cash)
   Sum: 0 ✓
 ```
 
@@ -67,19 +60,19 @@ Lines:
 
 ```
 Lines:
-  1. account_id: bbva-debit, amount_cents: 30000, debit_credit: debit
-  2. debt_id: credit-card, amount_cents: 30000, debit_credit: credit
+  1. account_id: bbva-debit, amount_cents: -30000        (money leaves account)
+  2. account_id: credit-card, amount_cents: 30000       (debt reduced)
   Sum: 0 ✓
 ```
 
 ## Ledger Invariant
 
 Every transaction must satisfy:
-1. Sum of all lines' effective signed amount = 0
+
+1. Sum of all lines' `amount_cents` = 0
 2. At least 2 lines per transaction
-3. `amount_cents` positive in storage (if using explicit mode)
+3. Each line's `amount_cents` must be non-zero
 
 ## Credit Card Payment
 
 Debt payment, not expense. Prevents double-counting in reports.
-

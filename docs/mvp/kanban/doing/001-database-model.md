@@ -24,8 +24,8 @@ Spendable balance formula: Real account balance - Protected envelopes - Upcoming
 - [ ] Schema overview shows relationships
 - [ ] Accounts support debit, credit, loan, savings, cash
 - [ ] Envelopes support protected allocations
-- [ ] Financial rules document spendable balance formula
-- [ ] Migrations use Drizzle declarative approach
+- [x] Financial rules document spendable balance formula
+- [x] Migrations use Drizzle declarative approach
 
 ## Technical Notes
 

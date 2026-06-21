@@ -133,6 +133,105 @@ describe("Transaction", () => {
     expect(transaction.type).toBe("debt_payment");
   });
 
+  describe("transaction type examples", () => {
+    test("expense: $100 groceries (account -10000, category +10000)", () => {
+      const expenseLine = createValidLine({
+        amountCents: -10000,
+        targetType: "account",
+        targetId: accountId1,
+      });
+      const categoryLine = createValidLine({
+        id: lineId2,
+        amountCents: 10000,
+        targetType: "category",
+      });
+      const transaction = new Transaction({
+        id: transactionId,
+        userId: userId,
+        type: "expense" as TransactionType,
+        occurredAt: new Date(),
+        lines: [expenseLine, categoryLine],
+      });
+      expect(transaction.type).toBe("expense");
+      expect(transaction.lines).toHaveLength(2);
+      // Sum must be zero
+      const sum = transaction.lines.reduce((s, l) => s + l.amountCents, 0);
+      expect(sum).toBe(0);
+    });
+
+    test("income: $5000 paycheck (account +500000, source -500000)", () => {
+      const accountLine = createValidLine({
+        amountCents: 500000,
+        targetType: "account",
+        targetId: accountId1,
+      });
+      const sourceLine = createValidLine({
+        id: lineId2,
+        amountCents: -500000,
+        targetType: "account",
+        targetId: accountId2,
+      });
+      const transaction = new Transaction({
+        id: transactionId,
+        userId: userId,
+        type: "income" as TransactionType,
+        occurredAt: new Date(),
+        lines: [accountLine, sourceLine],
+      });
+      expect(transaction.type).toBe("income");
+      const sum = transaction.lines.reduce((s, l) => s + l.amountCents, 0);
+      expect(sum).toBe(0);
+    });
+
+    test("transfer: $200 BBVA → Cash (bbva -20000, cash +20000)", () => {
+      const fromLine = createValidLine({
+        amountCents: -20000,
+        targetType: "account",
+        targetId: accountId1,
+      });
+      const toLine = createValidLine({
+        id: lineId2,
+        amountCents: 20000,
+        targetType: "account",
+        targetId: accountId2,
+      });
+      const transaction = new Transaction({
+        id: transactionId,
+        userId: userId,
+        type: "transfer" as TransactionType,
+        occurredAt: new Date(),
+        lines: [fromLine, toLine],
+      });
+      expect(transaction.type).toBe("transfer");
+      const sum = transaction.lines.reduce((s, l) => s + l.amountCents, 0);
+      expect(sum).toBe(0);
+    });
+
+    test("debt_payment: $300 BBVA → Credit Card (account -30000, debt +30000)", () => {
+      const accountLine = createValidLine({
+        amountCents: -30000,
+        targetType: "account",
+        targetId: accountId1,
+      });
+      const debtLine = createValidLine({
+        id: lineId2,
+        amountCents: 30000,
+        targetType: "account",
+        targetId: accountId2,
+      });
+      const transaction = new Transaction({
+        id: transactionId,
+        userId: userId,
+        type: "debt_payment" as TransactionType,
+        occurredAt: new Date(),
+        lines: [accountLine, debtLine],
+      });
+      expect(transaction.type).toBe("debt_payment");
+      const sum = transaction.lines.reduce((s, l) => s + l.amountCents, 0);
+      expect(sum).toBe(0);
+    });
+  });
+
   test("rejects lines with mismatched transactionId", () => {
     const mismatchedTransactionId = transactionIdFromString(
       "f7a6b5c4-d3e2-49fa-8b7c-6d5e4f3a2b1c",

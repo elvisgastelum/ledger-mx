@@ -20,7 +20,9 @@ Stories are in `todo/`, `doing/`, `done/`, `archive/` folders.
 
 ## DONE Index
 
+- 010-product-foundations.md
 - 011-architecture-foundations.md
+- 002-ledger-model.md
 
 ## Story Template
 

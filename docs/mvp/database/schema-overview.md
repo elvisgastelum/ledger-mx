@@ -14,53 +14,57 @@ transactions (1) ─── (N) transaction_lines
 
 ### users
 
-| Column | Type | Notes |
-|--------|------|-------|
-| id | UUID PK | Client-generated |
-| email | text UNIQUE | Login |
+| Column | Type        | Notes            |
+| ------ | ----------- | ---------------- |
+| id     | UUID PK     | Client-generated |
+| email  | text UNIQUE | Login            |
 
 ### accounts
 
-| Column | Type | Notes |
-|--------|------|-------|
-| id | UUID PK | |
-| user_id | UUID FK | user scoping |
-| name | text | "BBVA Debit" |
-| type | enum | debit/credit/loan/savings/cash |
-| balance_cents | integer | Current balance |
+| Column        | Type    | Notes                          |
+| ------------- | ------- | ------------------------------ |
+| id            | UUID PK |                                |
+| user_id       | UUID FK | user scoping                   |
+| name          | text    | "BBVA Debit"                   |
+| type          | enum    | debit/credit/loan/savings/cash |
+| balance_cents | integer | Current balance                |
 
 ### envelopes
 
-| Column | Type | Notes |
-|--------|------|-------|
-| id | UUID PK | |
-| user_id | UUID FK | |
-| name | text | "Emergency Fund" |
+| Column          | Type    | Notes            |
+| --------------- | ------- | ---------------- |
+| id              | UUID PK |                  |
+| user_id         | UUID FK |                  |
+| name            | text    | "Emergency Fund" |
 | allocated_cents | integer | Protected amount |
 
 ### transactions
 
-| Column | Type | Notes |
-|--------|------|-------|
-| id | UUID PK | |
-| user_id | UUID FK | |
-| amount_cents | integer | Total amount |
-| type | enum | expense/income/transfer/debt_payment |
+| Column       | Type    | Notes                                |
+| ------------ | ------- | ------------------------------------ |
+| id           | UUID PK |                                      |
+| user_id      | UUID FK |                                      |
+| amount_cents | integer | Total amount                         |
+| type         | enum    | expense/income/transfer/debt_payment |
 
 ### transaction_lines
 
-| Column | Type | Notes |
-|--------|------|-------|
-| id | UUID PK | |
-| transaction_id | UUID FK | |
-| account_id | UUID FK | |
-| amount_cents | integer | Signed |
+| Column         | Type    | Notes                                        |
+| -------------- | ------- | -------------------------------------------- |
+| id             | UUID PK |                                              |
+| transaction_id | UUID FK |                                              |
+| account_id     | UUID FK |                                              |
+| envelope_id    | UUID FK | Optional                                     |
+| category_id    | UUID FK | Optional                                     |
+| target_type    | enum    | account/envelope/category                    |
+| target_id      | UUID    | References target_type entity                |
+| amount_cents   | integer | Signed (positive = credit, negative = debit) |
 
 ## Enums
 
-- transaction_type: expense/income/transfer/debt_payment/envelope_allocation
+- transaction_type: income/expense/transfer/adjustment/reversal/debt_payment
 - account_type: debit/credit/loan/savings/investment/cash
-- line_type: debit/credit
+- transaction_line_target_type: account/envelope/category
 
 ## Indexes
 

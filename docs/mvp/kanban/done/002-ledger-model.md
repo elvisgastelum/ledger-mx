@@ -1,6 +1,6 @@
 # Story: Ledger Model
 
-**Status**: Doing
+**Status**: Done
 **Priority**: P0
 **Estimated**: 4 days
 
@@ -17,11 +17,11 @@ Implement double-entry ledger with transaction lines.
 
 ## Acceptance Criteria
 
-- [ ] Double-entry bookkeeping enforced
-- [ ] Transaction lines support multiple accounts
-- [ ] Debt payment transfers correctly
-- [ ] Ledger invariant tested
-- [ ] Examples show expense, income, transfer, debt payment
+- [x] Double-entry bookkeeping enforced
+- [x] Transaction lines support multiple accounts
+- [x] Debt payment transfers correctly
+- [x] Ledger invariant tested
+- [x] Examples show expense, income, transfer, debt payment
 
 ## Technical Notes
 
@@ -39,5 +39,5 @@ Ledger invariant is critical. Every transaction must balance. Test this invarian
 
 ## Done Checklist
 
-- [ ] All acceptance criteria met
-- [ ] Ledger invariant tests pass
+- [x] All acceptance criteria met
+- [x] Ledger invariant tests pass
