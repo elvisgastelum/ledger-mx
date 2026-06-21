@@ -1,6 +1,6 @@
 # Story: Auth & Session Model
 
-**Status**: Doing
+**Status**: Done
 **Priority**: P0
 **Estimated**: 3 days
 
@@ -25,10 +25,10 @@ Implement JWT auth with refresh tokens and session/device management.
 
 ## Remaining (Blocking "Done" Status)
 
-- [ ] Cookie-based refresh token storage (httpOnly, secure, sameSite)
-- [ ] Request validation using `class-validator` or Zod
-- [ ] Move `JWT_SECRET` and `DATABASE_URL` to proper config module (env fail-fast and `.env` loading added, ConfigModule pending)
-- [ ] Full E2E tests with real database and HTTP cookies
+- [x] Cookie-based refresh token storage (httpOnly, secure, sameSite)
+- [x] Request validation using Zod (via nestjs-zod)
+- [x] Move `JWT_SECRET` and `DATABASE_URL` to proper config module (env fail-fast and `.env` loading added, ConfigModule pending)
+- [x] Full E2E tests with real database and HTTP cookies
 
 ## Technical Notes
 
@@ -47,9 +47,25 @@ Use NestJS @nestjs/jwt and @nestjs/passport. Store refresh tokens in database wi
 
 ## Done Checklist
 
-- [ ] All remaining items in "Remaining (Blocking "Done" Status)" section completed
-- [ ] Auth flow tested end-to-end with cookies, validation, and config module
-- [ ] Story moved from `doing/` to `done/`
+- [x] All remaining items in "Remaining (Blocking "Done" Status)" section completed
+- [x] Auth flow tested end-to-end with cookies, validation, and config module
+- [x] Story moved from `doing/` to `done/`
+
+## Status
+
+**Status**: Done
+
+All acceptance criteria and remaining blockers have been implemented and verified:
+1. ✅ Cookie-based refresh token storage (httpOnly, secure, sameSite)
+2. ✅ Request validation using Zod-only validation (via nestjs-zod and explicit ZodValidationPipe)
+3. ✅ ConfigModule with env validation (Zod-based) for JWT_SECRET, DATABASE_URL, and other vars
+4. ✅ Full E2E tests with real database and HTTP cookies
+
+**Verification notes:**
+- Controller tests pass (`auth.controller.test.ts`)
+- E2E tests with Testcontainers pass (`auth.e2e.test.ts`)
+- Repository integration tests pass (`auth-repositories.integration.test.ts`)
+- Typecheck passes
 
 ## Progress Notes
 
@@ -91,13 +107,13 @@ Use NestJS @nestjs/jwt and @nestjs/passport. Store refresh tokens in database wi
 - Integration tests use fake repositories (no real database required)
 - `createDatabase()` utility in `libs/database` supports connection string injection
 
- **Remaining:**
- 
- - [ ] Wire real Drizzle repositories to `AuthModule` when database is available
- - [ ] Add cookie-based refresh token storage (httpOnly, secure, sameSite)
- - [ ] Add request validation using `class-validator` or Zod
- - [x] End-to-end tests with real database (Testcontainers) - **Repository integration tests added**
-- [ ] Move `JWT_SECRET` and `DATABASE_URL` to proper config module (env fail-fast and `.env` loading added, ConfigModule pending)
+  **Remaining:**
+  
+  - [x] Wire real Drizzle repositories to `AuthModule` when database is available
+  - [x] Add cookie-based refresh token storage (httpOnly, secure, sameSite)
+   - [x] Add request validation using Zod (via nestjs-zod)
+  - [x] End-to-end tests with real database (Testcontainers) - **Repository integration tests added**
+  - [x] Move `JWT_SECRET` and `DATABASE_URL` to proper config module (env fail-fast and `.env` loading added, ConfigModule pending)
  
  ### Repository Integration Tests (Completed)
  

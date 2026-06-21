@@ -1,5 +1,6 @@
 import { Injectable, Inject } from "@nestjs/common";
 import { JwtService, JwtSignOptions } from "@nestjs/jwt";
+import { ConfigService } from "@nestjs/config";
 import type { AccessTokenPayload, TokenService } from "@ledger-mx/application";
 import { randomBytes, createHash } from "node:crypto";
 
@@ -9,10 +10,13 @@ import { randomBytes, createHash } from "node:crypto";
  */
 @Injectable()
 export class JwtTokenService implements TokenService {
-  constructor(@Inject(JwtService) private readonly jwtService: JwtService) {}
+  constructor(
+    @Inject(JwtService) private readonly jwtService: JwtService,
+    @Inject(ConfigService) private readonly configService: ConfigService,
+  ) {}
 
   async signAccessToken(payload: AccessTokenPayload): Promise<string> {
-    const expiresIn = (process.env.JWT_ACCESS_TOKEN_TTL ??
+    const expiresIn = (this.configService.get<string>("JWT_ACCESS_TOKEN_TTL") ??
       "15m") as JwtSignOptions["expiresIn"];
     return this.jwtService.signAsync(payload, { expiresIn });
   }

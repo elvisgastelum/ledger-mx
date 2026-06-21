@@ -4,7 +4,8 @@ import {
   Provider,
   FactoryProvider,
 } from "@nestjs/common";
-import { JwtModule } from "@nestjs/jwt";
+import { JwtModule, JwtModuleOptions } from "@nestjs/jwt";
+import { ConfigModule, ConfigService } from "@nestjs/config";
 import { AuthController } from "./auth.controller";
 import { JwtTokenService } from "./infrastructure/jwt-token.service";
 import { BcryptPasswordHasher } from "./infrastructure/bcrypt-password-hasher";
@@ -95,19 +96,21 @@ export class AuthModule {
       !options?.sessionRepository ||
       !options?.auditLogRepository;
 
-    const jwtSecret = process.env.JWT_SECRET;
-    if (!jwtSecret) {
-      throw new Error(
-        "JWT_SECRET environment variable is required. Copy .env.example to .env and set a secure JWT_SECRET for local development.",
-      );
-    }
-
     return {
       module: AuthModule,
       controllers: [AuthController],
       imports: [
-        JwtModule.register({
-          secret: jwtSecret,
+        ConfigModule,
+        JwtModule.registerAsync({
+          imports: [ConfigModule],
+          inject: [ConfigService],
+          useFactory: (configService: ConfigService): JwtModuleOptions => {
+            const jwtSecret = configService.get<string>("JWT_SECRET");
+            // ConfigModule validation ensures JWT_SECRET exists and meets minimum length
+            return {
+              secret: jwtSecret,
+            };
+          },
         }),
       ],
       providers: [

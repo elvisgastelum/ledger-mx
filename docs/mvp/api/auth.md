@@ -8,19 +8,19 @@ All auth endpoints are part of the `auth` router in `libs/contracts`, with the f
 
 ### POST /auth/register
 
-Register new user. Returns user, access token, refresh token.
+Register new user. Returns user, access token, and session ID in response body. Refresh token is set as an httpOnly cookie.
 
 ### POST /auth/login
 
-Login with email/password. Returns tokens.
+Login with email/password. Returns access token and session ID in response body. Refresh token is set as an httpOnly cookie.
 
 ### POST /auth/refresh
 
-Refresh access token using refresh token.
+Refresh access token using refresh token from httpOnly cookie. Returns new access token and session ID in response body. New refresh token is set as an httpOnly cookie.
 
 ### POST /auth/logout
 
-Revoke session.
+Revoke session. Reads refresh token from httpOnly cookie (body fallback is temporary backwards compatibility if implemented).
 
 ## Token Strategy
 
@@ -33,14 +33,15 @@ Revoke session.
 ### Refresh Token
 
 - 7 days (15 with rememberMe)
-- Stored in httpOnly cookie
+- Stored in httpOnly cookie (not in JSON response body)
 - Single-use (rotating)
 - Revocable via sessions table
+- Read from httpOnly cookie on refresh/logout; body fallback is temporary backwards compatibility if implemented
 
 ## Password Security
 
 - bcrypt hashing (salt rounds: 10)
-- Min 8 chars, uppercase, lowercase, number
+- Min 8 chars, uppercase, lowercase, number, and special character
 - No common passwords
 
 ## Session Management
@@ -53,7 +54,7 @@ All non-auth endpoints must reference auth requirements consistently in their co
 
 ## Implementation
 
-Auth endpoint handlers in `apps/api` implement the `auth` router contract defined in `libs/contracts`. The contract defines Zod schemas for request bodies (email, password, rememberMe). Handlers map contract inputs to application use cases without class-validator DTOs:
+Auth endpoint handlers in `apps/api` implement the `auth` router contract defined in `libs/contracts`. The contract defines Zod schemas for request bodies (email, password, rememberMe). Handlers map contract inputs to application use cases without class-validator DTOs. Request validation uses Zod via nestjs-zod:
 
 ```typescript
 // apps/api/src/auth/auth.controller.ts

@@ -37,7 +37,7 @@ Technology stack decisions for LedgerMx MVP.
 - Passport/JWT (authentication)
 - ts-rest (API contracts in `libs/contracts`)
 - OpenAPI/Swagger (generated from ts-rest contracts)
-- Zod (request/response schema validation)
+- Zod (exclusive request/response/config validation - mandatory project-wide)
 - @ts-rest/nest (contract implementation)
 
 ### Testing

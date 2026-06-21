@@ -49,7 +49,11 @@ Controllers use `@TsRestHandler()` or `tsRestHandler()` to implement contract-de
 
 ### Validation
 
-Request/response validation is handled by Zod schemas defined in `libs/contracts`, replacing class-validator DTOs.
+**Zod is the mandatory validation library** for all request/response/config validation across the project.
+
+- Joi, class-validator, and class-transformer are **prohibited** for validation purposes.
+- Rationale: Zod provides shared schemas/contracts with type-safe validation and better integration with ts-rest contracts in `libs/contracts`.
+- Use `nestjs-zod` for NestJS integration with `createZodDto` and `ZodValidationPipe`.
 
 ### OpenAPI
 
