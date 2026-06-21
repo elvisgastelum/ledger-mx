@@ -2,6 +2,8 @@
 
 Track spending by group or person. Supports shared budgets and dependents.
 
+**Note**: Responsibility groups are different from *category groups* (`category_groups`). See `category-groups.md` for category classification (Need/Want/Savings).
+
 ## Purpose
 
 Responsibility groups let users assign transactions to:

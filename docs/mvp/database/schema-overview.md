@@ -7,10 +7,13 @@ users (1) ─── (N) accounts
 users (1) ─── (N) envelopes
 users (1) ─── (N) transactions
 users (1) ─── (N) categories
+users (1) ─── (N) category_groups
 users (1) ─── (N) sessions
 users (1) ─── (N) auth_audit_logs
 transactions (1) ─── (N) transaction_lines
 ```
+
+**Note**: `category_groups` is separate from `responsibility_groups`. See `category-groups.md` and `responsibility-groups.md` for distinction.
 
 ## Key Tables
 
@@ -53,6 +56,34 @@ transactions (1) ─── (N) transaction_lines
 
 **FK Decision — `reversal_of_transaction_id`:** The default `ON DELETE NO ACTION` is kept intentionally for MVP. Transaction history must not be hard-deleted; reversal links should remain referentially intact. Corrections, reversals, and soft-delete policies are preferred over deleting posted transactions. If a future physical-delete workflow is introduced, revisit whether `ON DELETE SET NULL` is safer.
 
+### categories
+
+| Column             | Type        | Notes                                        |
+| ------------------ | ----------- | -------------------------------------------- |
+| id                 | UUID PK     |                                              |
+| user_id            | UUID FK     | User scoping                                 |
+| name               | text        | "Groceries"                                  |
+| category_group_id  | UUID FK     | Required; links to `category_groups`         |
+| parent_id          | UUID FK     | Optional; subcategory hierarchy              |
+| deleted_at         | timestamptz | Nullable; soft delete                        |
+
+**Note**: Optional responsibility-related columns (`responsibility_group_id`) are documented separately in `responsibility-groups.md`.
+
+### category_groups
+
+| Column                          | Type        | Notes                                      |
+| ------------------------------- | ----------- | ------------------------------------------ |
+| id                              | UUID PK     |                                            |
+| user_id                         | UUID FK     | User scoping                               |
+| name                            | text        | "Need", "Want", "Savings"                  |
+| kind                            | enum        | income/expense/savings/general              |
+| ideal_percentage_basis_points   | integer     | Nullable; 5000 = 50%                       |
+| sort_order                      | integer     | Display order                              |
+| is_system                       | boolean     | Default groups, not user-deletable         |
+| created_at                      | timestamptz |                                          |
+| updated_at                      | timestamptz |                                          |
+| deleted_at                      | timestamptz | Nullable; soft delete                   |
+
 ### transaction_lines
 
 | Column         | Type    | Notes                                        |
@@ -65,6 +96,8 @@ transactions (1) ─── (N) transaction_lines
 | target_type    | enum    | account/envelope/category                    |
 | target_id      | UUID    | References target_type entity                |
 | amount_cents   | integer | Signed (positive = credit, negative = debit) |
+
+**Note**: Optional responsibility-related columns (`responsibility_group_id`, `person_id`) are documented separately in `responsibility-groups.md`.
 
 ### sessions
 

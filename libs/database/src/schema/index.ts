@@ -2,6 +2,7 @@ export * from "./enums";
 export * from "./users";
 export * from "./accounts";
 export * from "./envelopes";
+export * from "./category-groups";
 export * from "./categories";
 export * from "./transactions";
 export * from "./transaction-lines";
@@ -12,6 +13,7 @@ export * from "./relations";
 import { users } from "./users";
 import { accounts } from "./accounts";
 import { envelopes } from "./envelopes";
+import { categoryGroups } from "./category-groups";
 import { categories } from "./categories";
 import { transactions } from "./transactions";
 import { transactionLines } from "./transaction-lines";
@@ -26,6 +28,9 @@ export type NewAccount = typeof accounts.$inferInsert;
 
 export type Envelope = typeof envelopes.$inferSelect;
 export type NewEnvelope = typeof envelopes.$inferInsert;
+
+export type CategoryGroup = typeof categoryGroups.$inferSelect;
+export type NewCategoryGroup = typeof categoryGroups.$inferInsert;
 
 export type Category = typeof categories.$inferSelect;
 export type NewCategory = typeof categories.$inferInsert;

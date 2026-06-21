@@ -44,6 +44,7 @@ export type UserId = Brand<string, "UserId">;
 export type AccountId = Brand<string, "AccountId">;
 export type EnvelopeId = Brand<string, "EnvelopeId">;
 export type CategoryId = Brand<string, "CategoryId">;
+export type CategoryGroupId = Brand<string, "CategoryGroupId">;
 export type TransactionId = Brand<string, "TransactionId">;
 export type TransactionLineId = Brand<string, "TransactionLineId">;
 
@@ -97,6 +98,17 @@ export function envelopeIdFromString(value: string): EnvelopeId {
 export function categoryIdFromString(value: string): CategoryId {
   assertUuidV4(value, "CategoryId");
   return value as CategoryId;
+}
+
+/**
+ * Creates a CategoryGroupId from a string after validating it's a valid UUID v4.
+ * @param value - The UUID v4 string
+ * @returns CategoryGroupId (branded string)
+ * @throws InvalidIdError if value is not a valid UUID v4
+ */
+export function categoryGroupIdFromString(value: string): CategoryGroupId {
+  assertUuidV4(value, "CategoryGroupId");
+  return value as CategoryGroupId;
 }
 
 /**

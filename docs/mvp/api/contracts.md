@@ -43,12 +43,42 @@ libs/contracts/src/
 1. **Transport only**: Contracts define API transport shapes, not domain behavior or business logic
 2. **Schema conventions**:
    - Money: Integer `amountCents` (no floats)
+   - Percentages: Integer `basisPoints` (no floats; 5000 = 50%)
    - IDs: UUID v4 strings
    - All routes: User-scoped (validate user ownership of resources)
    - Transaction APIs: Preserve double-entry invariants where possible
 3. **No forbidden imports**: Contracts must not import from `libs/domain`, `libs/application`, NestJS, React, Drizzle, or application services
 4. **Standard Schema**: Use Zod for schemas; ts-rest supports all Standard Schema compatible validators
 5. **Path prefix**: Use `pathPrefix: '/api/v1'` in root contract to model API versioning (ts-rest ignores Nest global prefixes)
+
+## Future: Category Groups Contracts
+
+Planned API endpoints for category groups feature:
+
+### Category Groups Router
+```
+GET    /api/v1/category-groups
+POST   /api/v1/category-groups
+PUT    /api/v1/category-groups/:id
+DELETE /api/v1/category-groups/:id (soft delete)
+```
+
+### Categories Router Updates
+```
+PUT    /api/v1/categories/:id (add required categoryGroupId field)
+```
+
+### Onboarding Router
+```
+POST   /api/v1/onboarding/layout (create default groups by layout type)
+GET    /api/v1/onboarding/layout-options (list available layouts)
+```
+
+### Zod Schema Conventions (Future)
+- `categoryGroupSchema`: id, userId, name, kind (enum), idealPercentageBasisPoints (nullable), sortOrder, isSystem, timestamps, deletedAt
+- `createCategoryGroupSchema`: omit system fields (id, timestamps, isSystem)
+- `layoutTypeSchema`: enum `blank | 50-30-20`
+- All percentage fields use `z.number().int().nullable()` for basis points
 
 ## Versioning
 

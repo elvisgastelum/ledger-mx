@@ -4,8 +4,8 @@ import {
   Provider,
   FactoryProvider,
 } from "@nestjs/common";
-import { JwtModule, JwtModuleOptions } from "@nestjs/jwt";
-import { ConfigModule, ConfigService } from "@nestjs/config";
+import { JwtAccessModule } from "./jwt-access.module";
+import { ConfigModule } from "@nestjs/config";
 import { AuthController } from "./auth.controller";
 import { JwtTokenService } from "./infrastructure/jwt-token.service";
 import { BcryptPasswordHasher } from "./infrastructure/bcrypt-password-hasher";
@@ -101,17 +101,7 @@ export class AuthModule {
       controllers: [AuthController],
       imports: [
         ConfigModule,
-        JwtModule.registerAsync({
-          imports: [ConfigModule],
-          inject: [ConfigService],
-          useFactory: (configService: ConfigService): JwtModuleOptions => {
-            const jwtSecret = configService.get<string>("JWT_SECRET");
-            // ConfigModule validation ensures JWT_SECRET exists and meets minimum length
-            return {
-              secret: jwtSecret,
-            };
-          },
-        }),
+        JwtAccessModule,
       ],
       providers: [
         userRepoProvider,

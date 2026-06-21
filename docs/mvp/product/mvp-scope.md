@@ -8,12 +8,14 @@
 - Transaction entry (expense, income, transfer, debt payment, envelope allocation)
 - Double-entry ledger with transaction lines
 - Categories for transactions
+- Category groups (Need/Want/Savings) for budget planning
 - Responsibility groups and people/dependents
 - Debt tracking and payoff planning
 - Credit card management
 - Recurring charges
 - Paycheck-based budgets with income rules
 - Income projections (biweekly every second Friday)
+- New user onboarding with category layout selection (blank or 50/30/20)
 
 ### Technical Features
 - Offline-first architecture with PGlite/IndexedDB

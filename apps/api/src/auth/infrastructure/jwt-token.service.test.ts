@@ -3,6 +3,7 @@ import { JwtTokenService } from "./jwt-token.service";
 import type { AccessTokenPayload } from "@ledger-mx/application";
 import type { UserId } from "@ledger-mx/domain";
 import { JwtService } from "@nestjs/jwt";
+import { ConfigService } from "@nestjs/config";
 
 describe("JwtTokenService", () => {
   let service: JwtTokenService;
@@ -12,8 +13,18 @@ describe("JwtTokenService", () => {
     mockSignAsync = vi.fn().mockResolvedValue("mock-signed-token");
     const mockJwtService = {
       signAsync: mockSignAsync,
-    };
-    service = new JwtTokenService(mockJwtService as unknown as JwtService);
+    } as unknown as JwtService;
+
+    const mockConfigService = {
+      get: vi.fn().mockImplementation((key: string) => {
+        if (key === "JWT_ACCESS_TOKEN_TTL") {
+          return "15m";
+        }
+        return undefined;
+      }),
+    } as unknown as ConfigService;
+
+    service = new JwtTokenService(mockJwtService, mockConfigService);
   });
 
   describe("signAccessToken", () => {
@@ -40,6 +51,20 @@ describe("JwtTokenService", () => {
       expect(mockSignAsync).toHaveBeenCalledWith(
         payload,
         expect.objectContaining({ expiresIn: expect.any(String) }),
+      );
+    });
+
+    it("should use default expiresIn when ConfigService returns undefined", async () => {
+      const payload: AccessTokenPayload = {
+        sub: "user-123" as UserId,
+        email: "test@example.com",
+      };
+
+      await service.signAccessToken(payload);
+
+      expect(mockSignAsync).toHaveBeenCalledWith(
+        payload,
+        expect.objectContaining({ expiresIn: "15m" }),
       );
     });
   });

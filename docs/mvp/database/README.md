@@ -8,7 +8,8 @@ Database schema, migrations, and financial rules for LedgerMx.
 - [User Scope](./user-scope.md) - Multi-user data isolation
 - [Accounts and Envelopes](./accounts-envelopes.md) - Account/envelope model
 - [Ledger](./ledger.md) - Double-entry transactions
-- [Responsibility Groups](./responsibility-groups.md) - Groups and people
+- [Responsibility Groups](./responsibility-groups.md) - Groups and people (spending by person)
+- [Category Groups](./category-groups.md) - Category classification (Need/Want/Savings)
 - [Debts and Recurring](./debts-recurring.md) - Debt tracking, recurring charges
 - [Paycheck Plans](./paycheck-plans.md) - Income allocation planning
 - [Financial Rules](./financial-rules.md) - Business logic in DB
@@ -48,8 +49,9 @@ Database schema, migrations, and financial rules for LedgerMx.
 - `financial_calendar_events` - Calendar items
 
 ### People and Groups
-- `responsibility_groups` - Budget groups
+- `responsibility_groups` - Budget groups (spending by person/group)
 - `people` - Dependents
+- `category_groups` - Category classification (Need/Want/Savings for budget planning)
 
 ## Key Rules
 

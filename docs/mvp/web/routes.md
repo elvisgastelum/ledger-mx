@@ -6,6 +6,7 @@
 
 - `/login` - Login page
 - `/register` - Registration page
+- `/onboarding` - New user setup wizard (category layout selection)
 
 ### Protected Routes (Require Auth)
 
@@ -22,6 +23,9 @@
 - `/calendar` - Financial calendar
 - `/export` - Export CSV (ZIP future)
 - `/settings` - User settings
+  - `/settings/categories` - Manage categories and category groups
+  - `/settings/categories/groups` - Category group management
+  - `/settings/categories/list` - Category list and editing
 
 ## Route Guards
 

@@ -27,6 +27,14 @@ export const TRANSACTION_LINE_TARGET_TYPES = [
 export type TransactionLineTargetType =
   (typeof TRANSACTION_LINE_TARGET_TYPES)[number];
 
+export const CATEGORY_GROUP_KINDS = [
+  "income",
+  "expense",
+  "savings",
+  "general",
+] as const;
+export type CategoryGroupKind = (typeof CATEGORY_GROUP_KINDS)[number];
+
 // Value Objects
 export { Money } from "./value-objects/money";
 export {
@@ -38,6 +46,7 @@ export {
   type AccountId,
   type EnvelopeId,
   type CategoryId,
+  type CategoryGroupId,
   type TransactionId,
   type TransactionLineId,
   type TransactionLineTargetId,
@@ -46,6 +55,7 @@ export {
   accountIdFromString,
   envelopeIdFromString,
   categoryIdFromString,
+  categoryGroupIdFromString,
   transactionIdFromString,
   transactionLineIdFromString,
 } from "./value-objects/uuid";
@@ -64,6 +74,7 @@ export { TransactionLine } from "./ledger/transaction-line";
 export type { TransactionLineProps } from "./ledger/transaction-line";
 export { Transaction } from "./ledger/transaction";
 export type { TransactionProps } from "./ledger/transaction";
+export type { CategoryGroup } from "./ledger/category-group";
 
 // Auth Errors
 export {
@@ -97,3 +108,4 @@ export type {
 } from "./repositories/user-repository";
 export type { SessionRepository } from "./repositories/session-repository";
 export type { AuthAuditLogRepository } from "./repositories/auth-audit-log-repository";
+export type { CategoryGroupRepository } from "./repositories/category-group-repository";

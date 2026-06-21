@@ -26,3 +26,25 @@ export type {
   LogoutInput,
   LogoutResult,
 } from "./auth/use-cases/logout.use-case";
+
+// Category Groups Types
+export type {
+  ListCategoryGroupsInput,
+  CreateCategoryGroupInput,
+  UpdateCategoryGroupInput,
+  DeleteCategoryGroupInput,
+} from "./category-groups/category-group.types";
+
+// Category Groups Use Cases
+export { ListCategoryGroupsUseCase } from "./category-groups/use-cases/list-category-groups.use-case";
+export { CreateCategoryGroupUseCase } from "./category-groups/use-cases/create-category-group.use-case";
+export { UpdateCategoryGroupUseCase } from "./category-groups/use-cases/update-category-group.use-case";
+export { DeleteCategoryGroupUseCase } from "./category-groups/use-cases/delete-category-group.use-case";
+
+// Category Groups Errors
+export {
+  CategoryGroupApplicationError,
+  CategoryGroupNotFoundError,
+  SystemCategoryGroupModificationError,
+  CategoryGroupHasActiveCategoriesError,
+} from "./category-groups/category-group.errors";
