@@ -17,3 +17,16 @@ export type {
   ListCategoryGroupsResponse,
   CategoryGroupResponse,
 } from "./category-groups/category-group.schemas";
+
+// Onboarding
+export {
+  LAYOUT_TYPES,
+  ApplyLayoutRequestSchema,
+  OnboardingCategoryGroupSchema,
+  ApplyLayoutResponseSchema,
+} from "./onboarding";
+export type {
+  LayoutType,
+  ApplyLayoutRequest,
+  ApplyLayoutResponse,
+} from "./onboarding";

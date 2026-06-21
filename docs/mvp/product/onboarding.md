@@ -53,12 +53,16 @@ User chooses one of two layouts:
 ### Blank Layout
 ```json
 {
-  "category_groups": [
+  "categoryGroups": [
     {
+      "id": "uuid",
       "name": "General",
       "kind": "general",
-      "ideal_percentage_basis_points": null,
-      "is_system": true
+      "idealPercentageBasisPoints": null,
+      "sortOrder": 0,
+      "isSystem": true,
+      "createdAt": "2024-01-01T00:00:00Z",
+      "updatedAt": "2024-01-01T00:00:00Z"
     }
   ]
 }
@@ -67,24 +71,36 @@ User chooses one of two layouts:
 ### 50/30/20 Layout
 ```json
 {
-  "category_groups": [
+  "categoryGroups": [
     {
+      "id": "uuid",
       "name": "Need",
       "kind": "expense",
-      "ideal_percentage_basis_points": 5000,
-      "is_system": true
+      "idealPercentageBasisPoints": 5000,
+      "sortOrder": 0,
+      "isSystem": true,
+      "createdAt": "2024-01-01T00:00:00Z",
+      "updatedAt": "2024-01-01T00:00:00Z"
     },
     {
+      "id": "uuid",
       "name": "Want",
       "kind": "expense",
-      "ideal_percentage_basis_points": 3000,
-      "is_system": true
+      "idealPercentageBasisPoints": 3000,
+      "sortOrder": 1,
+      "isSystem": true,
+      "createdAt": "2024-01-01T00:00:00Z",
+      "updatedAt": "2024-01-01T00:00:00Z"
     },
     {
+      "id": "uuid",
       "name": "Savings",
       "kind": "savings",
-      "ideal_percentage_basis_points": 2000,
-      "is_system": true
+      "idealPercentageBasisPoints": 2000,
+      "sortOrder": 2,
+      "isSystem": true,
+      "createdAt": "2024-01-01T00:00:00Z",
+      "updatedAt": "2024-01-01T00:00:00Z"
     }
   ]
 }
@@ -107,3 +123,39 @@ User chooses one of two layouts:
 ## Route
 
 `/onboarding` - Main onboarding wizard route
+
+## API Endpoint
+
+`POST /api/v1/onboarding/layout` - Apply default category group layout
+
+### Request
+```json
+{
+  "layout": "blank | 50-30-20"
+}
+```
+
+### Response
+```json
+{
+  "categoryGroups": [
+    {
+      "id": "uuid",
+      "name": "General",
+      "kind": "general",
+      "idealPercentageBasisPoints": null,
+      "isSystem": true,
+      "sortOrder": 0,
+      "createdAt": "2024-01-01T00:00:00Z",
+      "updatedAt": "2024-01-01T00:00:00Z"
+    }
+  ],
+  "created": true
+}
+```
+
+### Behavior
+- Returns `created: true` when new groups are created
+- Returns `created: false` when matching system groups already exist (idempotent)
+- Returns 409 Conflict if existing groups don't match requested layout
+- All operations scoped by authenticated `user_id`

@@ -2,6 +2,7 @@ import { Module } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
 import { AuthModule } from "./auth/auth.module";
 import { CategoryGroupsModule } from "./category-groups/category-groups.module";
+import { OnboardingModule } from "./onboarding/onboarding.module";
 import { validateEnv } from "./config/env.validation";
 
 @Module({
@@ -13,6 +14,7 @@ import { validateEnv } from "./config/env.validation";
     }),
     AuthModule.forRoot(),
     CategoryGroupsModule.forRoot(),
+    OnboardingModule.forRoot(),
   ],
 })
 export class AppModule {}

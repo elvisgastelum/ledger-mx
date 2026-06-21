@@ -51,6 +51,38 @@ libs/contracts/src/
 4. **Standard Schema**: Use Zod for schemas; ts-rest supports all Standard Schema compatible validators
 5. **Path prefix**: Use `pathPrefix: '/api/v1'` in root contract to model API versioning (ts-rest ignores Nest global prefixes)
 
+## Onboarding Router (Implemented)
+
+### Endpoints
+```
+POST   /api/v1/onboarding/layout (create default groups by layout type)
+```
+
+### Request Schema
+```typescript
+const ApplyLayoutRequestSchema = z.object({
+  layout: z.enum(['blank', '50-30-20']),
+});
+```
+
+### Response Schema
+```typescript
+const ApplyLayoutResponseSchema = z.object({
+  categoryGroups: z.array(OnboardingCategoryGroupSchema),
+  created: z.boolean(),
+});
+```
+
+### Layout Types
+- `blank`: Creates single "General" group (kind: general, percentage: null, isSystem: true)
+- `50-30-20`: Creates Need (5000bp), Want (3000bp), Savings (2000bp) groups
+
+### Behavior
+- If no active category groups exist for user: creates default groups (201/200 with created=true)
+- If system groups matching layout already exist: returns them idempotently (200 with created=false)
+- If existing groups conflict with requested layout: returns 409 Conflict
+- All operations scoped by authenticated user's `user_id`
+
 ## Future: Category Groups Contracts
 
 Planned API endpoints for category groups feature:

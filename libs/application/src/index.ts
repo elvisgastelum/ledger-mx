@@ -48,3 +48,15 @@ export {
   SystemCategoryGroupModificationError,
   CategoryGroupHasActiveCategoriesError,
 } from "./category-groups/category-group.errors";
+
+// Onboarding Types
+export type {
+  ApplyDefaultCategoryGroupLayoutInput,
+  ApplyDefaultCategoryGroupLayoutResult,
+} from "./onboarding";
+
+// Onboarding Use Cases
+export { ApplyDefaultCategoryGroupLayoutUseCase } from "./onboarding";
+
+// Onboarding Errors
+export { CategoryGroupLayoutConflictError } from "./onboarding";
