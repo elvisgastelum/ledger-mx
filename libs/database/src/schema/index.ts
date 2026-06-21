@@ -5,6 +5,8 @@ export * from "./envelopes";
 export * from "./categories";
 export * from "./transactions";
 export * from "./transaction-lines";
+export * from "./sessions";
+export * from "./auth-audit-logs";
 export * from "./relations";
 
 import { users } from "./users";
@@ -13,6 +15,8 @@ import { envelopes } from "./envelopes";
 import { categories } from "./categories";
 import { transactions } from "./transactions";
 import { transactionLines } from "./transaction-lines";
+import { sessions } from "./sessions";
+import { authAuditLogs } from "./auth-audit-logs";
 
 export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;
@@ -31,3 +35,9 @@ export type NewTransaction = typeof transactions.$inferInsert;
 
 export type TransactionLine = typeof transactionLines.$inferSelect;
 export type NewTransactionLine = typeof transactionLines.$inferInsert;
+
+export type Session = typeof sessions.$inferSelect;
+export type NewSession = typeof sessions.$inferInsert;
+
+export type AuthAuditLog = typeof authAuditLogs.$inferSelect;
+export type NewAuthAuditLog = typeof authAuditLogs.$inferInsert;

@@ -10,6 +10,8 @@ import {
   categories,
   transactions,
   transactionLines,
+  sessions,
+  authAuditLogs,
 } from "./index";
 
 test("user-owned tables have userId field", () => {
@@ -44,4 +46,35 @@ test("deletedAt exists on soft-deletable tables", () => {
   expect("deletedAt" in accounts).toBe(true);
   expect("deletedAt" in envelopes).toBe(true);
   expect("deletedAt" in transactionLines).toBe(true);
+});
+
+test("users table has passwordHash field", () => {
+  expect("passwordHash" in users).toBe(true);
+});
+
+test("sessions table has required auth fields", () => {
+  expect(sessions.userId).toBeDefined();
+  expect("refreshTokenHash" in sessions).toBe(true);
+  expect("deviceName" in sessions).toBe(true);
+  expect("ipAddress" in sessions).toBe(true);
+  expect("userAgent" in sessions).toBe(true);
+  expect("lastActiveAt" in sessions).toBe(true);
+  expect("expiresAt" in sessions).toBe(true);
+  expect("revokedAt" in sessions).toBe(true);
+  expect("createdAt" in sessions).toBe(true);
+  expect("updatedAt" in sessions).toBe(true);
+});
+
+test("authAuditLogs table has required fields", () => {
+  expect(authAuditLogs.userId).toBeDefined();
+  expect("eventType" in authAuditLogs).toBe(true);
+  expect("ipAddress" in authAuditLogs).toBe(true);
+  expect("userAgent" in authAuditLogs).toBe(true);
+  expect("metadata" in authAuditLogs).toBe(true);
+  expect("createdAt" in authAuditLogs).toBe(true);
+});
+
+test("sessions and authAuditLogs are user-scoped", () => {
+  expect(sessions.userId).toBeDefined();
+  expect(authAuditLogs.userId).toBeDefined();
 });

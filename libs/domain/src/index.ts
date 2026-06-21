@@ -65,5 +65,35 @@ export type { TransactionLineProps } from "./ledger/transaction-line";
 export { Transaction } from "./ledger/transaction";
 export type { TransactionProps } from "./ledger/transaction";
 
+// Auth Errors
+export {
+  InvalidCredentialsError,
+  SessionRevokedError,
+  SessionExpiredError,
+  TokenReuseDetectedError,
+  DuplicateEmailError,
+} from "./auth/auth-errors";
+
+// Auth Session
+export {
+  type SessionId,
+  sessionIdFromString,
+  type AuthSessionStatus,
+  type AuthSession,
+  isSessionExpired,
+  isSessionRevoked,
+  getSessionStatus,
+} from "./auth/auth-session";
+
+// Auth Audit Log
+export type { AuthAuditEventType, AuthAuditLog } from "./auth/auth-audit-log";
+
 // Repositories
 export type { TransactionRepository } from "./repositories/transaction-repository";
+export type {
+  AuthUser,
+  NewAuthUser,
+  UserRepository,
+} from "./repositories/user-repository";
+export type { SessionRepository } from "./repositories/session-repository";
+export type { AuthAuditLogRepository } from "./repositories/auth-audit-log-repository";

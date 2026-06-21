@@ -5,6 +5,8 @@ import { envelopes } from "./envelopes";
 import { categories } from "./categories";
 import { transactions } from "./transactions";
 import { transactionLines } from "./transaction-lines";
+import { sessions } from "./sessions";
+import { authAuditLogs } from "./auth-audit-logs";
 
 export const usersRelations = relations(users, ({ many }) => ({
   accounts: many(accounts),
@@ -12,6 +14,8 @@ export const usersRelations = relations(users, ({ many }) => ({
   categories: many(categories),
   transactions: many(transactions),
   transactionLines: many(transactionLines),
+  sessions: many(sessions),
+  authAuditLogs: many(authAuditLogs),
 }));
 
 export const accountsRelations = relations(accounts, ({ one, many }) => ({
@@ -73,3 +77,14 @@ export const transactionLinesRelations = relations(
     }),
   }),
 );
+
+export const sessionsRelations = relations(sessions, ({ one }) => ({
+  user: one(users, { fields: [sessions.userId], references: [users.id] }),
+}));
+
+export const authAuditLogsRelations = relations(authAuditLogs, ({ one }) => ({
+  user: one(users, {
+    fields: [authAuditLogs.userId],
+    references: [users.id],
+  }),
+}));
