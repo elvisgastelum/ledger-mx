@@ -2,6 +2,8 @@
 
 Shapes define what data to sync from PostgreSQL to client.
 
+> **Note:** Code examples in this document are API/UX sketches and are not runtime implementation yet.
+
 ## User-Scoped Shapes
 
 All shapes filter by user_id. Shape definition includes:

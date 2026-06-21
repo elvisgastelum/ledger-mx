@@ -4,6 +4,8 @@ Queue and retry strategy for offline writes.
 
 Implementation details: [Offline Retry](./offline-retry.md)
 
+> **Note:** Code examples in this document are API/UX sketches and are not runtime implementation yet.
+
 ## Write Flow
 
 1. Save to local PGlite (optimistic)

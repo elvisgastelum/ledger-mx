@@ -1,6 +1,6 @@
 # Sync Model
 
-Electric + TanStack DB Shape API for offline-first sync.
+Electric + TanStack DB Shape API is the official MVP sync path for offline-first LedgerMx.
 
 ## Architecture
 
@@ -30,6 +30,8 @@ Electric + TanStack DB Shape API for offline-first sync.
 
 ## Shape Subscriptions
 
+Electric + TanStack DB Shape API is the official MVP sync path. Every shape is scoped by authenticated `user_id` to ensure data isolation between users.
+
 - Subscribe to table with user filter
 - Shape definition: table name + where clause (user_id)
 - Client receives all matching rows
@@ -42,10 +44,17 @@ Example shape config:
 
 ## Sync Status
 
-- ✅ Synced
-- ⏳ Pending
-- ⚠️ Conflict
-- ❌ Error
+Sync status must be visible in the UI for MVP. See [Sync Status UI](./sync-status-ui.md) for full documentation.
+
+Required user-visible states:
+- **Offline**: No network connection
+- **Queued**: Writes pending in IndexedDB queue
+- **Syncing**: Actively syncing with server
+- **Synced**: All changes synced
+- **Conflict**: Conflict requires user resolution (Keep A/Keep B/Keep Both)
+- **Error**: Sync error with retry option
+
+Status appears in: global app chrome/status badge, per-record pending/error markers, and conflict resolution panel entry point.
 
 ## Configuration
 

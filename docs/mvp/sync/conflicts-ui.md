@@ -4,6 +4,8 @@ UI implementation details for sync conflict resolution.
 
 Overview: [Sync Conflicts](./conflicts.md)
 
+> **Note:** Code examples in this document are API/UX sketches and are not runtime implementation yet.
+
 ## Conflict UI
 
 ```typescript

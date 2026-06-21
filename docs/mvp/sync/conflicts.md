@@ -4,6 +4,8 @@ User-driven conflict resolution. Never auto-delete financial records.
 
 UI implementation: [Conflict UI](./conflicts-ui.md)
 
+> **Note:** Code examples in this document are API/UX sketches and are not runtime implementation yet.
+
 ## When Conflicts Happen
 
 Same transaction edited on two devices offline → conflict on sync.

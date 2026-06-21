@@ -4,6 +4,8 @@ Implementation details for offline write retry logic.
 
 Overview: [Offline Writes](./offline-writes.md)
 
+> **Note:** Code examples in this document are API/UX sketches and are not runtime implementation yet.
+
 ## Retry Implementation
 
 ```typescript

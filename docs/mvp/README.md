@@ -9,6 +9,7 @@ Offline-first personal finance app for irregular income and paycheck budgeting.
 - [Stack](./stack/) - Technology decisions
 - [Database](./database/) - Schema, rules, migrations
 - [Sync](./sync/) - Electric + TanStack DB Shape API
+  - [Conflicts UI](./sync/conflicts-ui.md), [Offline Retry](./sync/offline-retry.md), [Sync Status UI](./sync/sync-status-ui.md)
 - [API](./api/) - Boundaries, auth, OpenAPI
 - [Web](./web/) - UX, flows, wireframes
 - [Security](./security/) - Auth, sessions, isolation

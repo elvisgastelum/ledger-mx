@@ -8,6 +8,13 @@ Electric sync with TanStack DB Shape API for offline-first LedgerMx.
 - [Shapes](./shapes.md) - Electric shape subscriptions
 - [Offline Writes](./offline-writes.md) - Queue and retry logic
 - [Conflicts](./conflicts.md) - Conflict resolution strategy
+- [Conflicts UI](./conflicts-ui.md) - Conflict resolution UI implementation
+- [Offline Retry](./offline-retry.md) - Retry logic for failed syncs
+- [Sync Status UI](./sync-status-ui.md) - Sync status visibility in the UI
+
+## Official MVP Sync Path
+
+Electric + TanStack DB Shape API is the official MVP sync path. All sync documentation and implementation follows this stack: Electric as the sync server with shape-based subscriptions, and TanStack DB on the client with PGlite/IndexedDB for offline persistence. Sync status UI is part of this official path.
 
 ## Sync Technology
 
