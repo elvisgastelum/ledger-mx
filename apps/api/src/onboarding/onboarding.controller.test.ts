@@ -4,8 +4,8 @@ import { INestApplication } from "@nestjs/common";
 import request from "supertest";
 import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
 import { OnboardingModule } from "./onboarding.module";
-import type { CategoryGroupRepository, UserId, CategoryGroupId } from "@ledger-mx/domain";
-import { categoryGroupIdFromString } from "@ledger-mx/domain";
+import type { UserId } from "@ledger-mx/domain";
+// categoryGroupIdFromString removed - unused
 import { ApplyDefaultCategoryGroupLayoutUseCase } from "@ledger-mx/application";
 import { CategoryGroupLayoutConflictError } from "@ledger-mx/application";
 
@@ -26,13 +26,13 @@ afterEach(() => {
 const validUserId = "550e8400-e29b-41d4-a716-446655440000" as UserId;
 
 // Mock repository
-const mockCategoryGroupRepository = {
-  save: vi.fn(),
-  findById: vi.fn(),
-  listByUserId: vi.fn(),
-  hasActiveCategories: vi.fn(),
-  softDelete: vi.fn(),
-};
+// const mockCategoryGroupRepository = {
+//   save: vi.fn(),
+//   findById: vi.fn(),
+//   listByUserId: vi.fn(),
+//   hasActiveCategories: vi.fn(),
+//   softDelete: vi.fn(),
+// };
 
 // Mock use case
 const mockApplyLayoutUseCase = {
@@ -41,7 +41,7 @@ const mockApplyLayoutUseCase = {
 
 // Mock guard that attaches user to request
 const mockJwtAuthGuard = {
-  canActivate: vi.fn().mockImplementation((context: any) => {
+  canActivate: vi.fn().mockImplementation((context: unknown) => {
     const request = context.switchToHttp().getRequest();
     request.user = { sub: validUserId, email: "test@example.com" };
     return true;

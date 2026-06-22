@@ -1,4 +1,4 @@
-import type { UserId, CategoryGroupId } from "@ledger-mx/domain";
+import type { CategoryGroupId } from "@ledger-mx/domain";
 import type { CategoryGroupRepository } from "@ledger-mx/domain";
 import type { CategoryGroupKind } from "@ledger-mx/domain";
 import type { Clock } from "../../auth/ports/clock.port";

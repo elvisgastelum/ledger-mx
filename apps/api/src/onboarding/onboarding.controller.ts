@@ -14,9 +14,7 @@ import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
 import { CurrentUser } from "../auth/decorators/current-user.decorator";
 import {
   ApplyLayoutRequestSchema,
-  LAYOUT_TYPES,
 } from "@ledger-mx/contracts";
-import type { UserId } from "@ledger-mx/domain";
 import { userIdFromString } from "@ledger-mx/domain";
 import {
   ApplyDefaultCategoryGroupLayoutUseCase,

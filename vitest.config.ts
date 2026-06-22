@@ -17,6 +17,7 @@ export default defineConfig({
       "@ledger-mx/sync": resolve(__dirname, "libs/sync/src/index.ts"),
       "@ledger-mx/testing": resolve(__dirname, "libs/testing/src/index.ts"),
       "@ledger-mx/ui": resolve(__dirname, "libs/ui/src/index.ts"),
+      "@ledger-mx/infrastructure": resolve(__dirname, "libs/infrastructure/src/index.ts"),
     },
   },
 });

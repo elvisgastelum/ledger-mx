@@ -1,13 +1,11 @@
 import { defineConfig } from "drizzle-kit";
 import * as dotenv from "dotenv";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 // Load root .env file for DATABASE_URL
-dotenv.config({ path: path.resolve(__dirname, "../../.env") });
+// Use process.cwd() as fallback since drizzle-kit may run from different contexts
+const rootDir = path.resolve(process.cwd(), "..", "..");
+dotenv.config({ path: path.join(rootDir, ".env") });
 
 const databaseUrl = process.env.DATABASE_URL;
 if (!databaseUrl) {

@@ -48,9 +48,9 @@ function OnboardingWizard() {
     localStorage.setItem(WIZARD_STORAGE_KEY, JSON.stringify(wizardState));
   }, [wizardState]);
 
-  const goToStep = (step: WizardStep) => {
-    setWizardState((prev) => ({ ...prev, currentStep: step }));
-  };
+//   const goToStep = (step: WizardStep) => {
+//     setWizardState((prev) => ({ ...prev, currentStep: step }));
+//   };
 
   const goNext = () => {
     setWizardState((prev) => ({
@@ -101,7 +101,6 @@ function OnboardingWizard() {
         );
       }
 
-      const result = await response.json();
 
       // Mark wizard as completed
       setWizardState((prev) => ({ ...prev, completed: true }));

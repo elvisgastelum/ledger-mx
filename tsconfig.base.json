@@ -18,7 +18,8 @@
       "@ledger-mx/contracts": ["./libs/contracts/src/index.ts"],
       "@ledger-mx/sync": ["./libs/sync/src/index.ts"],
       "@ledger-mx/ui": ["./libs/ui/src/index.ts"],
-      "@ledger-mx/testing": ["./libs/testing/src/index.ts"]
+      "@ledger-mx/testing": ["./libs/testing/src/index.ts"],
+      "@ledger-mx/infrastructure": ["./libs/infrastructure/src/index.ts"]
     }
   }
 }

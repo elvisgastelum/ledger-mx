@@ -7,19 +7,21 @@ import * as schema from "../schema/index";
 import { DrizzleUserRepository } from "./drizzle-user.repository";
 import { DrizzleSessionRepository } from "./drizzle-session.repository";
 import { DrizzleAuthAuditLogRepository } from "./drizzle-auth-audit-log.repository";
-import { AuthUser, AuthSession, AuthAuditLog } from "@ledger-mx/domain";
-import { randomUUID } from "node:crypto";
+import { AuthUser, AuthSession, AuthAuditLog, SessionId, sessionIdFromString, UserId, userIdFromString } from "@ledger-mx/domain";
+import { NodeCryptoIdGenerator } from "@ledger-mx/infrastructure";
+
+const idGenerator = new NodeCryptoIdGenerator();
 
 describe("Auth Repositories Integration Tests", () => {
-  let container: any;
+  let container: InstanceType<typeof PostgreSqlContainer> | null = null;
   let pool: Pool;
   let db: NodePgDatabase<typeof schema>;
   let userRepository: DrizzleUserRepository;
   let sessionRepository: DrizzleSessionRepository;
   let auditLogRepository: DrizzleAuthAuditLogRepository;
 
-  const testUser1Id = randomUUID() as any;
-  const testUser2Id = randomUUID() as any;
+  const testUser1Id: UserId = userIdFromString(idGenerator.uuid());
+  const testUser2Id: UserId = userIdFromString(idGenerator.uuid());
 
   beforeAll(async () => {
     // Start PostgreSQL container
@@ -108,7 +110,7 @@ describe("Auth Repositories Integration Tests", () => {
     });
 
     it("should return null for non-existent id", async () => {
-      const found = await userRepository.findById(randomUUID() as any);
+      const found = await userRepository.findById(userIdFromString(idGenerator.uuid()));
       expect(found).toBeNull();
     });
 
@@ -178,7 +180,7 @@ describe("Auth Repositories Integration Tests", () => {
     });
 
     it("should save a session and find by refresh token hash", async () => {
-      const sessionId = randomUUID() as any;
+      const sessionId: SessionId = sessionIdFromString(idGenerator.uuid());
       const session: AuthSession = {
         id: sessionId,
         userId: testUser1Id,
@@ -212,7 +214,7 @@ describe("Auth Repositories Integration Tests", () => {
     });
 
     it("should revoke session scoped by userId - correct user", async () => {
-      const sessionId = randomUUID() as any;
+      const sessionId: SessionId = sessionIdFromString(idGenerator.uuid());
       const session: AuthSession = {
         id: sessionId,
         userId: testUser1Id,
@@ -234,7 +236,7 @@ describe("Auth Repositories Integration Tests", () => {
     });
 
     it("should NOT revoke session when wrong userId is provided", async () => {
-      const sessionId = randomUUID() as any;
+      const sessionId: SessionId = sessionIdFromString(idGenerator.uuid());
       const session: AuthSession = {
         id: sessionId,
         userId: testUser1Id,
@@ -259,9 +261,9 @@ describe("Auth Repositories Integration Tests", () => {
 
     it("should revokeAllForUser only revoke sessions for specific user", async () => {
       // Create multiple sessions for user1
-      const session1Id = randomUUID() as any;
-      const session2Id = randomUUID() as any;
-      const session3Id = randomUUID() as any; // For user2
+      const session1Id: SessionId = sessionIdFromString(idGenerator.uuid());
+      const session2Id: SessionId = sessionIdFromString(idGenerator.uuid());
+      const session3Id: SessionId = sessionIdFromString(idGenerator.uuid()); // For user2
 
       const session1: AuthSession = {
         id: session1Id,
@@ -314,8 +316,8 @@ describe("Auth Repositories Integration Tests", () => {
     });
 
     it("should find active sessions by userId", async () => {
-      const session1Id = randomUUID() as any;
-      const session2Id = randomUUID() as any;
+      const session1Id: SessionId = sessionIdFromString(idGenerator.uuid());
+      const session2Id: SessionId = sessionIdFromString(idGenerator.uuid());
 
       const session1: AuthSession = {
         id: session1Id,
@@ -348,7 +350,7 @@ describe("Auth Repositories Integration Tests", () => {
     });
 
     it("should not return revoked sessions in findActiveByUserId", async () => {
-      const sessionId = randomUUID() as any;
+      const sessionId: SessionId = sessionIdFromString(idGenerator.uuid());
 
       const session: AuthSession = {
         id: sessionId,
@@ -390,7 +392,7 @@ describe("Auth Repositories Integration Tests", () => {
 
     it("should record an audit log entry", async () => {
       const auditLog: AuthAuditLog = {
-        id: randomUUID(),
+        id: idGenerator.uuid(),
         userId: testUser1Id,
         eventType: "LOGIN_SUCCESS",
         ipAddress: "192.168.1.1",
@@ -414,7 +416,7 @@ describe("Auth Repositories Integration Tests", () => {
 
     it("should record audit log without userId (nullable)", async () => {
       const auditLog: AuthAuditLog = {
-        id: randomUUID(),
+        id: idGenerator.uuid(),
         eventType: "LOGIN_FAILED",
         ipAddress: "10.0.0.1",
         createdAt: new Date("2024-01-01T00:00:00Z"),
@@ -430,14 +432,14 @@ describe("Auth Repositories Integration Tests", () => {
 
     it("should record multiple audit log entries", async () => {
       const auditLog1: AuthAuditLog = {
-        id: randomUUID(),
+        id: idGenerator.uuid(),
         userId: testUser1Id,
         eventType: "LOGIN_SUCCESS",
         createdAt: new Date("2024-01-01T00:00:00Z"),
       };
 
       const auditLog2: AuthAuditLog = {
-        id: randomUUID(),
+        id: idGenerator.uuid(),
         userId: testUser1Id,
         eventType: "TOKEN_REFRESH",
         createdAt: new Date("2024-01-01T00:01:00Z"),

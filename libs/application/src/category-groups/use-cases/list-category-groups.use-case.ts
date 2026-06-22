@@ -1,4 +1,3 @@
-import type { UserId } from "@ledger-mx/domain";
 import type { CategoryGroupRepository } from "@ledger-mx/domain";
 import type { ListCategoryGroupsInput } from "../category-group.types";
 

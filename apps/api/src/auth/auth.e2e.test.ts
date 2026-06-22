@@ -31,7 +31,7 @@ process.env.JWT_ACCESS_TOKEN_TTL = "15m";
 
 describe("Auth E2E (real database)", () => {
   let app: INestApplication;
-  let container: any;
+  let container: InstanceType<typeof PostgreSqlContainer> | null = null;
   let pool: Pool;
   let db: NodePgDatabase<typeof schema>;
 

@@ -1,4 +1,4 @@
-import type { UserId, CategoryGroupId } from "@ledger-mx/domain";
+import type { UserId } from "@ledger-mx/domain";
 import type { CategoryGroupRepository } from "@ledger-mx/domain";
 import type { CategoryGroupKind } from "@ledger-mx/domain";
 import type { IdGenerator } from "../../auth/ports/id-generator.port";
@@ -97,7 +97,7 @@ export class ApplyDefaultCategoryGroupLayoutUseCase {
     const defaultDefs = this.getDefaultGroupDefs(layout);
 
     // Check for conflicts or idempotency
-    const result = await this.checkAndApplyLayout(userId, existingGroups, defaultDefs, layout);
+    const result = await this.checkAndApplyLayout(userId, existingGroups, defaultDefs);
 
     return result;
   }
@@ -126,7 +126,6 @@ export class ApplyDefaultCategoryGroupLayoutUseCase {
       deletedAt?: Date | null;
     }>,
     defaultDefs: DefaultCategoryGroupDef[],
-    layout: LayoutType,
   ): Promise<ApplyDefaultCategoryGroupLayoutResult> {
     // If no existing groups, create all default groups
     if (existingGroups.length === 0) {

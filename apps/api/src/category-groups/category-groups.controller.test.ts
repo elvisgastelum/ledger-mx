@@ -6,7 +6,7 @@ import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
 import { CategoryGroupsModule } from "./category-groups.module";
 import { CATEGORY_GROUPS_TOKENS } from "./category-groups.tokens";
 import type { CategoryGroupRepository } from "@ledger-mx/domain";
-import type { CategoryGroup, CategoryGroupKind, UserId, CategoryGroupId } from "@ledger-mx/domain";
+import type { CategoryGroup, CategoryGroupKind, UserId } from "@ledger-mx/domain";
 import { categoryGroupIdFromString } from "@ledger-mx/domain";
 
 // Environment setup: save original and set test values before module creation

@@ -23,7 +23,6 @@ import {
   UpdateCategoryGroupRequestSchema,
 } from "@ledger-mx/contracts";
 import type { CategoryGroupKind } from "@ledger-mx/domain";
-import type { UserId, CategoryGroupId } from "@ledger-mx/domain";
 import { categoryGroupIdFromString, userIdFromString } from "@ledger-mx/domain";
 import {
   CreateCategoryGroupUseCase,

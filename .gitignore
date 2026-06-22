@@ -15,3 +15,10 @@ pnpm-debug.log*
 *.sln
 *.sw?
 *.tsbuildinfo
+
+# Seed files - personal seed data should not be committed
+**/seeds/personal.ts
+**/seeds/personal.js
+**/*.personal.ts
+**/*.personal.js
+

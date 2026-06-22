@@ -123,7 +123,8 @@ export class AuthController {
     sessionId: string;
     user: { id: string; email: string; displayName?: string | null };
   }): AuthResultResponse {
-    const { refreshToken: _refreshToken, ...rest } = result;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { refreshToken: _, ...rest } = result;
     // Map displayName null to undefined for TypeScript compatibility
     if (rest.user) {
       rest.user = {

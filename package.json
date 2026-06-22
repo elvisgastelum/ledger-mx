@@ -17,7 +17,11 @@
     "clean": "pnpm -r --if-present clean",
     "db:up": "docker compose -f docker-compose.dev.yml up -d postgres",
     "db:down": "docker compose -f docker-compose.dev.yml down",
-    "db:reset": "docker compose -f docker-compose.dev.yml down -v"
+    "db:reset": "docker compose -f docker-compose.dev.yml down -v",
+    "db:seed:demo": "pnpm --filter @ledger-mx/database seed:demo",
+    "db:seed:personal": "pnpm --filter @ledger-mx/database seed:personal",
+    "db:seed:reset": "pnpm --filter @ledger-mx/database seed:reset",
+    "db:seed:verify": "pnpm --filter @ledger-mx/database seed:verify"
   },
   "devDependencies": {
     "@eslint/js": "^9.17.0",

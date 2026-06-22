@@ -1,5 +1,8 @@
 -- Migration: Add category_groups table and update categories with required category_group_id
 
+-- Enable pgcrypto extension for gen_random_uuid() function
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
+
 -- Create enum type for category_group_kind (idempotent)
 DO $$ BEGIN
   CREATE TYPE "category_group_kind" AS ENUM ('income', 'expense', 'savings', 'general');

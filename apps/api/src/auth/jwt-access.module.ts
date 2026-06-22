@@ -1,4 +1,4 @@
-import { Module, FactoryProvider } from "@nestjs/common";
+import { Module } from "@nestjs/common";
 import { JwtModule, JwtModuleOptions } from "@nestjs/jwt";
 import { ConfigModule, ConfigService } from "@nestjs/config";
 

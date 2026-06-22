@@ -4,7 +4,8 @@
     "composite": true,
     "rootDir": "src",
     "outDir": "dist",
-    "noEmit": false
+    "noEmit": false,
+    "lib": ["ES2022"]
   },
   "include": ["src/**/*.ts"],
   "exclude": [
@@ -14,5 +15,5 @@
     "**/*.spec.ts",
     "**/*.spec.tsx"
   ],
-  "references": [{ "path": "../domain" }, { "path": "../application" }, { "path": "../infrastructure" }]
+  "references": [{ "path": "../application" }]
 }

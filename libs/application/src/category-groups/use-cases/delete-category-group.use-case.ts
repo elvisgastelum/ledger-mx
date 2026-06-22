@@ -1,4 +1,4 @@
-import type { UserId, CategoryGroupId } from "@ledger-mx/domain";
+// UserId and CategoryGroupId removed - unused
 import type { CategoryGroupRepository } from "@ledger-mx/domain";
 import type { Clock } from "../../auth/ports/clock.port";
 import type { DeleteCategoryGroupInput } from "../category-group.types";
