@@ -43,7 +43,11 @@ libs/contracts/src/
    - Transaction APIs: Preserve double-entry invariants where possible
 3. **No forbidden imports**: Contracts must not import from `libs/domain`, `libs/application`, NestJS, React, Drizzle, or application services
 4. **Standard Schema**: Use Zod for schemas; ts-rest supports all Standard Schema compatible validators
-5. **Path prefix**: Use `pathPrefix: '/api/v1'` in root contract to model API versioning (ts-rest ignores Nest global prefixes)
+5. **Path prefix**: Use `pathPrefix: '/api/v1'` in root contract to model API versioning.
+   - NestJS app is configured with `app.setGlobalPrefix('api')` + `app.enableVersioning({ type: VersioningType.URI })` in `main.ts`
+   - However, **@ts-rest/nest ignores Nest global prefix/versioning** for contract routing and OpenAPI generation (see ts-rest NestJS docs: "NestJS global prefixes, versioning, and controller prefixes are currently ignored by ts-rest")
+   - Contract root `pathPrefix: '/api/v1'` models the external API base path, ensuring generated OpenAPI specs and @TsRestHandler routing produce correct `/api/v1/...` paths without relying on Nest prefix behavior
+   - Individual endpoint paths in the contract are prefix-free (e.g., `/auth/register`, not `/api/v1/auth/register`)
 
 ## Onboarding Router (Implemented)
 

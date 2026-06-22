@@ -1,16 +1,11 @@
 import {
-  Body,
   Controller,
-  HttpCode,
-  HttpStatus,
-  Post,
-  Req,
-  Res,
   UnauthorizedException,
   ConflictException,
   Inject,
 } from "@nestjs/common";
 import type { Request, Response } from "express";
+import { Req, Res } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import {
   RegisterUserUseCase,
@@ -22,28 +17,11 @@ import {
   InvalidCredentialsError,
   DuplicateEmailError,
 } from "@ledger-mx/domain";
-import {
-  RegisterRequestSchema,
-  LoginRequestSchema,
-  RefreshTokenRequestSchema,
-  LogoutRequestSchema,
-} from "@ledger-mx/contracts";
 import type { AuthRequestContext } from "@ledger-mx/application";
-import { createZodDto, ZodValidationPipe } from "nestjs-zod";
+import { contract } from "@ledger-mx/contracts";
+import { TsRestHandler, tsRestHandler } from "@ts-rest/nest";
 
 export const REFRESH_COOKIE_NAME = "ledger_mx_refresh_token";
-
-// Auth routes use explicit ZodValidationPipe on each @Body parameter to avoid
-// metadata inference issues that can occur with global validation pipes.
-export class RegisterDto extends createZodDto(RegisterRequestSchema) {}
-
-export class LoginDto extends createZodDto(LoginRequestSchema) {}
-
-export class RefreshDto extends createZodDto(RefreshTokenRequestSchema) {}
-
-export class LogoutDto extends createZodDto(LogoutRequestSchema) {}
-
-
 
 interface AuthResultResponse {
   accessToken: string;
@@ -55,7 +33,7 @@ interface AuthResultResponse {
   };
 }
 
-@Controller("auth")
+@Controller()
 export class AuthController {
   constructor(
     @Inject(RegisterUserUseCase)
@@ -82,14 +60,13 @@ export class AuthController {
     const sameSite =
       (this.configService.get<string>("AUTH_REFRESH_COOKIE_SAME_SITE") as "strict" | "lax" | "none") ?? "lax";
 
-    // Default refresh token expiry: 7 days (no rememberMe) or 30 days (rememberMe)
     const maxAge = rememberMe ? 30 * 24 * 60 * 60 * 1000 : 7 * 24 * 60 * 60 * 1000;
 
     res.cookie(cookieName, refreshToken, {
       httpOnly: true,
       secure,
       sameSite,
-      path: "/auth",
+      path: "/api/v1/auth",
       maxAge,
     });
   }
@@ -106,7 +83,7 @@ export class AuthController {
       httpOnly: true,
       secure,
       sameSite,
-      path: "/auth",
+      path: "/api/v1/auth",
       maxAge: 0,
     });
   }
@@ -123,130 +100,126 @@ export class AuthController {
     sessionId: string;
     user: { id: string; email: string; displayName?: string | null };
   }): AuthResultResponse {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { refreshToken: _, ...rest } = result;
-    // Map displayName null to undefined for TypeScript compatibility
-    if (rest.user) {
-      rest.user = {
-        ...rest.user,
-        displayName: rest.user.displayName ?? undefined,
+    const { accessToken, sessionId, user } = result;
+    return {
+      accessToken,
+      sessionId,
+      user: {
+        ...user,
+        displayName: user.displayName ?? undefined,
+      },
+    };
+  }
+
+  @TsRestHandler(contract.auth.register)
+  async register(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
+    return tsRestHandler(contract.auth.register, async ({ body }) => {
+      const context: AuthRequestContext = {
+        ipAddress: req.ip,
+        userAgent: req.get("user-agent"),
+        deviceName: body.deviceName,
+        rememberMe: body.rememberMe,
       };
-    }
-    return rest as AuthResultResponse;
-  }
 
-  @Post("register")
-  @HttpCode(HttpStatus.CREATED)
-  async register(
-    @Body(new ZodValidationPipe(RegisterDto)) dto: RegisterDto,
-    @Req() req: Request,
-    @Res({ passthrough: true }) res: Response,
-  ) {
-    const context: AuthRequestContext = {
-      ipAddress: req.ip,
-      userAgent: req.get("user-agent"),
-      deviceName: dto.deviceName,
-      rememberMe: dto.rememberMe,
-    };
-
-    try {
-      const result = await this.registerUserUseCase.execute({
-        email: dto.email,
-        password: dto.password,
-        displayName: dto.displayName,
-        context,
-      });
-
-      this.setRefreshTokenCookie(res, result.refreshToken, dto.rememberMe);
-      return this.stripRefreshToken(result);
-    } catch (error) {
-      if (error instanceof DuplicateEmailError) {
-        throw new ConflictException("Email already exists");
-      }
-      throw error;
-    }
-  }
-
-  @Post("login")
-  @HttpCode(HttpStatus.OK)
-  async login(
-    @Body(new ZodValidationPipe(LoginDto)) dto: LoginDto,
-    @Req() req: Request,
-    @Res({ passthrough: true }) res: Response,
-  ) {
-    const context: AuthRequestContext = {
-      ipAddress: req.ip,
-      userAgent: req.get("user-agent"),
-      deviceName: dto.deviceName,
-      rememberMe: dto.rememberMe,
-    };
-
-    try {
-      const result = await this.loginUserUseCase.execute({
-        email: dto.email,
-        password: dto.password,
-        context,
-      });
-
-      this.setRefreshTokenCookie(res, result.refreshToken, dto.rememberMe);
-      return this.stripRefreshToken(result);
-    } catch (error) {
-      if (error instanceof InvalidCredentialsError) {
-        throw new UnauthorizedException("Invalid credentials");
-      }
-      throw error;
-    }
-  }
-
-  @Post("refresh")
-  @HttpCode(HttpStatus.OK)
-  async refresh(
-    @Body(new ZodValidationPipe(RefreshTokenRequestSchema.optional().default({}))) dto: RefreshDto | undefined,
-    @Req() req: Request,
-    @Res({ passthrough: true }) res: Response,
-  ) {
-    // Read refresh token from cookie first, then fallback to body for backwards compatibility
-    const refreshToken = this.getRefreshTokenFromRequest(req) ?? dto?.refreshToken;
-
-    if (!refreshToken) {
-      throw new UnauthorizedException("Refresh token is required");
-    }
-
-    try {
-      const result = await this.refreshTokenUseCase.execute({
-        refreshToken,
-      });
-
-      this.setRefreshTokenCookie(res, result.refreshToken);
-      return this.stripRefreshToken(result);
-    } catch {
-      throw new UnauthorizedException("Invalid or expired refresh token");
-    }
-  }
-
-  @Post("logout")
-  @HttpCode(HttpStatus.OK)
-  async logout(
-    @Body(new ZodValidationPipe(LogoutRequestSchema.optional().default({}))) dto: LogoutDto | undefined,
-    @Req() req: Request,
-    @Res({ passthrough: true }) res: Response,
-  ) {
-      // Read refresh token from cookie first, then fallback to body for backwards compatibility
-    const refreshToken = this.getRefreshTokenFromRequest(req) ?? dto?.refreshToken;
-
-    // Always clear the cookie regardless of whether logout succeeds
-    this.clearRefreshTokenCookie(res);
-
-    if (refreshToken) {
       try {
-        await this.logoutUseCase.execute({
+        const result = await this.registerUserUseCase.execute({
+          email: body.email,
+          password: body.password,
+          displayName: body.displayName,
+          context,
+        });
+
+        this.setRefreshTokenCookie(res, result.refreshToken, body.rememberMe);
+        return {
+          status: 201 as const,
+          body: this.stripRefreshToken(result),
+        };
+      } catch (error) {
+        if (error instanceof DuplicateEmailError) {
+          throw new ConflictException("Email already exists");
+        }
+        throw error;
+      }
+    });
+  }
+
+  @TsRestHandler(contract.auth.login)
+  async login(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
+    return tsRestHandler(contract.auth.login, async ({ body }) => {
+      const context: AuthRequestContext = {
+        ipAddress: req.ip,
+        userAgent: req.get("user-agent"),
+        deviceName: body.deviceName,
+        rememberMe: body.rememberMe,
+      };
+
+      try {
+        const result = await this.loginUserUseCase.execute({
+          email: body.email,
+          password: body.password,
+          context,
+        });
+
+        this.setRefreshTokenCookie(res, result.refreshToken, body.rememberMe);
+        return {
+          status: 200 as const,
+          body: this.stripRefreshToken(result),
+        };
+      } catch (error) {
+        if (error instanceof InvalidCredentialsError) {
+          throw new UnauthorizedException("Invalid credentials");
+        }
+        throw error;
+      }
+    });
+  }
+
+  @TsRestHandler(contract.auth.refresh)
+  async refresh(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
+    return tsRestHandler(contract.auth.refresh, async () => {
+      const refreshToken = this.getRefreshTokenFromRequest(req);
+
+      if (!refreshToken) {
+        throw new UnauthorizedException("Refresh token is required");
+      }
+
+      try {
+        const result = await this.refreshTokenUseCase.execute({
           refreshToken,
         });
-      } catch {
-        // Always return success for logout
-      }
-    }
 
-    return { success: true };
+        this.setRefreshTokenCookie(res, result.refreshToken);
+        return {
+          status: 200 as const,
+          body: this.stripRefreshToken(result),
+        };
+      } catch {
+        throw new UnauthorizedException("Invalid or expired refresh token");
+      }
+    });
+  }
+
+  @TsRestHandler(contract.auth.logout)
+  async logout(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
+    return tsRestHandler(contract.auth.logout, async () => {
+      const refreshToken = this.getRefreshTokenFromRequest(req);
+
+      this.clearRefreshTokenCookie(res);
+
+      if (refreshToken) {
+        try {
+          await this.logoutUseCase.execute({
+            refreshToken,
+          });
+        } catch {
+          // Always return success for logout
+        }
+      }
+
+      return {
+        status: 200 as const,
+        body: { success: true },
+      };
+    });
   }
 }

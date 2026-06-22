@@ -36,26 +36,6 @@ export const LoginRequestSchema = z.object({
 export type LoginRequest = z.infer<typeof LoginRequestSchema>;
 
 /**
- * Request body for refreshing access tokens
- * Refresh token can come from cookie or optionally from body
- */
-export const RefreshTokenRequestSchema = z.object({
-  refreshToken: z.string().optional().describe("Refresh token (can also be provided via httpOnly cookie)"),
-}).strict();
-
-export type RefreshTokenRequest = z.infer<typeof RefreshTokenRequestSchema>;
-
-/**
- * Request body for user logout
- * Refresh token can come from cookie or optionally from body
- */
-export const LogoutRequestSchema = z.object({
-  refreshToken: z.string().optional().describe("Refresh token to invalidate (can also be provided via httpOnly cookie)"),
-}).strict();
-
-export type LogoutRequest = z.infer<typeof LogoutRequestSchema>;
-
-/**
  * Response body for successful authentication (register/login/refresh)
  * Note: refreshToken is set as httpOnly cookie, not returned in JSON body
  */

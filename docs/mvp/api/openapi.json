@@ -1124,7 +1124,7 @@
         }
       }
     },
-    "/api/v1/onboarding/layout": {
+    "/onboarding/layout": {
       "post": {
         "summary": "Apply a default category group layout during user onboarding",
         "tags": [
@@ -1299,7 +1299,3137 @@
         }
       }
     },
-    "/api/v1/reports/spendable-balance": {
+    "/accounts": {
+      "get": {
+        "summary": "List all accounts for the authenticated user",
+        "tags": [
+          "accounts"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "200",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "accounts": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "format": "uuid",
+                            "description": "UUID v4 identifier"
+                          },
+                          "name": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 100
+                          },
+                          "type": {
+                            "type": "string",
+                            "enum": [
+                              "checking",
+                              "savings",
+                              "credit",
+                              "cash",
+                              "investment"
+                            ]
+                          },
+                          "balanceCents": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "description": "Current account balance in cents"
+                          },
+                          "currency": {
+                            "default": "MXN",
+                            "type": "string",
+                            "minLength": 3,
+                            "maxLength": 3,
+                            "description": "ISO 4217 currency code"
+                          },
+                          "isActive": {
+                            "type": "boolean"
+                          },
+                          "createdAt": {
+                            "type": "string",
+                            "format": "date-time"
+                          },
+                          "updatedAt": {
+                            "type": "string",
+                            "format": "date-time"
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "name",
+                          "type",
+                          "balanceCents",
+                          "isActive",
+                          "createdAt",
+                          "updatedAt"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "accounts"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "401",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Error type identifier (e.g., 'VALIDATION_ERROR', 'UNAUTHORIZED')"
+                    },
+                    "message": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Human-readable error description"
+                    },
+                    "statusCode": {
+                      "type": "integer",
+                      "minimum": 100,
+                      "maximum": 599,
+                      "description": "HTTP status code matching the response"
+                    }
+                  },
+                  "required": [
+                    "error",
+                    "message",
+                    "statusCode"
+                  ]
+                }
+              }
+            }
+          },
+          "501": {
+            "description": "Endpoint not yet implemented",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Error type identifier (e.g., 'VALIDATION_ERROR', 'UNAUTHORIZED')"
+                    },
+                    "message": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Human-readable error description"
+                    },
+                    "statusCode": {
+                      "type": "integer",
+                      "minimum": 100,
+                      "maximum": 599,
+                      "description": "HTTP status code matching the response"
+                    }
+                  },
+                  "required": [
+                    "error",
+                    "message",
+                    "statusCode"
+                  ],
+                  "description": "Endpoint not yet implemented"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Create a new account for the authenticated user",
+        "tags": [
+          "accounts"
+        ],
+        "parameters": [],
+        "requestBody": {
+          "description": "Body",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100
+                  },
+                  "type": {
+                    "type": "string",
+                    "enum": [
+                      "checking",
+                      "savings",
+                      "credit",
+                      "cash",
+                      "investment"
+                    ]
+                  },
+                  "currency": {
+                    "default": "MXN",
+                    "type": "string",
+                    "minLength": 3,
+                    "maxLength": 3,
+                    "description": "ISO 4217 currency code"
+                  }
+                },
+                "required": [
+                  "name",
+                  "type"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "201",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "format": "uuid",
+                      "description": "UUID v4 identifier"
+                    },
+                    "name": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 100
+                    },
+                    "type": {
+                      "type": "string",
+                      "enum": [
+                        "checking",
+                        "savings",
+                        "credit",
+                        "cash",
+                        "investment"
+                      ]
+                    },
+                    "balanceCents": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "description": "Current account balance in cents"
+                    },
+                    "currency": {
+                      "default": "MXN",
+                      "type": "string",
+                      "minLength": 3,
+                      "maxLength": 3,
+                      "description": "ISO 4217 currency code"
+                    },
+                    "isActive": {
+                      "type": "boolean"
+                    },
+                    "createdAt": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "updatedAt": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "name",
+                    "type",
+                    "balanceCents",
+                    "isActive",
+                    "createdAt",
+                    "updatedAt"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "400",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Error type identifier (e.g., 'VALIDATION_ERROR', 'UNAUTHORIZED')"
+                    },
+                    "message": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Human-readable error description"
+                    },
+                    "statusCode": {
+                      "type": "integer",
+                      "minimum": 100,
+                      "maximum": 599,
+                      "description": "HTTP status code matching the response"
+                    }
+                  },
+                  "required": [
+                    "error",
+                    "message",
+                    "statusCode"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "401",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Error type identifier (e.g., 'VALIDATION_ERROR', 'UNAUTHORIZED')"
+                    },
+                    "message": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Human-readable error description"
+                    },
+                    "statusCode": {
+                      "type": "integer",
+                      "minimum": 100,
+                      "maximum": 599,
+                      "description": "HTTP status code matching the response"
+                    }
+                  },
+                  "required": [
+                    "error",
+                    "message",
+                    "statusCode"
+                  ]
+                }
+              }
+            }
+          },
+          "501": {
+            "description": "Endpoint not yet implemented",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Error type identifier (e.g., 'VALIDATION_ERROR', 'UNAUTHORIZED')"
+                    },
+                    "message": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Human-readable error description"
+                    },
+                    "statusCode": {
+                      "type": "integer",
+                      "minimum": 100,
+                      "maximum": 599,
+                      "description": "HTTP status code matching the response"
+                    }
+                  },
+                  "required": [
+                    "error",
+                    "message",
+                    "statusCode"
+                  ],
+                  "description": "Endpoint not yet implemented"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/accounts/{id}": {
+      "get": {
+        "summary": "Get an account by ID",
+        "tags": [
+          "accounts"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "UUID v4 identifier"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "200",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "format": "uuid",
+                      "description": "UUID v4 identifier"
+                    },
+                    "name": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 100
+                    },
+                    "type": {
+                      "type": "string",
+                      "enum": [
+                        "checking",
+                        "savings",
+                        "credit",
+                        "cash",
+                        "investment"
+                      ]
+                    },
+                    "balanceCents": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "description": "Current account balance in cents"
+                    },
+                    "currency": {
+                      "default": "MXN",
+                      "type": "string",
+                      "minLength": 3,
+                      "maxLength": 3,
+                      "description": "ISO 4217 currency code"
+                    },
+                    "isActive": {
+                      "type": "boolean"
+                    },
+                    "createdAt": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "updatedAt": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "name",
+                    "type",
+                    "balanceCents",
+                    "isActive",
+                    "createdAt",
+                    "updatedAt"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "401",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Error type identifier (e.g., 'VALIDATION_ERROR', 'UNAUTHORIZED')"
+                    },
+                    "message": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Human-readable error description"
+                    },
+                    "statusCode": {
+                      "type": "integer",
+                      "minimum": 100,
+                      "maximum": 599,
+                      "description": "HTTP status code matching the response"
+                    }
+                  },
+                  "required": [
+                    "error",
+                    "message",
+                    "statusCode"
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Account not found or not owned by user",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Error type identifier (e.g., 'VALIDATION_ERROR', 'UNAUTHORIZED')"
+                    },
+                    "message": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Human-readable error description"
+                    },
+                    "statusCode": {
+                      "type": "integer",
+                      "minimum": 100,
+                      "maximum": 599,
+                      "description": "HTTP status code matching the response"
+                    }
+                  },
+                  "required": [
+                    "error",
+                    "message",
+                    "statusCode"
+                  ],
+                  "description": "Account not found or not owned by user"
+                }
+              }
+            }
+          },
+          "501": {
+            "description": "Endpoint not yet implemented",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Error type identifier (e.g., 'VALIDATION_ERROR', 'UNAUTHORIZED')"
+                    },
+                    "message": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Human-readable error description"
+                    },
+                    "statusCode": {
+                      "type": "integer",
+                      "minimum": 100,
+                      "maximum": 599,
+                      "description": "HTTP status code matching the response"
+                    }
+                  },
+                  "required": [
+                    "error",
+                    "message",
+                    "statusCode"
+                  ],
+                  "description": "Endpoint not yet implemented"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "summary": "Update an existing account by ID",
+        "tags": [
+          "accounts"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "UUID v4 identifier"
+          }
+        ],
+        "requestBody": {
+          "description": "Body",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100
+                  },
+                  "type": {
+                    "type": "string",
+                    "enum": [
+                      "checking",
+                      "savings",
+                      "credit",
+                      "cash",
+                      "investment"
+                    ]
+                  },
+                  "currency": {
+                    "type": "string",
+                    "minLength": 3,
+                    "maxLength": 3
+                  },
+                  "isActive": {
+                    "type": "boolean"
+                  }
+                },
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "200",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "format": "uuid",
+                      "description": "UUID v4 identifier"
+                    },
+                    "name": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 100
+                    },
+                    "type": {
+                      "type": "string",
+                      "enum": [
+                        "checking",
+                        "savings",
+                        "credit",
+                        "cash",
+                        "investment"
+                      ]
+                    },
+                    "balanceCents": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "description": "Current account balance in cents"
+                    },
+                    "currency": {
+                      "default": "MXN",
+                      "type": "string",
+                      "minLength": 3,
+                      "maxLength": 3,
+                      "description": "ISO 4217 currency code"
+                    },
+                    "isActive": {
+                      "type": "boolean"
+                    },
+                    "createdAt": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "updatedAt": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "name",
+                    "type",
+                    "balanceCents",
+                    "isActive",
+                    "createdAt",
+                    "updatedAt"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "400",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Error type identifier (e.g., 'VALIDATION_ERROR', 'UNAUTHORIZED')"
+                    },
+                    "message": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Human-readable error description"
+                    },
+                    "statusCode": {
+                      "type": "integer",
+                      "minimum": 100,
+                      "maximum": 599,
+                      "description": "HTTP status code matching the response"
+                    }
+                  },
+                  "required": [
+                    "error",
+                    "message",
+                    "statusCode"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "401",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Error type identifier (e.g., 'VALIDATION_ERROR', 'UNAUTHORIZED')"
+                    },
+                    "message": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Human-readable error description"
+                    },
+                    "statusCode": {
+                      "type": "integer",
+                      "minimum": 100,
+                      "maximum": 599,
+                      "description": "HTTP status code matching the response"
+                    }
+                  },
+                  "required": [
+                    "error",
+                    "message",
+                    "statusCode"
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Account not found or not owned by user",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Error type identifier (e.g., 'VALIDATION_ERROR', 'UNAUTHORIZED')"
+                    },
+                    "message": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Human-readable error description"
+                    },
+                    "statusCode": {
+                      "type": "integer",
+                      "minimum": 100,
+                      "maximum": 599,
+                      "description": "HTTP status code matching the response"
+                    }
+                  },
+                  "required": [
+                    "error",
+                    "message",
+                    "statusCode"
+                  ],
+                  "description": "Account not found or not owned by user"
+                }
+              }
+            }
+          },
+          "501": {
+            "description": "Endpoint not yet implemented",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Error type identifier (e.g., 'VALIDATION_ERROR', 'UNAUTHORIZED')"
+                    },
+                    "message": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Human-readable error description"
+                    },
+                    "statusCode": {
+                      "type": "integer",
+                      "minimum": 100,
+                      "maximum": 599,
+                      "description": "HTTP status code matching the response"
+                    }
+                  },
+                  "required": [
+                    "error",
+                    "message",
+                    "statusCode"
+                  ],
+                  "description": "Endpoint not yet implemented"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete an account by ID",
+        "tags": [
+          "accounts"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "UUID v4 identifier"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "204"
+          },
+          "401": {
+            "description": "401",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Error type identifier (e.g., 'VALIDATION_ERROR', 'UNAUTHORIZED')"
+                    },
+                    "message": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Human-readable error description"
+                    },
+                    "statusCode": {
+                      "type": "integer",
+                      "minimum": 100,
+                      "maximum": 599,
+                      "description": "HTTP status code matching the response"
+                    }
+                  },
+                  "required": [
+                    "error",
+                    "message",
+                    "statusCode"
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Account not found or not owned by user",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Error type identifier (e.g., 'VALIDATION_ERROR', 'UNAUTHORIZED')"
+                    },
+                    "message": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Human-readable error description"
+                    },
+                    "statusCode": {
+                      "type": "integer",
+                      "minimum": 100,
+                      "maximum": 599,
+                      "description": "HTTP status code matching the response"
+                    }
+                  },
+                  "required": [
+                    "error",
+                    "message",
+                    "statusCode"
+                  ],
+                  "description": "Account not found or not owned by user"
+                }
+              }
+            }
+          },
+          "501": {
+            "description": "Endpoint not yet implemented",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Error type identifier (e.g., 'VALIDATION_ERROR', 'UNAUTHORIZED')"
+                    },
+                    "message": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Human-readable error description"
+                    },
+                    "statusCode": {
+                      "type": "integer",
+                      "minimum": 100,
+                      "maximum": 599,
+                      "description": "HTTP status code matching the response"
+                    }
+                  },
+                  "required": [
+                    "error",
+                    "message",
+                    "statusCode"
+                  ],
+                  "description": "Endpoint not yet implemented"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/envelopes": {
+      "get": {
+        "summary": "List all envelopes for the authenticated user",
+        "tags": [
+          "envelopes"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "200",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "envelopes": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "format": "uuid",
+                            "description": "UUID v4 identifier"
+                          },
+                          "name": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 100
+                          },
+                          "targetAmountCents": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "description": "Target funding amount in cents"
+                          },
+                          "currentAmountCents": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "description": "Current funded amount in cents"
+                          },
+                          "status": {
+                            "type": "string",
+                            "enum": [
+                              "active",
+                              "funded",
+                              "depleted"
+                            ]
+                          },
+                          "month": {
+                            "type": "string",
+                            "pattern": "^\\d{4}-\\d{2}$",
+                            "description": "YYYY-MM format for envelope month"
+                          },
+                          "categoryGroupId": {
+                            "type": "string",
+                            "format": "uuid",
+                            "description": "Associated category group ID",
+                            "nullable": true
+                          },
+                          "createdAt": {
+                            "type": "string",
+                            "format": "date-time"
+                          },
+                          "updatedAt": {
+                            "type": "string",
+                            "format": "date-time"
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "name",
+                          "targetAmountCents",
+                          "currentAmountCents",
+                          "status",
+                          "month",
+                          "categoryGroupId",
+                          "createdAt",
+                          "updatedAt"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "envelopes"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "401",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Error type identifier (e.g., 'VALIDATION_ERROR', 'UNAUTHORIZED')"
+                    },
+                    "message": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Human-readable error description"
+                    },
+                    "statusCode": {
+                      "type": "integer",
+                      "minimum": 100,
+                      "maximum": 599,
+                      "description": "HTTP status code matching the response"
+                    }
+                  },
+                  "required": [
+                    "error",
+                    "message",
+                    "statusCode"
+                  ]
+                }
+              }
+            }
+          },
+          "501": {
+            "description": "Endpoint not yet implemented",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Error type identifier (e.g., 'VALIDATION_ERROR', 'UNAUTHORIZED')"
+                    },
+                    "message": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Human-readable error description"
+                    },
+                    "statusCode": {
+                      "type": "integer",
+                      "minimum": 100,
+                      "maximum": 599,
+                      "description": "HTTP status code matching the response"
+                    }
+                  },
+                  "required": [
+                    "error",
+                    "message",
+                    "statusCode"
+                  ],
+                  "description": "Endpoint not yet implemented"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Create a new envelope for the authenticated user",
+        "tags": [
+          "envelopes"
+        ],
+        "parameters": [],
+        "requestBody": {
+          "description": "Body",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100
+                  },
+                  "targetAmountCents": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "description": "Monetary value in cents (1/100 of currency unit)"
+                  },
+                  "month": {
+                    "type": "string",
+                    "pattern": "^\\d{4}-\\d{2}$",
+                    "description": "YYYY-MM format for envelope month"
+                  },
+                  "categoryGroupId": {
+                    "type": "string",
+                    "format": "uuid",
+                    "description": "UUID v4 identifier",
+                    "nullable": true
+                  }
+                },
+                "required": [
+                  "name",
+                  "targetAmountCents",
+                  "month"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "201",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "format": "uuid",
+                      "description": "UUID v4 identifier"
+                    },
+                    "name": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 100
+                    },
+                    "targetAmountCents": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "description": "Target funding amount in cents"
+                    },
+                    "currentAmountCents": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "description": "Current funded amount in cents"
+                    },
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "active",
+                        "funded",
+                        "depleted"
+                      ]
+                    },
+                    "month": {
+                      "type": "string",
+                      "pattern": "^\\d{4}-\\d{2}$",
+                      "description": "YYYY-MM format for envelope month"
+                    },
+                    "categoryGroupId": {
+                      "type": "string",
+                      "format": "uuid",
+                      "description": "Associated category group ID",
+                      "nullable": true
+                    },
+                    "createdAt": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "updatedAt": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "name",
+                    "targetAmountCents",
+                    "currentAmountCents",
+                    "status",
+                    "month",
+                    "categoryGroupId",
+                    "createdAt",
+                    "updatedAt"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "400",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Error type identifier (e.g., 'VALIDATION_ERROR', 'UNAUTHORIZED')"
+                    },
+                    "message": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Human-readable error description"
+                    },
+                    "statusCode": {
+                      "type": "integer",
+                      "minimum": 100,
+                      "maximum": 599,
+                      "description": "HTTP status code matching the response"
+                    }
+                  },
+                  "required": [
+                    "error",
+                    "message",
+                    "statusCode"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "401",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Error type identifier (e.g., 'VALIDATION_ERROR', 'UNAUTHORIZED')"
+                    },
+                    "message": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Human-readable error description"
+                    },
+                    "statusCode": {
+                      "type": "integer",
+                      "minimum": 100,
+                      "maximum": 599,
+                      "description": "HTTP status code matching the response"
+                    }
+                  },
+                  "required": [
+                    "error",
+                    "message",
+                    "statusCode"
+                  ]
+                }
+              }
+            }
+          },
+          "501": {
+            "description": "Endpoint not yet implemented",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Error type identifier (e.g., 'VALIDATION_ERROR', 'UNAUTHORIZED')"
+                    },
+                    "message": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Human-readable error description"
+                    },
+                    "statusCode": {
+                      "type": "integer",
+                      "minimum": 100,
+                      "maximum": 599,
+                      "description": "HTTP status code matching the response"
+                    }
+                  },
+                  "required": [
+                    "error",
+                    "message",
+                    "statusCode"
+                  ],
+                  "description": "Endpoint not yet implemented"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/envelopes/{id}": {
+      "get": {
+        "summary": "Get an envelope by ID",
+        "tags": [
+          "envelopes"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "UUID v4 identifier"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "200",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "format": "uuid",
+                      "description": "UUID v4 identifier"
+                    },
+                    "name": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 100
+                    },
+                    "targetAmountCents": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "description": "Target funding amount in cents"
+                    },
+                    "currentAmountCents": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "description": "Current funded amount in cents"
+                    },
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "active",
+                        "funded",
+                        "depleted"
+                      ]
+                    },
+                    "month": {
+                      "type": "string",
+                      "pattern": "^\\d{4}-\\d{2}$",
+                      "description": "YYYY-MM format for envelope month"
+                    },
+                    "categoryGroupId": {
+                      "type": "string",
+                      "format": "uuid",
+                      "description": "Associated category group ID",
+                      "nullable": true
+                    },
+                    "createdAt": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "updatedAt": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "name",
+                    "targetAmountCents",
+                    "currentAmountCents",
+                    "status",
+                    "month",
+                    "categoryGroupId",
+                    "createdAt",
+                    "updatedAt"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "401",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Error type identifier (e.g., 'VALIDATION_ERROR', 'UNAUTHORIZED')"
+                    },
+                    "message": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Human-readable error description"
+                    },
+                    "statusCode": {
+                      "type": "integer",
+                      "minimum": 100,
+                      "maximum": 599,
+                      "description": "HTTP status code matching the response"
+                    }
+                  },
+                  "required": [
+                    "error",
+                    "message",
+                    "statusCode"
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Envelope not found or not owned by user",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Error type identifier (e.g., 'VALIDATION_ERROR', 'UNAUTHORIZED')"
+                    },
+                    "message": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Human-readable error description"
+                    },
+                    "statusCode": {
+                      "type": "integer",
+                      "minimum": 100,
+                      "maximum": 599,
+                      "description": "HTTP status code matching the response"
+                    }
+                  },
+                  "required": [
+                    "error",
+                    "message",
+                    "statusCode"
+                  ],
+                  "description": "Envelope not found or not owned by user"
+                }
+              }
+            }
+          },
+          "501": {
+            "description": "Endpoint not yet implemented",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Error type identifier (e.g., 'VALIDATION_ERROR', 'UNAUTHORIZED')"
+                    },
+                    "message": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Human-readable error description"
+                    },
+                    "statusCode": {
+                      "type": "integer",
+                      "minimum": 100,
+                      "maximum": 599,
+                      "description": "HTTP status code matching the response"
+                    }
+                  },
+                  "required": [
+                    "error",
+                    "message",
+                    "statusCode"
+                  ],
+                  "description": "Endpoint not yet implemented"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "summary": "Update an existing envelope by ID",
+        "tags": [
+          "envelopes"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "UUID v4 identifier"
+          }
+        ],
+        "requestBody": {
+          "description": "Body",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100
+                  },
+                  "targetAmountCents": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "description": "Monetary value in cents (1/100 of currency unit)"
+                  },
+                  "month": {
+                    "type": "string",
+                    "pattern": "^\\d{4}-\\d{2}$"
+                  },
+                  "categoryGroupId": {
+                    "type": "string",
+                    "format": "uuid",
+                    "description": "UUID v4 identifier",
+                    "nullable": true
+                  }
+                },
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "200",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "format": "uuid",
+                      "description": "UUID v4 identifier"
+                    },
+                    "name": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 100
+                    },
+                    "targetAmountCents": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "description": "Target funding amount in cents"
+                    },
+                    "currentAmountCents": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "description": "Current funded amount in cents"
+                    },
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "active",
+                        "funded",
+                        "depleted"
+                      ]
+                    },
+                    "month": {
+                      "type": "string",
+                      "pattern": "^\\d{4}-\\d{2}$",
+                      "description": "YYYY-MM format for envelope month"
+                    },
+                    "categoryGroupId": {
+                      "type": "string",
+                      "format": "uuid",
+                      "description": "Associated category group ID",
+                      "nullable": true
+                    },
+                    "createdAt": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "updatedAt": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "name",
+                    "targetAmountCents",
+                    "currentAmountCents",
+                    "status",
+                    "month",
+                    "categoryGroupId",
+                    "createdAt",
+                    "updatedAt"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "400",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Error type identifier (e.g., 'VALIDATION_ERROR', 'UNAUTHORIZED')"
+                    },
+                    "message": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Human-readable error description"
+                    },
+                    "statusCode": {
+                      "type": "integer",
+                      "minimum": 100,
+                      "maximum": 599,
+                      "description": "HTTP status code matching the response"
+                    }
+                  },
+                  "required": [
+                    "error",
+                    "message",
+                    "statusCode"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "401",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Error type identifier (e.g., 'VALIDATION_ERROR', 'UNAUTHORIZED')"
+                    },
+                    "message": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Human-readable error description"
+                    },
+                    "statusCode": {
+                      "type": "integer",
+                      "minimum": 100,
+                      "maximum": 599,
+                      "description": "HTTP status code matching the response"
+                    }
+                  },
+                  "required": [
+                    "error",
+                    "message",
+                    "statusCode"
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Envelope not found or not owned by user",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Error type identifier (e.g., 'VALIDATION_ERROR', 'UNAUTHORIZED')"
+                    },
+                    "message": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Human-readable error description"
+                    },
+                    "statusCode": {
+                      "type": "integer",
+                      "minimum": 100,
+                      "maximum": 599,
+                      "description": "HTTP status code matching the response"
+                    }
+                  },
+                  "required": [
+                    "error",
+                    "message",
+                    "statusCode"
+                  ],
+                  "description": "Envelope not found or not owned by user"
+                }
+              }
+            }
+          },
+          "501": {
+            "description": "Endpoint not yet implemented",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Error type identifier (e.g., 'VALIDATION_ERROR', 'UNAUTHORIZED')"
+                    },
+                    "message": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Human-readable error description"
+                    },
+                    "statusCode": {
+                      "type": "integer",
+                      "minimum": 100,
+                      "maximum": 599,
+                      "description": "HTTP status code matching the response"
+                    }
+                  },
+                  "required": [
+                    "error",
+                    "message",
+                    "statusCode"
+                  ],
+                  "description": "Endpoint not yet implemented"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete an envelope by ID",
+        "tags": [
+          "envelopes"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "UUID v4 identifier"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "204"
+          },
+          "401": {
+            "description": "401",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Error type identifier (e.g., 'VALIDATION_ERROR', 'UNAUTHORIZED')"
+                    },
+                    "message": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Human-readable error description"
+                    },
+                    "statusCode": {
+                      "type": "integer",
+                      "minimum": 100,
+                      "maximum": 599,
+                      "description": "HTTP status code matching the response"
+                    }
+                  },
+                  "required": [
+                    "error",
+                    "message",
+                    "statusCode"
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Envelope not found or not owned by user",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Error type identifier (e.g., 'VALIDATION_ERROR', 'UNAUTHORIZED')"
+                    },
+                    "message": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Human-readable error description"
+                    },
+                    "statusCode": {
+                      "type": "integer",
+                      "minimum": 100,
+                      "maximum": 599,
+                      "description": "HTTP status code matching the response"
+                    }
+                  },
+                  "required": [
+                    "error",
+                    "message",
+                    "statusCode"
+                  ],
+                  "description": "Envelope not found or not owned by user"
+                }
+              }
+            }
+          },
+          "501": {
+            "description": "Endpoint not yet implemented",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Error type identifier (e.g., 'VALIDATION_ERROR', 'UNAUTHORIZED')"
+                    },
+                    "message": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Human-readable error description"
+                    },
+                    "statusCode": {
+                      "type": "integer",
+                      "minimum": 100,
+                      "maximum": 599,
+                      "description": "HTTP status code matching the response"
+                    }
+                  },
+                  "required": [
+                    "error",
+                    "message",
+                    "statusCode"
+                  ],
+                  "description": "Endpoint not yet implemented"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/transactions": {
+      "get": {
+        "summary": "List transactions for the authenticated user with optional filters",
+        "tags": [
+          "transactions"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "200",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "transactions": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "format": "uuid",
+                            "description": "UUID v4 identifier"
+                          },
+                          "transactionDate": {
+                            "type": "string",
+                            "format": "date-time",
+                            "description": "Transaction date in UTC"
+                          },
+                          "note": {
+                            "type": "string",
+                            "maxLength": 500,
+                            "nullable": true
+                          },
+                          "type": {
+                            "type": "string",
+                            "enum": [
+                              "expense",
+                              "income",
+                              "transfer",
+                              "debt_payment",
+                              "envelope_allocation"
+                            ]
+                          },
+                          "totalAmountCents": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "description": "Total transaction amount in cents (absolute value)"
+                          },
+                          "lines": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "id": {
+                                  "type": "string",
+                                  "format": "uuid",
+                                  "description": "UUID v4 identifier"
+                                },
+                                "accountId": {
+                                  "type": "string",
+                                  "format": "uuid",
+                                  "description": "Account ID (null for category lines)",
+                                  "nullable": true
+                                },
+                                "categoryId": {
+                                  "type": "string",
+                                  "format": "uuid",
+                                  "description": "Category ID (null for account lines)",
+                                  "nullable": true
+                                },
+                                "envelopeId": {
+                                  "type": "string",
+                                  "format": "uuid",
+                                  "description": "Envelope ID (for envelope allocations)",
+                                  "nullable": true
+                                },
+                                "amountCents": {
+                                  "type": "integer",
+                                  "description": "Signed monetary value in cents (negative for outflow, positive for inflow)"
+                                },
+                                "type": {
+                                  "type": "string",
+                                  "enum": [
+                                    "expense",
+                                    "income",
+                                    "transfer",
+                                    "debt_payment",
+                                    "envelope_allocation"
+                                  ]
+                                }
+                              },
+                              "required": [
+                                "id",
+                                "accountId",
+                                "categoryId",
+                                "envelopeId",
+                                "amountCents",
+                                "type"
+                              ],
+                              "additionalProperties": false
+                            },
+                            "minItems": 2,
+                            "description": "Double-entry transaction lines"
+                          },
+                          "createdAt": {
+                            "type": "string",
+                            "format": "date-time"
+                          },
+                          "updatedAt": {
+                            "type": "string",
+                            "format": "date-time"
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "transactionDate",
+                          "note",
+                          "type",
+                          "totalAmountCents",
+                          "lines",
+                          "createdAt",
+                          "updatedAt"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "transactions"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "401",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Error type identifier (e.g., 'VALIDATION_ERROR', 'UNAUTHORIZED')"
+                    },
+                    "message": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Human-readable error description"
+                    },
+                    "statusCode": {
+                      "type": "integer",
+                      "minimum": 100,
+                      "maximum": 599,
+                      "description": "HTTP status code matching the response"
+                    }
+                  },
+                  "required": [
+                    "error",
+                    "message",
+                    "statusCode"
+                  ]
+                }
+              }
+            }
+          },
+          "501": {
+            "description": "Endpoint not yet implemented",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Error type identifier (e.g., 'VALIDATION_ERROR', 'UNAUTHORIZED')"
+                    },
+                    "message": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Human-readable error description"
+                    },
+                    "statusCode": {
+                      "type": "integer",
+                      "minimum": 100,
+                      "maximum": 599,
+                      "description": "HTTP status code matching the response"
+                    }
+                  },
+                  "required": [
+                    "error",
+                    "message",
+                    "statusCode"
+                  ],
+                  "description": "Endpoint not yet implemented"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Create a new transaction (double-entry, lines must sum to zero)",
+        "tags": [
+          "transactions"
+        ],
+        "parameters": [],
+        "requestBody": {
+          "description": "Body",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "format": "uuid",
+                    "description": "Client-generated UUID v4 for transaction"
+                  },
+                  "transactionDate": {
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "Transaction date in UTC"
+                  },
+                  "note": {
+                    "type": "string",
+                    "maxLength": 500,
+                    "nullable": true
+                  },
+                  "type": {
+                    "type": "string",
+                    "enum": [
+                      "expense",
+                      "income",
+                      "transfer",
+                      "debt_payment",
+                      "envelope_allocation"
+                    ]
+                  },
+                  "lines": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "format": "uuid",
+                          "description": "UUID v4 identifier"
+                        },
+                        "accountId": {
+                          "type": "string",
+                          "format": "uuid",
+                          "description": "Account ID (null for category lines)",
+                          "nullable": true
+                        },
+                        "categoryId": {
+                          "type": "string",
+                          "format": "uuid",
+                          "description": "Category ID (null for account lines)",
+                          "nullable": true
+                        },
+                        "envelopeId": {
+                          "type": "string",
+                          "format": "uuid",
+                          "description": "Envelope ID (for envelope allocations)",
+                          "nullable": true
+                        },
+                        "amountCents": {
+                          "type": "integer",
+                          "description": "Signed monetary value in cents (negative for outflow, positive for inflow)"
+                        },
+                        "type": {
+                          "type": "string",
+                          "enum": [
+                            "expense",
+                            "income",
+                            "transfer",
+                            "debt_payment",
+                            "envelope_allocation"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "accountId",
+                        "categoryId",
+                        "envelopeId",
+                        "amountCents",
+                        "type"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "minItems": 2
+                  }
+                },
+                "required": [
+                  "id",
+                  "transactionDate",
+                  "type",
+                  "lines"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "201",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "format": "uuid",
+                      "description": "UUID v4 identifier"
+                    },
+                    "transactionDate": {
+                      "type": "string",
+                      "format": "date-time",
+                      "description": "Transaction date in UTC"
+                    },
+                    "note": {
+                      "type": "string",
+                      "maxLength": 500,
+                      "nullable": true
+                    },
+                    "type": {
+                      "type": "string",
+                      "enum": [
+                        "expense",
+                        "income",
+                        "transfer",
+                        "debt_payment",
+                        "envelope_allocation"
+                      ]
+                    },
+                    "totalAmountCents": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "description": "Total transaction amount in cents (absolute value)"
+                    },
+                    "lines": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "format": "uuid",
+                            "description": "UUID v4 identifier"
+                          },
+                          "accountId": {
+                            "type": "string",
+                            "format": "uuid",
+                            "description": "Account ID (null for category lines)",
+                            "nullable": true
+                          },
+                          "categoryId": {
+                            "type": "string",
+                            "format": "uuid",
+                            "description": "Category ID (null for account lines)",
+                            "nullable": true
+                          },
+                          "envelopeId": {
+                            "type": "string",
+                            "format": "uuid",
+                            "description": "Envelope ID (for envelope allocations)",
+                            "nullable": true
+                          },
+                          "amountCents": {
+                            "type": "integer",
+                            "description": "Signed monetary value in cents (negative for outflow, positive for inflow)"
+                          },
+                          "type": {
+                            "type": "string",
+                            "enum": [
+                              "expense",
+                              "income",
+                              "transfer",
+                              "debt_payment",
+                              "envelope_allocation"
+                            ]
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "accountId",
+                          "categoryId",
+                          "envelopeId",
+                          "amountCents",
+                          "type"
+                        ],
+                        "additionalProperties": false
+                      },
+                      "minItems": 2,
+                      "description": "Double-entry transaction lines"
+                    },
+                    "createdAt": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "updatedAt": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "transactionDate",
+                    "note",
+                    "type",
+                    "totalAmountCents",
+                    "lines",
+                    "createdAt",
+                    "updatedAt"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "400",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Error type identifier (e.g., 'VALIDATION_ERROR', 'UNAUTHORIZED')"
+                    },
+                    "message": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Human-readable error description"
+                    },
+                    "statusCode": {
+                      "type": "integer",
+                      "minimum": 100,
+                      "maximum": 599,
+                      "description": "HTTP status code matching the response"
+                    }
+                  },
+                  "required": [
+                    "error",
+                    "message",
+                    "statusCode"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "401",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Error type identifier (e.g., 'VALIDATION_ERROR', 'UNAUTHORIZED')"
+                    },
+                    "message": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Human-readable error description"
+                    },
+                    "statusCode": {
+                      "type": "integer",
+                      "minimum": 100,
+                      "maximum": 599,
+                      "description": "HTTP status code matching the response"
+                    }
+                  },
+                  "required": [
+                    "error",
+                    "message",
+                    "statusCode"
+                  ]
+                }
+              }
+            }
+          },
+          "501": {
+            "description": "Endpoint not yet implemented",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Error type identifier (e.g., 'VALIDATION_ERROR', 'UNAUTHORIZED')"
+                    },
+                    "message": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Human-readable error description"
+                    },
+                    "statusCode": {
+                      "type": "integer",
+                      "minimum": 100,
+                      "maximum": 599,
+                      "description": "HTTP status code matching the response"
+                    }
+                  },
+                  "required": [
+                    "error",
+                    "message",
+                    "statusCode"
+                  ],
+                  "description": "Endpoint not yet implemented"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/transactions/{id}": {
+      "get": {
+        "summary": "Get a transaction by ID with all lines",
+        "tags": [
+          "transactions"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "UUID v4 identifier"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "200",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "format": "uuid",
+                      "description": "UUID v4 identifier"
+                    },
+                    "transactionDate": {
+                      "type": "string",
+                      "format": "date-time",
+                      "description": "Transaction date in UTC"
+                    },
+                    "note": {
+                      "type": "string",
+                      "maxLength": 500,
+                      "nullable": true
+                    },
+                    "type": {
+                      "type": "string",
+                      "enum": [
+                        "expense",
+                        "income",
+                        "transfer",
+                        "debt_payment",
+                        "envelope_allocation"
+                      ]
+                    },
+                    "totalAmountCents": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "description": "Total transaction amount in cents (absolute value)"
+                    },
+                    "lines": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "format": "uuid",
+                            "description": "UUID v4 identifier"
+                          },
+                          "accountId": {
+                            "type": "string",
+                            "format": "uuid",
+                            "description": "Account ID (null for category lines)",
+                            "nullable": true
+                          },
+                          "categoryId": {
+                            "type": "string",
+                            "format": "uuid",
+                            "description": "Category ID (null for account lines)",
+                            "nullable": true
+                          },
+                          "envelopeId": {
+                            "type": "string",
+                            "format": "uuid",
+                            "description": "Envelope ID (for envelope allocations)",
+                            "nullable": true
+                          },
+                          "amountCents": {
+                            "type": "integer",
+                            "description": "Signed monetary value in cents (negative for outflow, positive for inflow)"
+                          },
+                          "type": {
+                            "type": "string",
+                            "enum": [
+                              "expense",
+                              "income",
+                              "transfer",
+                              "debt_payment",
+                              "envelope_allocation"
+                            ]
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "accountId",
+                          "categoryId",
+                          "envelopeId",
+                          "amountCents",
+                          "type"
+                        ],
+                        "additionalProperties": false
+                      },
+                      "minItems": 2,
+                      "description": "Double-entry transaction lines"
+                    },
+                    "createdAt": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "updatedAt": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "transactionDate",
+                    "note",
+                    "type",
+                    "totalAmountCents",
+                    "lines",
+                    "createdAt",
+                    "updatedAt"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "401",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Error type identifier (e.g., 'VALIDATION_ERROR', 'UNAUTHORIZED')"
+                    },
+                    "message": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Human-readable error description"
+                    },
+                    "statusCode": {
+                      "type": "integer",
+                      "minimum": 100,
+                      "maximum": 599,
+                      "description": "HTTP status code matching the response"
+                    }
+                  },
+                  "required": [
+                    "error",
+                    "message",
+                    "statusCode"
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Transaction not found or not owned by user",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Error type identifier (e.g., 'VALIDATION_ERROR', 'UNAUTHORIZED')"
+                    },
+                    "message": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Human-readable error description"
+                    },
+                    "statusCode": {
+                      "type": "integer",
+                      "minimum": 100,
+                      "maximum": 599,
+                      "description": "HTTP status code matching the response"
+                    }
+                  },
+                  "required": [
+                    "error",
+                    "message",
+                    "statusCode"
+                  ],
+                  "description": "Transaction not found or not owned by user"
+                }
+              }
+            }
+          },
+          "501": {
+            "description": "Endpoint not yet implemented",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Error type identifier (e.g., 'VALIDATION_ERROR', 'UNAUTHORIZED')"
+                    },
+                    "message": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Human-readable error description"
+                    },
+                    "statusCode": {
+                      "type": "integer",
+                      "minimum": 100,
+                      "maximum": 599,
+                      "description": "HTTP status code matching the response"
+                    }
+                  },
+                  "required": [
+                    "error",
+                    "message",
+                    "statusCode"
+                  ],
+                  "description": "Endpoint not yet implemented"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "summary": "Update an existing transaction by ID",
+        "tags": [
+          "transactions"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "UUID v4 identifier"
+          }
+        ],
+        "requestBody": {
+          "description": "Body",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "transactionDate": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "note": {
+                    "type": "string",
+                    "maxLength": 500,
+                    "nullable": true
+                  },
+                  "type": {
+                    "type": "string",
+                    "enum": [
+                      "expense",
+                      "income",
+                      "transfer",
+                      "debt_payment",
+                      "envelope_allocation"
+                    ]
+                  },
+                  "lines": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "format": "uuid",
+                          "description": "UUID v4 identifier"
+                        },
+                        "accountId": {
+                          "type": "string",
+                          "format": "uuid",
+                          "description": "Account ID (null for category lines)",
+                          "nullable": true
+                        },
+                        "categoryId": {
+                          "type": "string",
+                          "format": "uuid",
+                          "description": "Category ID (null for account lines)",
+                          "nullable": true
+                        },
+                        "envelopeId": {
+                          "type": "string",
+                          "format": "uuid",
+                          "description": "Envelope ID (for envelope allocations)",
+                          "nullable": true
+                        },
+                        "amountCents": {
+                          "type": "integer",
+                          "description": "Signed monetary value in cents (negative for outflow, positive for inflow)"
+                        },
+                        "type": {
+                          "type": "string",
+                          "enum": [
+                            "expense",
+                            "income",
+                            "transfer",
+                            "debt_payment",
+                            "envelope_allocation"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "accountId",
+                        "categoryId",
+                        "envelopeId",
+                        "amountCents",
+                        "type"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "minItems": 2
+                  }
+                },
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "200",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "format": "uuid",
+                      "description": "UUID v4 identifier"
+                    },
+                    "transactionDate": {
+                      "type": "string",
+                      "format": "date-time",
+                      "description": "Transaction date in UTC"
+                    },
+                    "note": {
+                      "type": "string",
+                      "maxLength": 500,
+                      "nullable": true
+                    },
+                    "type": {
+                      "type": "string",
+                      "enum": [
+                        "expense",
+                        "income",
+                        "transfer",
+                        "debt_payment",
+                        "envelope_allocation"
+                      ]
+                    },
+                    "totalAmountCents": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "description": "Total transaction amount in cents (absolute value)"
+                    },
+                    "lines": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "format": "uuid",
+                            "description": "UUID v4 identifier"
+                          },
+                          "accountId": {
+                            "type": "string",
+                            "format": "uuid",
+                            "description": "Account ID (null for category lines)",
+                            "nullable": true
+                          },
+                          "categoryId": {
+                            "type": "string",
+                            "format": "uuid",
+                            "description": "Category ID (null for account lines)",
+                            "nullable": true
+                          },
+                          "envelopeId": {
+                            "type": "string",
+                            "format": "uuid",
+                            "description": "Envelope ID (for envelope allocations)",
+                            "nullable": true
+                          },
+                          "amountCents": {
+                            "type": "integer",
+                            "description": "Signed monetary value in cents (negative for outflow, positive for inflow)"
+                          },
+                          "type": {
+                            "type": "string",
+                            "enum": [
+                              "expense",
+                              "income",
+                              "transfer",
+                              "debt_payment",
+                              "envelope_allocation"
+                            ]
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "accountId",
+                          "categoryId",
+                          "envelopeId",
+                          "amountCents",
+                          "type"
+                        ],
+                        "additionalProperties": false
+                      },
+                      "minItems": 2,
+                      "description": "Double-entry transaction lines"
+                    },
+                    "createdAt": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "updatedAt": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "transactionDate",
+                    "note",
+                    "type",
+                    "totalAmountCents",
+                    "lines",
+                    "createdAt",
+                    "updatedAt"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "400",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Error type identifier (e.g., 'VALIDATION_ERROR', 'UNAUTHORIZED')"
+                    },
+                    "message": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Human-readable error description"
+                    },
+                    "statusCode": {
+                      "type": "integer",
+                      "minimum": 100,
+                      "maximum": 599,
+                      "description": "HTTP status code matching the response"
+                    }
+                  },
+                  "required": [
+                    "error",
+                    "message",
+                    "statusCode"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "401",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Error type identifier (e.g., 'VALIDATION_ERROR', 'UNAUTHORIZED')"
+                    },
+                    "message": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Human-readable error description"
+                    },
+                    "statusCode": {
+                      "type": "integer",
+                      "minimum": 100,
+                      "maximum": 599,
+                      "description": "HTTP status code matching the response"
+                    }
+                  },
+                  "required": [
+                    "error",
+                    "message",
+                    "statusCode"
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Transaction not found or not owned by user",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Error type identifier (e.g., 'VALIDATION_ERROR', 'UNAUTHORIZED')"
+                    },
+                    "message": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Human-readable error description"
+                    },
+                    "statusCode": {
+                      "type": "integer",
+                      "minimum": 100,
+                      "maximum": 599,
+                      "description": "HTTP status code matching the response"
+                    }
+                  },
+                  "required": [
+                    "error",
+                    "message",
+                    "statusCode"
+                  ],
+                  "description": "Transaction not found or not owned by user"
+                }
+              }
+            }
+          },
+          "501": {
+            "description": "Endpoint not yet implemented",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Error type identifier (e.g., 'VALIDATION_ERROR', 'UNAUTHORIZED')"
+                    },
+                    "message": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Human-readable error description"
+                    },
+                    "statusCode": {
+                      "type": "integer",
+                      "minimum": 100,
+                      "maximum": 599,
+                      "description": "HTTP status code matching the response"
+                    }
+                  },
+                  "required": [
+                    "error",
+                    "message",
+                    "statusCode"
+                  ],
+                  "description": "Endpoint not yet implemented"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete a transaction by ID (creates reversal transaction)",
+        "tags": [
+          "transactions"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "UUID v4 identifier"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "204"
+          },
+          "401": {
+            "description": "401",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Error type identifier (e.g., 'VALIDATION_ERROR', 'UNAUTHORIZED')"
+                    },
+                    "message": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Human-readable error description"
+                    },
+                    "statusCode": {
+                      "type": "integer",
+                      "minimum": 100,
+                      "maximum": 599,
+                      "description": "HTTP status code matching the response"
+                    }
+                  },
+                  "required": [
+                    "error",
+                    "message",
+                    "statusCode"
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Transaction not found or not owned by user",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Error type identifier (e.g., 'VALIDATION_ERROR', 'UNAUTHORIZED')"
+                    },
+                    "message": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Human-readable error description"
+                    },
+                    "statusCode": {
+                      "type": "integer",
+                      "minimum": 100,
+                      "maximum": 599,
+                      "description": "HTTP status code matching the response"
+                    }
+                  },
+                  "required": [
+                    "error",
+                    "message",
+                    "statusCode"
+                  ],
+                  "description": "Transaction not found or not owned by user"
+                }
+              }
+            }
+          },
+          "501": {
+            "description": "Endpoint not yet implemented",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Error type identifier (e.g., 'VALIDATION_ERROR', 'UNAUTHORIZED')"
+                    },
+                    "message": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Human-readable error description"
+                    },
+                    "statusCode": {
+                      "type": "integer",
+                      "minimum": 100,
+                      "maximum": 599,
+                      "description": "HTTP status code matching the response"
+                    }
+                  },
+                  "required": [
+                    "error",
+                    "message",
+                    "statusCode"
+                  ],
+                  "description": "Endpoint not yet implemented"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/reports/spendable-balance": {
       "get": {
         "summary": "Get spendable balance for a date range",
         "tags": [
@@ -1410,7 +4540,7 @@
         }
       }
     },
-    "/api/v1/reports/expenses-by-category": {
+    "/reports/expenses-by-category": {
       "get": {
         "summary": "Get expenses grouped by category for a date range",
         "tags": [
@@ -1547,7 +4677,7 @@
         }
       }
     },
-    "/api/v1/reports/debt-progress": {
+    "/reports/debt-progress": {
       "get": {
         "summary": "Get debt payoff progress for a date range",
         "tags": [
@@ -1664,52 +4794,19 @@
         }
       }
     },
-    "/api/v1/export/csv": {
+    "/export/csv": {
       "get": {
-        "summary": "Download filtered data as a CSV file",
+        "summary": "Download transactions as a CSV file with optional date range filter",
         "tags": [
           "export"
         ],
-        "parameters": [
-          {
-            "name": "startDate",
-            "in": "query",
-            "description": "Inclusive start of date range (ISO 8601)",
-            "schema": {
-              "type": "string",
-              "format": "date-time"
-            }
-          },
-          {
-            "name": "endDate",
-            "in": "query",
-            "description": "Inclusive end of date range (ISO 8601)",
-            "schema": {
-              "type": "string",
-              "format": "date-time"
-            }
-          },
-          {
-            "name": "type",
-            "in": "query",
-            "description": "Type of data to export",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "enum": [
-                "transactions",
-                "category-groups",
-                "reports"
-              ]
-            }
-          }
-        ],
+        "parameters": [],
         "responses": {
           "200": {
             "description": "200"
           },
-          "401": {
-            "description": "401",
+          "400": {
+            "description": "400",
             "content": {
               "application/json": {
                 "schema": {
@@ -1741,8 +4838,8 @@
               }
             }
           },
-          "501": {
-            "description": "Endpoint not yet implemented",
+          "401": {
+            "description": "401",
             "content": {
               "application/json": {
                 "schema": {
@@ -1769,8 +4866,7 @@
                     "error",
                     "message",
                     "statusCode"
-                  ],
-                  "description": "Endpoint not yet implemented"
+                  ]
                 }
               }
             }

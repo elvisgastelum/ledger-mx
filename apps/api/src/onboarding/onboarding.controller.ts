@@ -1,28 +1,30 @@
 import {
-  Body,
   Controller,
-  Post,
-  HttpCode,
-  HttpStatus,
-  Inject,
   UseGuards,
+  Inject,
   ConflictException,
   BadRequestException,
 } from "@nestjs/common";
-import { ZodValidationPipe } from "nestjs-zod";
+import { Req } from "@nestjs/common";
+import type { Request } from "express";
 import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
-import { CurrentUser } from "../auth/decorators/current-user.decorator";
-import {
-  ApplyLayoutRequestSchema,
-} from "@ledger-mx/contracts";
 import { userIdFromString } from "@ledger-mx/domain";
 import {
   ApplyDefaultCategoryGroupLayoutUseCase,
   CategoryGroupLayoutConflictError,
 } from "@ledger-mx/application";
-import type { LayoutType } from "@ledger-mx/contracts";
+import type { CategoryGroupKind } from "@ledger-mx/domain";
+import { contract } from "@ledger-mx/contracts";
+import { TsRestHandler, tsRestHandler } from "@ts-rest/nest";
 
-@Controller("api/v1/onboarding")
+// Extend Express Request type to include user property added by JWT guard
+interface RequestWithUser extends Request {
+  user: {
+    sub: string;
+  };
+}
+
+@Controller()
 @UseGuards(JwtAuthGuard)
 export class OnboardingController {
   constructor(
@@ -30,37 +32,37 @@ export class OnboardingController {
     private readonly applyLayoutUseCase: ApplyDefaultCategoryGroupLayoutUseCase,
   ) {}
 
-  @Post("layout")
-  @HttpCode(HttpStatus.OK)
-  async applyLayout(
-    @Body(new ZodValidationPipe(ApplyLayoutRequestSchema.strict()))
-    dto: { layout: LayoutType },
-    @CurrentUser("sub") sub: string,
-  ) {
-    try {
-      const userId = userIdFromString(sub);
+  @TsRestHandler(contract.onboarding.applyLayout)
+  async applyLayout(@Req() req: RequestWithUser) {
+    return tsRestHandler(contract.onboarding.applyLayout, async ({ body }) => {
+      const userId = userIdFromString(req.user.sub);
 
-      const result = await this.applyLayoutUseCase.execute({
-        userId,
-        layout: dto.layout,
-      });
+      try {
+        const result = await this.applyLayoutUseCase.execute({
+          userId,
+          layout: body.layout,
+        });
 
-       return {
-         categoryGroups: result.categoryGroups.map((group: { id: string; name: string; kind: string; idealPercentageBasisPoints: number | null; sortOrder: number; isSystem: boolean; createdAt: Date; updatedAt: Date }) => ({
-           id: group.id,
-           name: group.name,
-           kind: group.kind,
-           idealPercentageBasisPoints: group.idealPercentageBasisPoints,
-           sortOrder: group.sortOrder,
-           isSystem: group.isSystem,
-           createdAt: group.createdAt.toISOString(),
-           updatedAt: group.updatedAt.toISOString(),
-         })),
-         created: result.created,
-       };
-    } catch (err) {
-      this.handleError(err);
-    }
+        return {
+          status: 200 as const,
+          body: {
+            categoryGroups: result.categoryGroups.map((group) => ({
+              id: group.id,
+              name: group.name,
+              kind: group.kind as CategoryGroupKind,
+              idealPercentageBasisPoints: group.idealPercentageBasisPoints,
+              sortOrder: group.sortOrder,
+              isSystem: group.isSystem,
+              createdAt: group.createdAt.toISOString(),
+              updatedAt: group.updatedAt.toISOString(),
+            })),
+            created: result.created,
+          },
+        };
+      } catch (err) {
+        this.handleError(err);
+      }
+    });
   }
 
   private handleError(error: unknown): never {

@@ -17,8 +17,6 @@ import { ApplyLayoutRequestSchema, ApplyLayoutResponseSchema } from "./onboardin
 import {
   RegisterRequestSchema,
   LoginRequestSchema,
-  RefreshTokenRequestSchema,
-  LogoutRequestSchema,
   AuthSuccessResponseSchema,
   LogoutResponseSchema,
 } from "./auth";
@@ -59,7 +57,7 @@ export const contract = c.router({
     refresh: {
       method: "POST",
       path: "/auth/refresh",
-      body: RefreshTokenRequestSchema,
+      body: c.noBody(),
       responses: {
         200: AuthSuccessResponseSchema,
         401: ErrorResponseSchema.describe("Invalid or expired refresh token"),
@@ -70,7 +68,7 @@ export const contract = c.router({
     logout: {
       method: "POST",
       path: "/auth/logout",
-      body: LogoutRequestSchema,
+      body: c.noBody(),
       responses: {
         200: LogoutResponseSchema.describe("Logout successful"),
         401: ErrorResponseSchema.describe("Invalid refresh token"),
@@ -131,11 +129,11 @@ export const contract = c.router({
     },
   }),
 
-  // ONBOARDING ENDPOINTS (implemented, matches actual /api/v1/onboarding/layout route)
+  // ONBOARDING ENDPOINTS (implemented, matches actual /onboarding/layout route)
   onboarding: c.router({
     applyLayout: {
       method: "POST",
-      path: "/api/v1/onboarding/layout",
+      path: "/onboarding/layout",
       body: ApplyLayoutRequestSchema,
       responses: {
         200: ApplyLayoutResponseSchema,
@@ -151,7 +149,7 @@ export const contract = c.router({
   reports: c.router({
     getSpendableBalance: {
       method: "GET",
-      path: "/api/v1/reports/spendable-balance",
+      path: "/reports/spendable-balance",
       query: DateRangeQuerySchema.optional(),
       responses: {
         200: z.object({
@@ -167,7 +165,7 @@ export const contract = c.router({
     },
     getExpensesByCategory: {
       method: "GET",
-      path: "/api/v1/reports/expenses-by-category",
+      path: "/reports/expenses-by-category",
       query: DateRangeQuerySchema,
       responses: {
         200: z.array(z.object({
@@ -184,7 +182,7 @@ export const contract = c.router({
     },
     getDebtProgress: {
       method: "GET",
-      path: "/api/v1/reports/debt-progress",
+      path: "/reports/debt-progress",
       query: DateRangeQuerySchema.optional(),
       responses: {
         200: z.object({
@@ -205,7 +203,7 @@ export const contract = c.router({
   export: c.router({
     downloadCsv: {
       method: "GET",
-      path: "/api/v1/export/csv",
+      path: "/export/csv",
       query: DateRangeQuerySchema.optional(),
       responses: {
         200: c.otherResponse({ contentType: "text/csv", body: z.string().min(1) }),
@@ -246,6 +244,6 @@ export const contract = c.router({
       metadata: { implemented: false, auth: false, planned: true },
     },
   }),
-});
+}, { pathPrefix: '/api/v1' });
 
 export type Contract = typeof contract;

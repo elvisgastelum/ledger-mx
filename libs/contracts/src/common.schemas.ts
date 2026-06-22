@@ -22,6 +22,11 @@ export const UuidSchema = z.string().uuid().describe("UUID v4 identifier");
 export const MoneySchema = z.number().int().min(0).describe("Monetary value in cents (1/100 of currency unit)");
 
 /**
+ * Signed monetary value schema (can be negative for transaction lines)
+ */
+export const SignedMoneySchema = z.number().int().describe("Signed monetary value in cents (negative for outflow, positive for inflow)");
+
+/**
  * Common date range query parameters for time-series endpoints
  */
 export const DateRangeQuerySchema = z.object({

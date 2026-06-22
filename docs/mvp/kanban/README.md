@@ -16,7 +16,6 @@ Stories are in `todo/`, `doing/`, `done/`, `archive/` folders.
 
 1. 009-deployment.md
 2. 012-mvp-validation.md
-3. 014-ts-rest-contracts.md
 
 ## DOING Index
 
@@ -35,6 +34,7 @@ Stories are in `todo/`, `doing/`, `done/`, `archive/` folders.
 - 010-product-foundations.md
 - 011-architecture-foundations.md
 - 013-web-ux-model.md
+- 014-ts-rest-contracts.md
 - 015-category-groups.md
 - 016-category-layout-onboarding.md
 
@@ -70,4 +70,4 @@ See `done/001-database-model.md` for required headings.
 
 - 012-mvp-validation.md
 - 013-web-ux-model.md (done)
-- 014-ts-rest-contracts.md
+- 014-ts-rest-contracts.md (done)

@@ -112,10 +112,10 @@ describe("Auth E2E (real database)", () => {
     await db.delete(schema.users);
   });
 
-  describe("POST /auth/register", () => {
+  describe("POST /api/v1/auth/register", () => {
     it("should register a new user and set refresh token in httpOnly cookie", async () => {
       const response = await supertest(app.getHttpServer())
-        .post("/auth/register")
+        .post("/api/v1/auth/register")
         .send({
           email: "test@example.com",
           password: "Password123@",
@@ -143,12 +143,12 @@ describe("Auth E2E (real database)", () => {
       );
       expect(refreshCookie).toBeDefined();
       expect(refreshCookie).toContain("HttpOnly");
-      expect(refreshCookie).toContain("Path=/auth");
+      expect(refreshCookie).toContain("Path=/api/v1/auth");
     });
 
     it("should return 400 for invalid email", async () => {
       await supertest(app.getHttpServer())
-        .post("/auth/register")
+        .post("/api/v1/auth/register")
         .send({
           email: "invalid-email",
           password: "Password123@",
@@ -158,7 +158,7 @@ describe("Auth E2E (real database)", () => {
 
     it("should return 400 for weak password", async () => {
       await supertest(app.getHttpServer())
-        .post("/auth/register")
+        .post("/api/v1/auth/register")
         .send({
           email: "test@example.com",
           password: "short",
@@ -168,7 +168,7 @@ describe("Auth E2E (real database)", () => {
 
     it("should return 409 for duplicate email", async () => {
       await supertest(app.getHttpServer())
-        .post("/auth/register")
+        .post("/api/v1/auth/register")
         .send({
           email: "test@example.com",
           password: "Password123@",
@@ -176,7 +176,7 @@ describe("Auth E2E (real database)", () => {
         .expect(201);
 
       await supertest(app.getHttpServer())
-        .post("/auth/register")
+        .post("/api/v1/auth/register")
         .send({
           email: "test@example.com",
           password: "Password123@",
@@ -185,11 +185,11 @@ describe("Auth E2E (real database)", () => {
     });
   });
 
-  describe("POST /auth/login", () => {
+  describe("POST /api/v1/auth/login", () => {
     beforeEach(async () => {
       // Register a user first
       await supertest(app.getHttpServer())
-        .post("/auth/register")
+        .post("/api/v1/auth/register")
         .send({
           email: "test@example.com",
           password: "Password123@",
@@ -199,7 +199,7 @@ describe("Auth E2E (real database)", () => {
 
     it("should login with valid credentials and set refresh token in cookie", async () => {
       const response = await supertest(app.getHttpServer())
-        .post("/auth/login")
+        .post("/api/v1/auth/login")
         .send({
           email: "test@example.com",
           password: "Password123@",
@@ -221,7 +221,7 @@ describe("Auth E2E (real database)", () => {
 
     it("should return 401 for invalid credentials", async () => {
       await supertest(app.getHttpServer())
-        .post("/auth/login")
+        .post("/api/v1/auth/login")
         .send({
           email: "test@example.com",
           password: "WrongPassword123@",
@@ -230,12 +230,12 @@ describe("Auth E2E (real database)", () => {
     });
   });
 
-  describe("POST /auth/refresh", () => {
+  describe("POST /api/v1/auth/refresh", () => {
     let refreshToken: string;
 
     beforeEach(async () => {
       const response = await supertest(app.getHttpServer())
-        .post("/auth/register")
+        .post("/api/v1/auth/register")
         .send({
           email: "test@example.com",
           password: "Password123@",
@@ -254,7 +254,7 @@ describe("Auth E2E (real database)", () => {
 
     it("should refresh tokens with valid refresh token from cookie", async () => {
       const response = await supertest(app.getHttpServer())
-        .post("/auth/refresh")
+        .post("/api/v1/auth/refresh")
         .set("Cookie", [`ledger_mx_refresh_token=${refreshToken}`])
         .expect(200);
 
@@ -269,24 +269,24 @@ describe("Auth E2E (real database)", () => {
 
     it("should return 401 for invalid refresh token", async () => {
       await supertest(app.getHttpServer())
-        .post("/auth/refresh")
+        .post("/api/v1/auth/refresh")
         .set("Cookie", ["ledger_mx_refresh_token=invalid-token"])
         .expect(401);
     });
 
     it("should return 401 when no refresh token provided", async () => {
       await supertest(app.getHttpServer())
-        .post("/auth/refresh")
+        .post("/api/v1/auth/refresh")
         .expect(401);
     });
   });
 
-  describe("POST /auth/logout", () => {
+  describe("POST /api/v1/auth/logout", () => {
     let refreshToken: string;
 
     beforeEach(async () => {
       const response = await supertest(app.getHttpServer())
-        .post("/auth/register")
+        .post("/api/v1/auth/register")
         .send({
           email: "test@example.com",
           password: "Password123@",
@@ -305,7 +305,7 @@ describe("Auth E2E (real database)", () => {
 
     it("should logout successfully and clear cookie", async () => {
       const response = await supertest(app.getHttpServer())
-        .post("/auth/logout")
+        .post("/api/v1/auth/logout")
         .set("Cookie", [`ledger_mx_refresh_token=${refreshToken}`])
         .expect(200);
 
@@ -323,13 +323,13 @@ describe("Auth E2E (real database)", () => {
 
     it("should invalidate refresh token after logout", async () => {
       await supertest(app.getHttpServer())
-        .post("/auth/logout")
+        .post("/api/v1/auth/logout")
         .set("Cookie", [`ledger_mx_refresh_token=${refreshToken}`])
         .expect(200);
 
       // Try to refresh with the logged-out token
       await supertest(app.getHttpServer())
-        .post("/auth/refresh")
+        .post("/api/v1/auth/refresh")
         .set("Cookie", [`ledger_mx_refresh_token=${refreshToken}`])
         .expect(401);
     });

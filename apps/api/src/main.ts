@@ -1,4 +1,5 @@
 import { NestFactory } from "@nestjs/core";
+import { VersioningType } from "@nestjs/common";
 import cookieParser from "cookie-parser";
 import { AppModule } from "./app.module";
 
@@ -7,6 +8,10 @@ async function bootstrap() {
 
   // Enable cookie parsing
   app.use(cookieParser());
+
+  // Global prefix and URI versioning: produces /api/v1/... paths
+  app.setGlobalPrefix("api");
+  app.enableVersioning({ type: VersioningType.URI });
 
   // Auth routes use explicit ZodValidationPipe on parameters; no global validation pipe
 

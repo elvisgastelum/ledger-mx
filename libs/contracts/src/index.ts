@@ -33,18 +33,17 @@ export type {
   CategoryGroupResponse,
 } from "./category-groups/category-group.schemas";
 
+// Accounts (planned)
+export * from "./accounts";
+
+// Envelopes (planned)
+export * from "./envelopes";
+
+// Transactions (planned)
+export * from "./transactions";
+
 // Onboarding
-export {
-  LAYOUT_TYPES,
-  ApplyLayoutRequestSchema,
-  OnboardingCategoryGroupSchema,
-  ApplyLayoutResponseSchema,
-} from "./onboarding";
-export type {
-  LayoutType,
-  ApplyLayoutRequest,
-  ApplyLayoutResponse,
-} from "./onboarding";
+export * from "./onboarding";
 
 // ts-rest contract (single source of truth for API shape)
 export { contract, type Contract } from "./contract";

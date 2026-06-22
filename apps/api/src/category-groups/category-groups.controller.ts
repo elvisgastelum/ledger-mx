@@ -1,29 +1,16 @@
 import {
-  Body,
   Controller,
-  Delete,
-  Get,
-  HttpCode,
-  HttpStatus,
-  Param,
-  Patch,
-  Post,
   UseGuards,
   Inject,
   NotFoundException,
   ConflictException,
   BadRequestException,
 } from "@nestjs/common";
-import { ZodValidationPipe } from "nestjs-zod";
-import { z } from "zod";
+import { Req } from "@nestjs/common";
+import type { Request } from "express";
 import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
-import { CurrentUser } from "../auth/decorators/current-user.decorator";
-import {
-  CreateCategoryGroupRequestSchema,
-  UpdateCategoryGroupRequestSchema,
-} from "@ledger-mx/contracts";
 import type { CategoryGroupKind } from "@ledger-mx/domain";
-import { categoryGroupIdFromString, userIdFromString } from "@ledger-mx/domain";
+import { userIdFromString, categoryGroupIdFromString } from "@ledger-mx/domain";
 import {
   CreateCategoryGroupUseCase,
   ListCategoryGroupsUseCase,
@@ -34,13 +21,18 @@ import {
   CategoryGroupHasActiveCategoriesError,
 } from "@ledger-mx/application";
 import type { CreateCategoryGroupInput, UpdateCategoryGroupInput } from "@ledger-mx/application";
+import { contract } from "@ledger-mx/contracts";
+import { TsRestHandler, tsRestHandler } from "@ts-rest/nest";
 
-// UUID validation schema for route params
-const UuidParamSchema = z.object({
-  id: z.string().uuid({ message: "Invalid category group ID format" }),
-});
+// Extend Express Request type to include user property added by JWT guard
+interface RequestWithUser extends Request {
+  user: {
+    sub: string;
+    // Add other user properties as needed
+  };
+}
 
-@Controller("category-groups")
+@Controller()
 @UseGuards(JwtAuthGuard)
 export class CategoryGroupsController {
   constructor(
@@ -54,108 +46,123 @@ export class CategoryGroupsController {
     private readonly deleteCategoryGroupUseCase: DeleteCategoryGroupUseCase,
   ) {}
 
-  @Get()
-  async listCategoryGroups(@CurrentUser("sub") sub: string) {
-    const userId = userIdFromString(sub);
-    const result = await this.listCategoryGroupsUseCase.execute({
-      userId,
-    });
+  @TsRestHandler(contract.categoryGroups.list)
+  async listCategoryGroups(@Req() req: RequestWithUser) {
+    return tsRestHandler(contract.categoryGroups.list, async () => {
+      const user = req.user as { sub: string };
+      const userId = userIdFromString(user.sub);
 
-     return {
-       categoryGroups: result.categoryGroups.map((group) => ({
-        id: group.id,
-        name: group.name,
-        kind: group.kind as CategoryGroupKind,
-        idealPercentageBasisPoints: group.idealPercentageBasisPoints,
-        sortOrder: group.sortOrder,
-        isSystem: group.isSystem,
-        createdAt: group.createdAt.toISOString(),
-         updatedAt: group.updatedAt.toISOString(),
-      })),
-    };
-  }
-
-  @Post()
-  @HttpCode(HttpStatus.CREATED)
-  async createCategoryGroup(
-    @Body(new ZodValidationPipe(CreateCategoryGroupRequestSchema.strict()))
-    dto: z.infer<typeof CreateCategoryGroupRequestSchema>,
-    @CurrentUser("sub") sub: string,
-  ) {
-    try {
-      const userId = userIdFromString(sub);
-      const result = await this.createCategoryGroupUseCase.execute({
+      const result = await this.listCategoryGroupsUseCase.execute({
         userId,
-        name: dto.name,
-        kind: dto.kind as CategoryGroupKind,
-        idealPercentageBasisPoints: dto.idealPercentageBasisPoints,
-        sortOrder: dto.sortOrder,
-      } as CreateCategoryGroupInput);
-
-      return {
-        id: result.id,
-        name: result.name,
-        kind: result.kind,
-        idealPercentageBasisPoints: result.idealPercentageBasisPoints,
-        sortOrder: result.sortOrder,
-        isSystem: result.isSystem,
-        createdAt: result.createdAt.toISOString(),
-         updatedAt: result.updatedAt.toISOString(),
-       };
-     } catch (error) {
-       this.handleError(error);
-     }
-   }
- 
-   @Patch(":id")
-  async updateCategoryGroup(
-    @Param(new ZodValidationPipe(UuidParamSchema)) params: z.infer<typeof UuidParamSchema>,
-    @Body(new ZodValidationPipe(UpdateCategoryGroupRequestSchema.strict()))
-    dto: z.infer<typeof UpdateCategoryGroupRequestSchema>,
-    @CurrentUser("sub") sub: string,
-  ) {
-    try {
-      const userId = userIdFromString(sub);
-      const result = await this.updateCategoryGroupUseCase.execute({
-        userId,
-        id: categoryGroupIdFromString(params.id),
-        name: dto.name,
-        kind: dto.kind as CategoryGroupKind | undefined,
-        idealPercentageBasisPoints: dto.idealPercentageBasisPoints,
-        sortOrder: dto.sortOrder,
-      } as UpdateCategoryGroupInput);
-
-      return {
-        id: result.id,
-        name: result.name,
-        kind: result.kind,
-        idealPercentageBasisPoints: result.idealPercentageBasisPoints,
-        sortOrder: result.sortOrder,
-        isSystem: result.isSystem,
-        createdAt: result.createdAt.toISOString(),
-         updatedAt: result.updatedAt.toISOString(),
-       };
-     } catch (error) {
-       this.handleError(error);
-     }
-   }
- 
-   @Delete(":id")
-  async deleteCategoryGroup(
-    @Param(new ZodValidationPipe(UuidParamSchema)) params: z.infer<typeof UuidParamSchema>,
-    @CurrentUser("sub") sub: string,
-  ) {
-    try {
-      const userId = userIdFromString(sub);
-      await this.deleteCategoryGroupUseCase.execute({
-        userId,
-        id: categoryGroupIdFromString(params.id),
       });
 
-      return { success: true };
-    } catch (error) {
-      this.handleError(error);
-    }
+      return {
+        status: 200 as const,
+        body: {
+          categoryGroups: result.categoryGroups.map((group) => ({
+            id: group.id,
+            name: group.name,
+            kind: group.kind as CategoryGroupKind,
+            idealPercentageBasisPoints: group.idealPercentageBasisPoints,
+            sortOrder: group.sortOrder,
+            isSystem: group.isSystem,
+            createdAt: group.createdAt.toISOString(),
+            updatedAt: group.updatedAt.toISOString(),
+          })),
+        },
+      };
+    });
+  }
+
+  @TsRestHandler(contract.categoryGroups.create)
+  async createCategoryGroup(@Req() req: RequestWithUser) {
+    return tsRestHandler(contract.categoryGroups.create, async ({ body }) => {
+      const user = req.user as { sub: string };
+      const userId = userIdFromString(user.sub);
+
+      try {
+        const result = await this.createCategoryGroupUseCase.execute({
+          userId,
+          name: body.name,
+          kind: body.kind as CategoryGroupKind,
+          idealPercentageBasisPoints: body.idealPercentageBasisPoints,
+          sortOrder: body.sortOrder,
+        } as CreateCategoryGroupInput);
+
+        return {
+          status: 201 as const,
+          body: {
+            id: result.id,
+            name: result.name,
+            kind: result.kind,
+            idealPercentageBasisPoints: result.idealPercentageBasisPoints,
+            sortOrder: result.sortOrder,
+            isSystem: result.isSystem,
+            createdAt: result.createdAt.toISOString(),
+            updatedAt: result.updatedAt.toISOString(),
+          },
+        };
+      } catch (error) {
+        this.handleError(error);
+      }
+    });
+  }
+
+  @TsRestHandler(contract.categoryGroups.update)
+  async updateCategoryGroup(@Req() req: RequestWithUser) {
+    return tsRestHandler(contract.categoryGroups.update, async ({ body, params }) => {
+      const user = req.user as { sub: string };
+      const userId = userIdFromString(user.sub);
+
+      try {
+        const result = await this.updateCategoryGroupUseCase.execute({
+          userId,
+          id: categoryGroupIdFromString(params.id),
+          name: body.name,
+          kind: body.kind as CategoryGroupKind | undefined,
+          idealPercentageBasisPoints: body.idealPercentageBasisPoints,
+          sortOrder: body.sortOrder,
+        } as UpdateCategoryGroupInput);
+
+        return {
+          status: 200 as const,
+          body: {
+            id: result.id,
+            name: result.name,
+            kind: result.kind,
+            idealPercentageBasisPoints: result.idealPercentageBasisPoints,
+            sortOrder: result.sortOrder,
+            isSystem: result.isSystem,
+            createdAt: result.createdAt.toISOString(),
+            updatedAt: result.updatedAt.toISOString(),
+          },
+        };
+      } catch (error) {
+        this.handleError(error);
+      }
+    });
+  }
+
+  @TsRestHandler(contract.categoryGroups.delete)
+  async deleteCategoryGroup(@Req() req: RequestWithUser) {
+    return tsRestHandler(contract.categoryGroups.delete, async ({ params }) => {
+      const user = req.user as { sub: string };
+      const userId = userIdFromString(user.sub);
+
+      try {
+        await this.deleteCategoryGroupUseCase.execute({
+          userId,
+          id: categoryGroupIdFromString(params.id),
+        });
+
+        return {
+          status: 204 as const,
+          body: undefined,
+        };
+      } catch (error) {
+        this.handleError(error);
+      }
+    });
   }
 
   private handleError(error: unknown): never {

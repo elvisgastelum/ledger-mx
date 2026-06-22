@@ -90,12 +90,12 @@ describe("CategoryGroupsController", () => {
     await app.close();
   });
 
-  describe("GET /category-groups", () => {
+  describe("GET /api/v1/category-groups", () => {
     it("should return list of category groups for authenticated user", async () => {
       vi.spyOn(repository, "listByUserId").mockResolvedValue([mockCategoryGroup]);
 
       const response = await request(app.getHttpServer())
-        .get("/category-groups")
+        .get("/api/v1/category-groups")
         .expect(200);
 
       expect(response.body).toEqual({
@@ -119,14 +119,14 @@ describe("CategoryGroupsController", () => {
       vi.spyOn(repository, "listByUserId").mockResolvedValue([]);
 
       const response = await request(app.getHttpServer())
-        .get("/category-groups")
+        .get("/api/v1/category-groups")
         .expect(200);
 
       expect(response.body).toEqual({ categoryGroups: [] });
     });
   });
 
-  describe("POST /category-groups", () => {
+  describe("POST /api/v1/category-groups", () => {
     const validCreateDto = {
       name: "Savings",
       kind: "savings",
@@ -138,7 +138,7 @@ describe("CategoryGroupsController", () => {
       vi.spyOn(repository, "save").mockResolvedValue(undefined);
 
       const response = await request(app.getHttpServer())
-        .post("/category-groups")
+        .post("/api/v1/category-groups")
         .send(validCreateDto)
         .expect(201);
 
@@ -156,7 +156,7 @@ describe("CategoryGroupsController", () => {
 
     it("should return 400 for invalid basis points (over 10000)", async () => {
       await request(app.getHttpServer())
-        .post("/category-groups")
+        .post("/api/v1/category-groups")
         .send({
           ...validCreateDto,
           idealPercentageBasisPoints: 15000,
@@ -166,14 +166,14 @@ describe("CategoryGroupsController", () => {
 
     it("should return 400 for missing required fields", async () => {
       await request(app.getHttpServer())
-        .post("/category-groups")
+        .post("/api/v1/category-groups")
         .send({})
         .expect(400);
     });
 
     it("should return 400 for invalid kind", async () => {
       await request(app.getHttpServer())
-        .post("/category-groups")
+        .post("/api/v1/category-groups")
         .send({
           ...validCreateDto,
           kind: "invalid-kind",
@@ -182,7 +182,7 @@ describe("CategoryGroupsController", () => {
     });
   });
 
-  describe("PATCH /category-groups/:id", () => {
+  describe("PATCH /api/v1/category-groups/:id", () => {
     const updateDto = {
       name: "Updated Needs",
       idealPercentageBasisPoints: 5500,
@@ -198,7 +198,7 @@ describe("CategoryGroupsController", () => {
       vi.spyOn(repository, "save").mockResolvedValue(undefined);
 
       const response = await request(app.getHttpServer())
-        .patch(`/category-groups/${validGroupId}`)
+        .patch(`/api/v1/category-groups/${validGroupId}`)
         .send(updateDto)
         .expect(200);
 
@@ -213,37 +213,35 @@ describe("CategoryGroupsController", () => {
       vi.spyOn(repository, "findById").mockResolvedValue(null);
 
       await request(app.getHttpServer())
-        .patch(`/category-groups/${validGroupId}`)
+        .patch(`/api/v1/category-groups/${validGroupId}`)
         .send(updateDto)
         .expect(404);
     });
 
     it("should return 400 for invalid UUID in param", async () => {
       await request(app.getHttpServer())
-        .patch("/category-groups/invalid-uuid")
+        .patch("/api/v1/category-groups/invalid-uuid")
         .send(updateDto)
         .expect(400);
     });
   });
 
-  describe("DELETE /category-groups/:id", () => {
-    it("should soft delete category group and return success", async () => {
+  describe("DELETE /api/v1/category-groups/:id", () => {
+    it("should soft delete category group and return 204 with no body", async () => {
       vi.spyOn(repository, "findById").mockResolvedValue(mockCategoryGroup);
       vi.spyOn(repository, "hasActiveCategories").mockResolvedValue(false);
       vi.spyOn(repository, "softDelete").mockResolvedValue(undefined);
 
-      const response = await request(app.getHttpServer())
-        .delete(`/category-groups/${validGroupId}`)
-        .expect(200);
-
-      expect(response.body).toEqual({ success: true });
+      await request(app.getHttpServer())
+        .delete(`/api/v1/category-groups/${validGroupId}`)
+        .expect(204);
     });
 
     it("should return 404 for non-existent category group", async () => {
       vi.spyOn(repository, "findById").mockResolvedValue(null);
 
       await request(app.getHttpServer())
-        .delete(`/category-groups/${validGroupId}`)
+        .delete(`/api/v1/category-groups/${validGroupId}`)
         .expect(404);
     });
 
@@ -252,7 +250,7 @@ describe("CategoryGroupsController", () => {
       vi.spyOn(repository, "findById").mockResolvedValue(systemGroup);
 
       await request(app.getHttpServer())
-        .delete(`/category-groups/${validGroupId}`)
+        .delete(`/api/v1/category-groups/${validGroupId}`)
         .expect(409);
     });
 
@@ -261,8 +259,14 @@ describe("CategoryGroupsController", () => {
       vi.spyOn(repository, "hasActiveCategories").mockResolvedValue(true);
 
       await request(app.getHttpServer())
-        .delete(`/category-groups/${validGroupId}`)
+        .delete(`/api/v1/category-groups/${validGroupId}`)
         .expect(409);
+    });
+
+    it("should return 400 for invalid UUID in param", async () => {
+      await request(app.getHttpServer())
+        .delete("/api/v1/category-groups/invalid-uuid")
+        .expect(400);
     });
   });
 });
