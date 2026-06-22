@@ -10,16 +10,13 @@ Stories are in `todo/`, `doing/`, `done/`, `archive/` folders.
 
 ## TODO Index (Canonical Order)
 
-> **Note:** The 16 files listed below are the canonical current order for the MVP backlog.
+> **Note:** The 3 files listed below are the canonical current order for the MVP backlog.
 > Some duplicate numbered files exist in `todo/` from an earlier ordering scheme; these are
 > obsolete leftovers and should be ignored (or removed when file deletion is available).
 
-1. 006-testing-strategy.md
-2. 009-deployment.md
-3. 012-mvp-validation.md
-4. 013-web-ux-model.md
-5. 014-ts-rest-contracts.md
-6. 016-category-layout-onboarding.md
+1. 009-deployment.md
+2. 012-mvp-validation.md
+3. 014-ts-rest-contracts.md
 
 ## DOING Index
 
@@ -32,11 +29,14 @@ Stories are in `todo/`, `doing/`, `done/`, `archive/` folders.
 - 003-api-model.md
 - 004-auth-session-model.md
 - 005-sync-model.md
+- 006-testing-strategy.md
 - 007-seeds.md
 - 008-export.md
 - 010-product-foundations.md
 - 011-architecture-foundations.md
+- 013-web-ux-model.md
 - 015-category-groups.md
+- 016-category-layout-onboarding.md
 
 ## Story Template
 
@@ -52,11 +52,11 @@ See `done/001-database-model.md` for required headings.
 - 004-auth-session-model.md (done)
 - 005-sync-model.md (done)
 - 015-category-groups.md (done)
-- 016-category-layout-onboarding.md (new)
+- 016-category-layout-onboarding.md (done)
 
 ### Testing & Tooling
 
-- 006-testing-strategy.md
+- 006-testing-strategy.md (done)
 - 007-seeds.md (done)
 - 008-export.md (done)
 - 009-deployment.md
@@ -69,5 +69,5 @@ See `done/001-database-model.md` for required headings.
 ### Validation & UX
 
 - 012-mvp-validation.md
-- 013-web-ux-model.md
+- 013-web-ux-model.md (done)
 - 014-ts-rest-contracts.md
