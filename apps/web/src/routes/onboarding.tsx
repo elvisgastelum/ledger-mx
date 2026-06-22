@@ -1,15 +1,42 @@
 import { useRouter } from "@tanstack/react-router";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
+import { useForm, type UseFormRegister } from "react-hook-form";
 import { z } from "zod";
 import { ApplyLayoutRequestSchema } from "@ledger-mx/contracts";
+
+// Helper to load persisted onboarding state from localStorage
+function loadPersistedState(): { wizardState: WizardState; selectedLayout: LayoutFormValues["selectedLayout"] } {
+  const saved = localStorage.getItem(WIZARD_STORAGE_KEY);
+  if (saved) {
+    try {
+      const parsed = JSON.parse(saved);
+      return {
+        wizardState: {
+          currentStep: parsed.currentStep ?? 1,
+          completed: parsed.completed ?? false,
+        },
+        selectedLayout: parsed.selectedLayout ?? undefined,
+      };
+    } catch {
+      // Ignore parse errors
+    }
+  }
+  return {
+    wizardState: { currentStep: 1, completed: false },
+    selectedLayout: undefined,
+  };
+}
 
 // Wizard step types
 type WizardStep = 1 | 2 | 3 | 4;
 
 interface WizardState {
   currentStep: WizardStep;
-  selectedLayout: "blank" | "50-30-20" | null;
   completed: boolean;
+}
+
+interface LayoutFormValues {
+  selectedLayout: "blank" | "50-30-20" | undefined;
 }
 
 const WIZARD_STORAGE_KEY = "ledger-mx-onboarding";
@@ -23,34 +50,49 @@ const STEPS: { number: WizardStep; title: string }[] = [
 
 function OnboardingWizard() {
   const router = useRouter();
-  const [wizardState, setWizardState] = useState<WizardState>(() => {
-    // Load state from localStorage
-    const saved = localStorage.getItem(WIZARD_STORAGE_KEY);
-    if (saved) {
-      try {
-        return JSON.parse(saved) as WizardState;
-      } catch {
-        // Ignore parse errors
-      }
-    }
-    return {
-      currentStep: 1,
-      selectedLayout: null,
-      completed: false,
-    };
+
+  // Load persisted state ONCE using useRef to avoid calling loadPersistedState on every render
+  const initialPersistedState = useRef<{ wizardState: WizardState; selectedLayout: LayoutFormValues["selectedLayout"] } | null>(null);
+  if (initialPersistedState.current === null) {
+    initialPersistedState.current = loadPersistedState();
+  }
+
+  const [wizardState, setWizardState] = useState<WizardState>(initialPersistedState.current.wizardState);
+
+  const [submitError, setSubmitError] = useState<string | null>(null);
+
+  // Track whether submission was successful to prevent localStorage re-write after removal
+  const isSubmitSuccessful = useRef(false);
+
+  const {
+    register,
+    handleSubmit,
+    formState: { isSubmitting },
+    watch,
+  } = useForm<LayoutFormValues>({
+    defaultValues: {
+      selectedLayout: initialPersistedState.current.selectedLayout,
+    },
   });
 
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const selectedLayout = watch("selectedLayout");
 
-  // Persist state to localStorage
+  // Persist wizard state and selectedLayout to localStorage (skip if submit was successful)
   useEffect(() => {
-    localStorage.setItem(WIZARD_STORAGE_KEY, JSON.stringify(wizardState));
-  }, [wizardState]);
+    // Don't persist if submission was successful (localStorage already removed)
+    if (isSubmitSuccessful.current) {
+      return;
+    }
 
-//   const goToStep = (step: WizardStep) => {
-//     setWizardState((prev) => ({ ...prev, currentStep: step }));
-//   };
+    localStorage.setItem(
+      WIZARD_STORAGE_KEY,
+      JSON.stringify({
+        currentStep: wizardState.currentStep,
+        completed: wizardState.completed,
+        selectedLayout,
+      }),
+    );
+  }, [wizardState, selectedLayout]);
 
   const goNext = () => {
     setWizardState((prev) => ({
@@ -66,23 +108,13 @@ function OnboardingWizard() {
     }));
   };
 
-  const selectLayout = (layout: "blank" | "50-30-20") => {
-    setWizardState((prev) => ({ ...prev, selectedLayout: layout }));
-  };
-
-  const handleSubmit = async () => {
-    if (!wizardState.selectedLayout) {
-      setError("Please select a layout");
-      return;
-    }
-
-    setIsSubmitting(true);
-    setError(null);
+  const onSubmit = async (data: LayoutFormValues) => {
+    setSubmitError(null);
 
     try {
       // Validate with Zod schema
       const validated = ApplyLayoutRequestSchema.parse({
-        layout: wizardState.selectedLayout,
+        layout: data.selectedLayout,
       });
 
       // Call API
@@ -92,34 +124,35 @@ function OnboardingWizard() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(validated),
+        credentials: "include",
       });
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => null);
         throw new Error(
-          errorData?.message || `Failed to apply layout: ${response.status}`
+          errorData?.message || `Failed to apply layout: ${response.status}`,
         );
       }
 
-
-      // Mark wizard as completed
-      setWizardState((prev) => ({ ...prev, completed: true }));
+      // Mark submission as successful BEFORE state updates to prevent localStorage re-write
+      isSubmitSuccessful.current = true;
 
       // Clear localStorage
       localStorage.removeItem(WIZARD_STORAGE_KEY);
+
+      // Mark wizard as completed
+      setWizardState((prev) => ({ ...prev, completed: true }));
 
       // Redirect to dashboard
       router.navigate({ to: "/" });
     } catch (err: unknown) {
       if (err instanceof z.ZodError) {
-        setError(err.errors.map((e: z.ZodIssue) => e.message).join(", "));
+        setSubmitError(err.errors.map((e: z.ZodIssue) => e.message).join(", "));
       } else if (err instanceof Error) {
-        setError(err.message);
+        setSubmitError(err.message);
       } else {
-        setError("An unexpected error occurred");
+        setSubmitError("An unexpected error occurred");
       }
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
@@ -137,7 +170,11 @@ function OnboardingWizard() {
   }
 
   return (
-    <div className="onboarding-wizard" aria-label="Onboarding Wizard">
+    <form
+      onSubmit={handleSubmit(onSubmit)}
+      className="onboarding-wizard"
+      aria-label="Onboarding Wizard"
+    >
       <header>
         <h1>LedgerMx Setup</h1>
         <nav aria-label="Wizard steps">
@@ -167,8 +204,8 @@ function OnboardingWizard() {
         )}
         {wizardState.currentStep === 2 && (
           <Step2LayoutSelection
-            selectedLayout={wizardState.selectedLayout}
-            onSelectLayout={selectLayout}
+            register={register}
+            selectedLayout={selectedLayout}
             onNext={goNext}
             onBack={goBack}
           />
@@ -178,15 +215,14 @@ function OnboardingWizard() {
         )}
         {wizardState.currentStep === 4 && (
           <Step4Summary
-            selectedLayout={wizardState.selectedLayout}
+            selectedLayout={selectedLayout}
             onBack={goBack}
-            onSubmit={handleSubmit}
             isSubmitting={isSubmitting}
-            error={error}
+            error={submitError}
           />
         )}
       </main>
-    </div>
+    </form>
   );
 }
 
@@ -204,7 +240,7 @@ function Step1Welcome({ onNext }: { onNext: () => void }) {
         <li>Double-entry: Every transaction balances</li>
         <li>Envelopes: Allocate money to specific goals</li>
       </ul>
-      <button onClick={onNext} aria-label="Start onboarding">
+      <button type="button" onClick={onNext} aria-label="Start onboarding">
         Get Started
       </button>
     </section>
@@ -213,13 +249,13 @@ function Step1Welcome({ onNext }: { onNext: () => void }) {
 
 // Step 2: Layout Selection
 function Step2LayoutSelection({
+  register,
   selectedLayout,
-  onSelectLayout,
   onNext,
   onBack,
 }: {
-  selectedLayout: "blank" | "50-30-20" | null;
-  onSelectLayout: (layout: "blank" | "50-30-20") => void;
+  register: UseFormRegister<LayoutFormValues>;
+  selectedLayout: "blank" | "50-30-20" | undefined;
   onNext: () => void;
   onBack: () => void;
 }) {
@@ -240,10 +276,8 @@ function Step2LayoutSelection({
           <label className="layout-option">
             <input
               type="radio"
-              name="layout"
               value="blank"
-              checked={selectedLayout === "blank"}
-              onChange={() => onSelectLayout("blank")}
+              {...register("selectedLayout", { required: true })}
               aria-describedby="blank-description"
             />
             <div>
@@ -258,10 +292,8 @@ function Step2LayoutSelection({
           <label className="layout-option">
             <input
               type="radio"
-              name="layout"
               value="50-30-20"
-              checked={selectedLayout === "50-30-20"}
-              onChange={() => onSelectLayout("50-30-20")}
+              {...register("selectedLayout", { required: true })}
               aria-describedby="503020-description"
             />
             <div>
@@ -275,12 +307,12 @@ function Step2LayoutSelection({
         </fieldset>
       </div>
 
-      <div className="wizard-actions">
-        <button onClick={onBack}>Back</button>
-        <button onClick={handleContinue} disabled={!selectedLayout}>
-          Next
-        </button>
-      </div>
+       <div className="wizard-actions">
+         <button type="button" onClick={onBack}>Back</button>
+         <button type="button" onClick={handleContinue} disabled={!selectedLayout}>
+           Next
+         </button>
+       </div>
     </section>
   );
 }
@@ -310,10 +342,10 @@ function Step3IncomeGroup({
         category groups.
       </p>
 
-      <div className="wizard-actions">
-        <button onClick={onBack}>Back</button>
-        <button onClick={onNext}>Next</button>
-      </div>
+       <div className="wizard-actions">
+         <button type="button" onClick={onBack}>Back</button>
+         <button type="button" onClick={onNext}>Next</button>
+       </div>
     </section>
   );
 }
@@ -322,13 +354,11 @@ function Step3IncomeGroup({
 function Step4Summary({
   selectedLayout,
   onBack,
-  onSubmit,
   isSubmitting,
   error,
 }: {
-  selectedLayout: "blank" | "50-30-20" | null;
+  selectedLayout: "blank" | "50-30-20" | undefined;
   onBack: () => void;
-  onSubmit: () => Promise<void>;
   isSubmitting: boolean;
   error: string | null;
 }) {
@@ -371,10 +401,10 @@ function Step4Summary({
       )}
 
       <div className="wizard-actions">
-        <button onClick={onBack} disabled={isSubmitting}>
+        <button type="button" onClick={onBack} disabled={isSubmitting}>
           Back
         </button>
-        <button onClick={onSubmit} disabled={isSubmitting} aria-label="Create category groups">
+        <button type="submit" disabled={isSubmitting} aria-label="Create category groups">
           {isSubmitting ? "Creating..." : "Create Groups"}
         </button>
       </div>

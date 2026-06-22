@@ -15,12 +15,11 @@ Stories are in `todo/`, `doing/`, `done/`, `archive/` folders.
 > obsolete leftovers and should be ignored (or removed when file deletion is available).
 
 1. 006-testing-strategy.md
-2. 008-export.md
-3. 009-deployment.md
-4. 012-mvp-validation.md
-5. 013-web-ux-model.md
-6. 014-ts-rest-contracts.md
-7. 016-category-layout-onboarding.md
+2. 009-deployment.md
+3. 012-mvp-validation.md
+4. 013-web-ux-model.md
+5. 014-ts-rest-contracts.md
+6. 016-category-layout-onboarding.md
 
 ## DOING Index
 
@@ -34,6 +33,7 @@ Stories are in `todo/`, `doing/`, `done/`, `archive/` folders.
 - 004-auth-session-model.md
 - 005-sync-model.md
 - 007-seeds.md
+- 008-export.md
 - 010-product-foundations.md
 - 011-architecture-foundations.md
 - 015-category-groups.md
@@ -58,7 +58,7 @@ See `done/001-database-model.md` for required headings.
 
 - 006-testing-strategy.md
 - 007-seeds.md (done)
-- 008-export.md
+- 008-export.md (done)
 - 009-deployment.md
 
 ### Product & Architecture

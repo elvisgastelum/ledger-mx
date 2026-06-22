@@ -1,6 +1,6 @@
 # Story: Export
 
-**Status**: Todo
+**Status**: Done
 **Priority**: P1
 **Estimated**: 3 days
 
@@ -17,10 +17,10 @@ Implement CSV export for audit (ZIP export is post-MVP).
 
 ## Acceptance Criteria
 
-- [ ] Export transactions to CSV
-- [ ] CSV format: date, amount, category, note, account
-- [ ] User can select date range for export
-- [ ] Export respects user scoping (only own data)
+- [x] Export transactions to CSV
+- [x] CSV format: date, amount, category, note, account
+- [x] User can select date range for export
+- [x] Export respects user scoping (only own data)
 
 ## Post-MVP (Future)
 
@@ -32,9 +32,9 @@ Export is for audit/tax purposes. Not for data portability (that's future).
 
 ## Tests Required
 
-- Test CSV export format
-- Test user scoping in exports
-- Test date range filtering
+- [x] Test CSV export format
+- [x] Test user scoping in exports
+- [x] Test date range filtering
 
 ## Dependencies
 
@@ -43,5 +43,5 @@ Export is for audit/tax purposes. Not for data portability (that's future).
 
 ## Done Checklist
 
-- [ ] All acceptance criteria met
-- [ ] Export functionality tested
+- [x] All acceptance criteria met
+- [x] Export functionality tested

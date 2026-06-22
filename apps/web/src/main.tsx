@@ -8,6 +8,7 @@ import {
   Outlet,
 } from "@tanstack/react-router";
 import OnboardingWizard from "./routes/onboarding";
+import { ExportForm } from "./components/export-form";
 
 // Home component for the '/' route
 function Home() {
@@ -15,6 +16,10 @@ function Home() {
     <div>
       <h1>Welcome to LedgerMx</h1>
       <a href="/onboarding">Start Onboarding</a>
+      
+      <hr />
+      
+      <ExportForm />
     </div>
   );
 }

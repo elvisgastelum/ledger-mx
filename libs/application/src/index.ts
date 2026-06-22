@@ -60,3 +60,16 @@ export { ApplyDefaultCategoryGroupLayoutUseCase } from "./onboarding";
 
 // Onboarding Errors
 export { CategoryGroupLayoutConflictError } from "./onboarding";
+
+// Export Use Cases
+export { ExportTransactionsCsvUseCase } from "./export/use-cases/export-transactions-csv.use-case";
+export type { ExportTransactionsCsvResult } from "./export/use-cases/export-transactions-csv.use-case";
+
+// Export Ports
+export type { TransactionExportRepository } from "./export/ports/transaction-export.repository.port";
+
+// Export Types
+export type { TransactionExportRow } from "./export/ports/transaction-export.repository.port";
+
+// Export Utilities
+export { escapeCsvValue } from "./export/csv-utils";

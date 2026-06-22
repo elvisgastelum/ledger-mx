@@ -201,22 +201,19 @@ export const contract = c.router({
     },
   }),
 
-  // EXPORT ENDPOINTS (planned, not yet implemented)
+  // EXPORT ENDPOINTS (implemented)
   export: c.router({
     downloadCsv: {
       method: "GET",
       path: "/api/v1/export/csv",
-      query: z.object({
-        ...DateRangeQuerySchema.shape,
-        type: z.enum(["transactions", "category-groups", "reports"]).describe("Type of data to export"),
-      }),
+      query: DateRangeQuerySchema.optional(),
       responses: {
-         200: c.otherResponse({ contentType: "text/csv", body: z.string().min(1) }),
+        200: c.otherResponse({ contentType: "text/csv", body: z.string().min(1) }),
+        400: ErrorResponseSchema,
         401: ErrorResponseSchema,
-        501: ErrorResponseSchema.describe("Endpoint not yet implemented"),
       },
-      summary: "Download filtered data as a CSV file",
-      metadata: { implemented: false, auth: true, scopes: ["user:read"], planned: true },
+      summary: "Download transactions as a CSV file with optional date range filter",
+      metadata: { implemented: true, auth: true, scopes: ["user:read"] },
     },
   }),
 
