@@ -4,8 +4,12 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "dev": "vite",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "clean": "rm -rf dist tsconfig.tsbuildinfo"
+    "clean": "rm -rf dist tsconfig.tsbuildinfo coverage",
+    "test": "vitest run --config vitest.config.ts",
+    "test:watch": "vitest --config vitest.config.ts",
+    "test:e2e": "playwright test --config playwright.config.ts"
   },
   "dependencies": {
     "@ledger-mx/contracts": "workspace:*",
@@ -20,7 +24,14 @@
     "zod": "^3.24.1"
   },
   "devDependencies": {
+    "@testing-library/jest-dom": "^6.6.3",
+    "@testing-library/react": "^16.1.0",
+    "@testing-library/user-event": "^14.5.2",
     "@types/react": "^19.0.0",
-    "@types/react-dom": "^19.0.0"
+    "@types/react-dom": "^19.0.0",
+    "@playwright/test": "^1.49.1",
+    "@vitejs/plugin-react": "^4.3.4",
+    "jsdom": "^25.0.1",
+    "vitest": "^2.1.8"
   }
 }

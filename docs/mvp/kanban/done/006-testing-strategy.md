@@ -1,6 +1,6 @@
 # Story: Testing Strategy
 
-**Status**: Todo
+**Status**: Done
 **Priority**: P0
 **Estimated**: 3 days
 
@@ -19,12 +19,12 @@ Define TDD workflow and testing approach.
 
 ## Acceptance Criteria
 
-- [ ] TDD: write test before code
-- [ ] Backend: Vitest + Testcontainers PostgreSQL
-- [ ] Frontend: Vitest + Testing Library
-- [ ] E2E: Playwright
-- [ ] Invariants: ledger balance, money integers, user scoping
-- [ ] Sync: offline queue, conflict resolution
+- [x] TDD: write test before code
+- [x] Backend: Vitest + Testcontainers PostgreSQL
+- [x] Frontend: Vitest + Testing Library
+- [x] E2E: Playwright
+- [x] Invariants: ledger balance, money integers, user scoping
+- [x] Sync: offline queue, conflict resolution
 
 ## Technical Notes
 
@@ -42,5 +42,5 @@ Testing docs are mandatory. Every use case must have tests.
 
 ## Done Checklist
 
-- [ ] All acceptance criteria met
-- [ ] Testing docs complete and reviewed
+- [x] All acceptance criteria met
+- [x] Testing docs complete and reviewed
