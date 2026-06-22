@@ -14,8 +14,9 @@ Stories are in `todo/`, `doing/`, `done/`, `archive/` folders.
 > Some duplicate numbered files exist in `todo/` from an earlier ordering scheme; these are
 > obsolete leftovers and should be ignored (or removed when file deletion is available).
 
-1. 009-deployment.md
-2. 012-mvp-validation.md
+1. 017-accounts-transactions-foundation.md
+2. 009-deployment.md
+3. 012-mvp-validation.md
 
 ## DOING Index
 
@@ -53,6 +54,7 @@ See `done/001-database-model.md` for required headings.
 - 005-sync-model.md (done)
 - 015-category-groups.md (done)
 - 016-category-layout-onboarding.md (done)
+- 017-accounts-transactions-foundation.md (todo)
 
 ### Testing & Tooling
 
