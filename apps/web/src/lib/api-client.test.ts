@@ -3,7 +3,12 @@
  * Verifies that all auth API calls use credentials: 'include'
  */
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { registerApi, loginApi, refreshApi, logoutApi } from "../lib/api-client";
+import {
+  registerApi,
+  loginApi,
+  refreshApi,
+  logoutApi,
+} from "../lib/api-client";
 
 describe("api-client", () => {
   let originalFetch: typeof fetch;
@@ -40,7 +45,7 @@ describe("api-client", () => {
           method: "POST",
           credentials: "include",
           headers: { "Content-Type": "application/json" },
-        })
+        }),
       );
     });
   });
@@ -58,7 +63,7 @@ describe("api-client", () => {
           method: "POST",
           credentials: "include",
           headers: { "Content-Type": "application/json" },
-        })
+        }),
       );
     });
   });
@@ -73,7 +78,7 @@ describe("api-client", () => {
           method: "POST",
           credentials: "include",
           headers: { "Content-Type": "application/json" },
-        })
+        }),
       );
     });
   });
@@ -88,7 +93,7 @@ describe("api-client", () => {
           method: "POST",
           credentials: "include",
           headers: { "Content-Type": "application/json" },
-        })
+        }),
       );
     });
   });
@@ -105,7 +110,7 @@ describe("api-client", () => {
       } as Response);
 
       await expect(
-        loginApi({ email: "test@example.com", password: "wrong" })
+        loginApi({ email: "test@example.com", password: "wrong" }),
       ).rejects.toThrow("Invalid email or password");
     });
 
@@ -117,7 +122,7 @@ describe("api-client", () => {
       } as Response);
 
       await expect(
-        loginApi({ email: "test@example.com", password: "wrong" })
+        loginApi({ email: "test@example.com", password: "wrong" }),
       ).rejects.toThrow("Request failed with status 500");
     });
   });

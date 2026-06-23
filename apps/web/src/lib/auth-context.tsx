@@ -68,6 +68,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
   // Ref to always have current accessToken for authFetch
   const accessTokenRef = useRef<string | null>(null);
 
+  // Ref for deduplicating concurrent refresh calls
+  const refreshPromiseRef = useRef<Promise<AuthSuccessResponse> | null>(null);
+
   // Update ref when accessToken changes
   useEffect(() => {
     accessTokenRef.current = accessToken;
@@ -76,12 +79,32 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const isAuthenticated = useMemo(() => user !== null, [user]);
 
   /**
+   * Deduplicated refresh API call. Returns the in-flight promise if present,
+   * otherwise calls refreshApi() and clears the ref in finally.
+   */
+  const refreshApiDeduped = useCallback(async (): Promise<AuthSuccessResponse> => {
+    if (refreshPromiseRef.current) {
+      return refreshPromiseRef.current;
+    }
+
+    refreshPromiseRef.current = (async () => {
+      try {
+        return await refreshApi();
+      } finally {
+        refreshPromiseRef.current = null;
+      }
+    })();
+
+    return refreshPromiseRef.current;
+  }, []);
+
+  /**
    * Attempts to restore session by refreshing the access token.
    * Called on mount to check for existing httpOnly refresh token cookie.
    */
   const refreshToken = useCallback(async () => {
     try {
-      const response = await refreshApi();
+      const response = await refreshApiDeduped();
       setAccessToken(response.accessToken);
       setUser(response.user);
     } catch {
@@ -91,7 +114,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [refreshApiDeduped]);
 
   /**
    * Registers a new user and sets auth state on success.
@@ -181,7 +204,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       // If 401, try to refresh token and retry once
       if (response.status === 401) {
         try {
-          const refreshResponse = await refreshApi();
+          const refreshResponse = await refreshApiDeduped();
           // Update auth state with new token
           setAccessToken(refreshResponse.accessToken);
           setUser(refreshResponse.user);

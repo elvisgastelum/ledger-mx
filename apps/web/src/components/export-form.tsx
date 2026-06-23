@@ -1,16 +1,7 @@
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { useAuth } from "../lib/auth-context";
-
-/**
- * Converts a YYYY-MM-DD string to an ISO 8601 datetime string at local midnight.
- * Uses numeric constructor to avoid date-only UTC interpretation.
- */
-function dateInputToISOString(dateStr: string): string {
-  const [year, month, day] = dateStr.split("-").map(Number);
-  // Month is 0-indexed in Date constructor
-  const localMidnight = new Date(year, month - 1, day);
-  return localMidnight.toISOString();
-}
+import { dateInputToISOString } from "../lib/date-format";
+import { DatePicker } from "./ui/date-picker";
 
 interface ExportFormValues {
   startDate?: string;
@@ -24,14 +15,12 @@ interface ExportFormValues {
 export function ExportForm() {
   const { authFetch } = useAuth();
   const {
-    register,
     handleSubmit,
+    control,
     formState: { isSubmitting, errors },
     watch,
     setError,
   } = useForm<ExportFormValues>();
-
-  const startDateValue = watch("startDate");
 
   const onSubmit = async (data: ExportFormValues) => {
     try {
@@ -51,7 +40,7 @@ export function ExportForm() {
       const response = await authFetch(url, {
         method: "GET",
         headers: {
-          "Accept": "text/csv",
+          Accept: "text/csv",
         },
       });
 
@@ -101,36 +90,50 @@ export function ExportForm() {
       <h2 id="export-heading">Export Transactions</h2>
       <p>Download your transactions as a CSV file for audit or tax purposes.</p>
 
-      <form
-        onSubmit={handleSubmit(onSubmit)}
-        aria-label="CSV Export Form"
-      >
+      <form onSubmit={handleSubmit(onSubmit)} aria-label="CSV Export Form">
         <div>
           <label htmlFor="startDate">Start Date (optional):</label>
-          <input
-            type="date"
-            id="startDate"
-            disabled={isSubmitting}
-            {...register("startDate")}
+          <Controller
+            name="startDate"
+            control={control}
+            render={({ field }) => (
+              <DatePicker
+                id="startDate"
+                value={field.value}
+                onChange={field.onChange}
+                onBlur={field.onBlur}
+                disabled={isSubmitting}
+              />
+            )}
           />
         </div>
 
         <div>
           <label htmlFor="endDate">End Date (optional):</label>
-          <input
-            type="date"
-            id="endDate"
-            disabled={isSubmitting}
-            {...register("endDate", {
+          <Controller
+            name="endDate"
+            control={control}
+            rules={{
               validate: (endDate) => {
                 // Only validate if both dates are provided
-                if (!endDate || !startDateValue) return true;
+                const startDate = watch("startDate");
+                if (!endDate || !startDate) return true;
                 return (
-                  endDate >= startDateValue ||
+                  endDate >= startDate ||
                   "End date must be on or after start date"
                 );
               },
-            })}
+            }}
+            render={({ field }) => (
+              <DatePicker
+                id="endDate"
+                value={field.value}
+                onChange={field.onChange}
+                onBlur={field.onBlur}
+                disabled={isSubmitting}
+                aria-invalid={!!errors.endDate}
+              />
+            )}
           />
           {errors.endDate?.message && (
             <div className="error-message" role="alert">

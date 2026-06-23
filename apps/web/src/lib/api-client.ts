@@ -1,6 +1,7 @@
 /**
  * API client for authentication endpoints.
  * All fetches use credentials: 'include' for httpOnly cookie support.
+ * Refresh deduplication is handled in AuthContext using useRef.
  */
 import type {
   RegisterRequest,
@@ -29,7 +30,7 @@ async function parseError(response: Response): Promise<string> {
  * POST /api/v1/auth/register
  */
 export async function registerApi(
-  data: RegisterRequest
+  data: RegisterRequest,
 ): Promise<AuthSuccessResponse> {
   const response = await fetch(`${API_BASE}/register`, {
     method: "POST",
@@ -51,7 +52,9 @@ export async function registerApi(
  * Logs in an existing user.
  * POST /api/v1/auth/login
  */
-export async function loginApi(data: LoginRequest): Promise<AuthSuccessResponse> {
+export async function loginApi(
+  data: LoginRequest,
+): Promise<AuthSuccessResponse> {
   const response = await fetch(`${API_BASE}/login`, {
     method: "POST",
     headers: {
@@ -71,6 +74,7 @@ export async function loginApi(data: LoginRequest): Promise<AuthSuccessResponse>
 /**
  * Refreshes the access token using the httpOnly refresh token cookie.
  * POST /api/v1/auth/refresh
+ * Note: Deduplication is now handled in AuthContext with useRef.
  */
 export async function refreshApi(): Promise<AuthSuccessResponse> {
   const response = await fetch(`${API_BASE}/refresh`, {
