@@ -1,4 +1,5 @@
 import { useForm } from "react-hook-form";
+import { useAuth } from "../lib/auth-context";
 
 /**
  * Converts a YYYY-MM-DD string to an ISO 8601 datetime string at local midnight.
@@ -21,6 +22,7 @@ interface ExportFormValues {
  * Allows users to download transactions as CSV with optional date range.
  */
 export function ExportForm() {
+  const { authFetch } = useAuth();
   const {
     register,
     handleSubmit,
@@ -45,13 +47,12 @@ export function ExportForm() {
       const queryString = params.toString();
       const url = `/api/v1/export/csv${queryString ? `?${queryString}` : ""}`;
 
-      // Fetch the CSV file
-      const response = await fetch(url, {
+      // Fetch the CSV file using authFetch
+      const response = await authFetch(url, {
         method: "GET",
         headers: {
           "Accept": "text/csv",
         },
-        credentials: "include",
       });
 
       if (!response.ok) {

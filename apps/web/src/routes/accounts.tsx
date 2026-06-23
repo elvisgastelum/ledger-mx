@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import type { AccountType } from "@ledger-mx/contracts";
+import { useAuth } from "../lib/auth-context";
+import { LogoutButton } from "../components/logout-button";
 
 interface AccountFormValues {
   name: string;
@@ -26,20 +28,17 @@ export function AccountsPage() {
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [editingAccount, setEditingAccount] = useState<Account | null>(null);
 
+  const { authFetch } = useAuth();
   const { register, handleSubmit, formState: { errors, isSubmitting }, reset } = useForm<AccountFormValues>();
 
-  // Load accounts
+  // Load accounts using authFetch
   const loadAccounts = async () => {
     setLoading(true);
     setError(null);
 
     try {
-      const response = await fetch("/api/v1/accounts", {
+      const response = await authFetch("/api/v1/accounts", {
         method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
       });
 
       if (!response.ok) {
@@ -61,13 +60,9 @@ export function AccountsPage() {
 
   const onCreateSubmit = async (data: AccountFormValues) => {
     try {
-      const response = await fetch("/api/v1/accounts", {
+      const response = await authFetch("/api/v1/accounts", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
         body: JSON.stringify(data),
-        credentials: "include",
       });
 
       if (!response.ok) {
@@ -87,13 +82,9 @@ export function AccountsPage() {
     if (!editingAccount) return;
 
     try {
-      const response = await fetch(`/api/v1/accounts/${editingAccount.id}`, {
+      const response = await authFetch(`/api/v1/accounts/${editingAccount.id}`, {
         method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
         body: JSON.stringify(data),
-        credentials: "include",
       });
 
       if (!response.ok) {
@@ -115,12 +106,8 @@ export function AccountsPage() {
     }
 
     try {
-      const response = await fetch(`/api/v1/accounts/${accountId}`, {
+      const response = await authFetch(`/api/v1/accounts/${accountId}`, {
         method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
       });
 
       if (!response.ok) {
@@ -150,16 +137,19 @@ export function AccountsPage() {
     <div className="accounts-page">
       <header>
         <h1>Accounts</h1>
-        <button
-          type="button"
-          onClick={() => {
-            setShowCreateForm(!showCreateForm);
-            setEditingAccount(null);
-            reset();
-          }}
-        >
-          {showCreateForm ? "Cancel" : "Create Account"}
-        </button>
+        <div>
+          <button
+            type="button"
+            onClick={() => {
+              setShowCreateForm(!showCreateForm);
+              setEditingAccount(null);
+              reset();
+            }}
+          >
+            {showCreateForm ? "Cancel" : "Create Account"}
+          </button>
+          <LogoutButton />
+        </div>
       </header>
 
       {error && (

@@ -3,6 +3,8 @@ import { useState, useEffect, useRef } from "react";
 import { useForm, type UseFormRegister } from "react-hook-form";
 import { z } from "zod";
 import { ApplyLayoutRequestSchema } from "@ledger-mx/contracts";
+import { useAuth } from "../lib/auth-context";
+import { LogoutButton } from "../components/logout-button";
 
 // Helper to load persisted onboarding state from localStorage
 function loadPersistedState(): { wizardState: WizardState; selectedLayout: LayoutFormValues["selectedLayout"] } {
@@ -50,6 +52,7 @@ const STEPS: { number: WizardStep; title: string }[] = [
 
 function OnboardingWizard() {
   const router = useRouter();
+  const { authFetch } = useAuth();
 
   // Load persisted state ONCE using useRef to avoid calling loadPersistedState on every render
   const initialPersistedState = useRef<{ wizardState: WizardState; selectedLayout: LayoutFormValues["selectedLayout"] } | null>(null);
@@ -117,14 +120,10 @@ function OnboardingWizard() {
         layout: data.selectedLayout,
       });
 
-      // Call API
-      const response = await fetch("/api/v1/onboarding/layout", {
+      // Call API using authFetch
+      const response = await authFetch("/api/v1/onboarding/layout", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
         body: JSON.stringify(validated),
-        credentials: "include",
       });
 
       if (!response.ok) {
@@ -177,6 +176,7 @@ function OnboardingWizard() {
     >
       <header>
         <h1>LedgerMx Setup</h1>
+        <LogoutButton />
         <nav aria-label="Wizard steps">
           <ol className="step-indicator">
             {STEPS.map((step) => (

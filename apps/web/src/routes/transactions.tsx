@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
 import { useForm, useFieldArray } from "react-hook-form";
+import { useAuth } from "../lib/auth-context";
+import { LogoutButton } from "../components/logout-button";
 
 interface TransactionLineFormValues {
   id: string;
@@ -43,6 +45,7 @@ export function TransactionsPage() {
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [showCreateForm, setShowCreateForm] = useState(false);
 
+  const { authFetch } = useAuth();
   const { register, handleSubmit, control, formState: { errors, isSubmitting }, watch, setError, clearErrors, reset } = useForm<TransactionFormValues>({
     defaultValues: {
       transactionDate: new Date().toISOString().split("T")[0],
@@ -60,18 +63,14 @@ export function TransactionsPage() {
     name: "lines",
   });
 
-  // Load transactions
+  // Load transactions using authFetch
   const loadTransactions = async () => {
     setLoading(true);
     clearErrors();
 
     try {
-      const response = await fetch("/api/v1/transactions", {
+      const response = await authFetch("/api/v1/transactions", {
         method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
       });
 
       if (!response.ok) {
@@ -100,11 +99,8 @@ export function TransactionsPage() {
     }
 
     try {
-      const response = await fetch("/api/v1/transactions", {
+      const response = await authFetch("/api/v1/transactions", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
         body: JSON.stringify({
           id: crypto.randomUUID(),
           transactionDate: new Date(data.transactionDate).toISOString(),
@@ -120,7 +116,6 @@ export function TransactionsPage() {
             type: data.type,
           })),
         }),
-        credentials: "include",
       });
 
       if (!response.ok) {
@@ -156,15 +151,18 @@ export function TransactionsPage() {
     <div className="transactions-page">
       <header>
         <h1>Transactions</h1>
-        <button
-          type="button"
-          onClick={() => {
-            setShowCreateForm(!showCreateForm);
-            reset();
-          }}
-        >
-          {showCreateForm ? "Cancel" : "Create Transaction"}
-        </button>
+        <div>
+          <button
+            type="button"
+            onClick={() => {
+              setShowCreateForm(!showCreateForm);
+              reset();
+            }}
+          >
+            {showCreateForm ? "Cancel" : "Create Transaction"}
+          </button>
+          <LogoutButton />
+        </div>
       </header>
 
       {submitError && (
