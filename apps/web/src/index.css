@@ -1,0 +1,31 @@
+/**
+ * Main CSS file with Tailwind directives.
+ * Import this file in main.tsx.
+ */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom base styles */
+:root {
+  --radius: 0.5rem;
+}
+
+* {
+  border-color: theme("colors.border");
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Ensure min viewport width for mobile-first */
+@media (max-width: 320px) {
+  html {
+    min-width: 320px;
+  }
+}

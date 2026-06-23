@@ -3,6 +3,7 @@
  */
 import { useAuth } from "../lib/auth-context";
 import { useNavigate } from "@tanstack/react-router";
+import { cn } from "../lib/utils";
 
 interface LogoutButtonProps {
   className?: string;
@@ -21,7 +22,7 @@ export function LogoutButton({ className }: LogoutButtonProps) {
     <button
       type="button"
       onClick={handleLogout}
-      className={className}
+      className={cn("min-h-[44px] min-w-[44px] px-4", className)}
       aria-label="Logout"
     >
       Logout

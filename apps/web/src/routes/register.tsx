@@ -8,6 +8,9 @@ import { useNavigate, useSearch } from "@tanstack/react-router";
 import { useForm } from "react-hook-form";
 import { useAuth } from "../lib/auth-context";
 import { getSafeRedirect } from "../lib/auth-utils";
+import { Button } from "../components/ui/button";
+import { Input } from "../components/ui/input";
+import { Label } from "../components/ui/label";
 
 interface RegisterFormValues {
   email: string;
@@ -74,125 +77,129 @@ export function RegisterPage() {
   }
 
   return (
-    <div className="register-page">
-      <header>
-        <h1>Create Your LedgerMx Account</h1>
-      </header>
+    <div className="flex min-h-screen items-center justify-center px-4 py-12 sm:px-6 lg:px-8">
+      <div className="w-full max-w-md space-y-8">
+        <div className="text-center">
+          <h1 className="text-3xl font-bold tracking-tight">Create Your LedgerMx Account</h1>
+        </div>
 
-      <form
-        onSubmit={handleSubmit(onSubmit)}
-        className="register-form"
-        aria-label="Registration Form"
-      >
-        {errors.root && (
-          <div className="error-message" role="alert">
-            {errors.root.message}
+        <form
+          onSubmit={handleSubmit(onSubmit)}
+          className="space-y-6"
+          aria-label="Registration Form"
+        >
+          {errors.root && (
+            <div className="rounded-md bg-destructive/15 p-3 text-sm text-destructive" role="alert">
+              {errors.root.message}
+            </div>
+          )}
+
+          <div className="space-y-2">
+            <Label htmlFor="email">Email</Label>
+            <Input
+              id="email"
+              type="email"
+              autoComplete="email"
+              disabled={isSubmitting}
+              error={!!errors.email}
+              {...register("email", {
+                required: "Email is required",
+                pattern: {
+                  value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+                  message: "Please enter a valid email address",
+                },
+              })}
+            />
+            {errors.email && (
+              <p className="text-sm text-destructive">{errors.email.message}</p>
+            )}
           </div>
-        )}
 
-        <div>
-          <label htmlFor="email">Email:</label>
-          <input
-            type="email"
-            id="email"
-            autoComplete="email"
-            disabled={isSubmitting}
-            {...register("email", {
-              required: "Email is required",
-              pattern: {
-                value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-                message: "Please enter a valid email address",
-              },
-            })}
-          />
-          {errors.email && (
-            <span className="error">{errors.email.message}</span>
-          )}
-        </div>
+          <div className="space-y-2">
+            <Label htmlFor="password">Password</Label>
+            <Input
+              id="password"
+              type="password"
+              autoComplete="new-password"
+              disabled={isSubmitting}
+              error={!!errors.password}
+              {...register("password", {
+                required: "Password is required",
+                minLength: {
+                  value: 8,
+                  message: "Password must be at least 8 characters",
+                },
+                pattern: {
+                  value:
+                    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/,
+                  message:
+                    "Password must contain uppercase, lowercase, number, and special character",
+                },
+              })}
+            />
+            {errors.password && (
+              <p className="text-sm text-destructive">{errors.password.message}</p>
+            )}
+          </div>
 
-        <div>
-          <label htmlFor="password">Password:</label>
-          <input
-            type="password"
-            id="password"
-            autoComplete="new-password"
-            disabled={isSubmitting}
-            {...register("password", {
-              required: "Password is required",
-              minLength: {
-                value: 8,
-                message: "Password must be at least 8 characters",
-              },
-              pattern: {
-                value:
-                  /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/,
-                message:
-                  "Password must contain uppercase, lowercase, number, and special character",
-              },
-            })}
-          />
-          {errors.password && (
-            <span className="error">{errors.password.message}</span>
-          )}
-        </div>
+          <div className="space-y-2">
+            <Label htmlFor="confirmPassword">Confirm Password</Label>
+            <Input
+              id="confirmPassword"
+              type="password"
+              autoComplete="new-password"
+              disabled={isSubmitting}
+              error={!!errors.confirmPassword}
+              {...register("confirmPassword", {
+                required: "Please confirm your password",
+                validate: (value) =>
+                  value === password || "Passwords do not match",
+              })}
+            />
+            {errors.confirmPassword && (
+              <p className="text-sm text-destructive">{errors.confirmPassword.message}</p>
+            )}
+          </div>
 
-        <div>
-          <label htmlFor="confirmPassword">Confirm Password:</label>
-          <input
-            type="password"
-            id="confirmPassword"
-            autoComplete="new-password"
-            disabled={isSubmitting}
-            {...register("confirmPassword", {
-              required: "Please confirm your password",
-              validate: (value) =>
-                value === password || "Passwords do not match",
-            })}
-          />
-          {errors.confirmPassword && (
-            <span className="error">{errors.confirmPassword.message}</span>
-          )}
-        </div>
+          <div className="space-y-2">
+            <Label htmlFor="displayName">Display Name (optional)</Label>
+            <Input
+              id="displayName"
+              type="text"
+              autoComplete="name"
+              disabled={isSubmitting}
+              error={!!errors.displayName}
+              {...register("displayName", {
+                maxLength: {
+                  value: 100,
+                  message: "Display name must be less than 100 characters",
+                },
+              })}
+            />
+            {errors.displayName && (
+              <p className="text-sm text-destructive">{errors.displayName.message}</p>
+            )}
+          </div>
 
-        <div>
-          <label htmlFor="displayName">Display Name (optional):</label>
-          <input
-            type="text"
-            id="displayName"
-            autoComplete="name"
-            disabled={isSubmitting}
-            {...register("displayName", {
-              maxLength: {
-                value: 100,
-                message: "Display name must be less than 100 characters",
-              },
-            })}
-          />
-          {errors.displayName && (
-            <span className="error">{errors.displayName.message}</span>
-          )}
-        </div>
-
-        <div>
-          <label htmlFor="rememberMe">
+          <label className="flex min-h-[44px] items-center space-x-2 cursor-pointer">
             <input
               type="checkbox"
-              id="rememberMe"
               disabled={isSubmitting}
+              className="h-4 w-4 rounded border-input"
               {...register("rememberMe")}
             />
-            Remember me (extends session to 30 days)
+            <span className="text-sm">Remember me (extends session to 30 days)</span>
           </label>
-        </div>
 
-        <button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? "Creating account..." : "Create Account"}
-        </button>
-      </form>
+          <Button type="submit" disabled={isSubmitting} className="w-full">
+            {isSubmitting ? "Creating account..." : "Create Account"}
+          </Button>
+        </form>
 
-      <p>
-        Already have an account? <a href="/login">Login here</a>
-      </p>
+        <p className="text-center text-sm">
+          Already have an account? <a href="/login" className="text-primary hover:underline">Login here</a>
+        </p>
+      </div>
     </div>
   );
 }

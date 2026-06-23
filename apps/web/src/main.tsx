@@ -1,5 +1,6 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
+import "./index.css";
 import {
   createRootRoute,
   createRoute,
@@ -7,9 +8,12 @@ import {
   RouterProvider,
   Outlet,
 } from "@tanstack/react-router";
+import { QueryClientProvider } from "@tanstack/react-query";
 import { AuthProvider } from "./lib/auth-context";
 import { AuthGuard } from "./components/auth-guard";
-import { LogoutButton } from "./components/logout-button";
+import { AppShell } from "./components/app-shell";
+import { createQueryClient } from "./lib/query-client";
+import { Toaster } from "./lib/toast";
 import LoginPage from "./routes/login";
 import RegisterPage from "./routes/register";
 import OnboardingWizard from "./routes/onboarding";
@@ -20,17 +24,16 @@ import TransactionsPage from "./routes/transactions";
 // Home component for the '/' route
 function Home() {
   return (
-    <div>
-      <header>
+    <AppShell>
+      <div>
         <h1>Welcome to LedgerMx</h1>
-        <LogoutButton />
-      </header>
-      <a href="/onboarding">Start Onboarding</a>
-      
-      <hr />
-      
-      <ExportForm />
-    </div>
+        <a href="/onboarding">Start Onboarding</a>
+        
+        <hr />
+        
+        <ExportForm />
+      </div>
+    </AppShell>
   );
 }
 
@@ -80,7 +83,9 @@ const onboardingRoute = createRoute({
   path: "/onboarding",
   component: () => (
     <AuthGuard>
-      <OnboardingWizard />
+      <AppShell>
+        <OnboardingWizard />
+      </AppShell>
     </AuthGuard>
   ),
 });
@@ -91,7 +96,9 @@ const accountsRoute = createRoute({
   path: "/accounts",
   component: () => (
     <AuthGuard>
-      <AccountsPage />
+      <AppShell>
+        <AccountsPage />
+      </AppShell>
     </AuthGuard>
   ),
 });
@@ -102,7 +109,9 @@ const transactionsRoute = createRoute({
   path: "/transactions",
   component: () => (
     <AuthGuard>
-      <TransactionsPage />
+      <AppShell>
+        <TransactionsPage />
+      </AppShell>
     </AuthGuard>
   ),
 });
@@ -122,6 +131,9 @@ const router = createRouter({
   routeTree,
 });
 
+// Create QueryClient instance
+const queryClient = createQueryClient();
+
 // Render the app
 const rootElement = document.getElementById("root");
 if (!rootElement) {
@@ -130,8 +142,11 @@ if (!rootElement) {
 
 createRoot(rootElement).render(
   <StrictMode>
-    <AuthProvider>
-      <RouterProvider router={router} />
-    </AuthProvider>
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider>
+        <RouterProvider router={router} />
+        <Toaster position="top-center" />
+      </AuthProvider>
+    </QueryClientProvider>
   </StrictMode>
 );
