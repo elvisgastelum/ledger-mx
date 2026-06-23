@@ -1,6 +1,6 @@
 # Story: Accounts and Transactions Foundation
 
-**Status**: Todo
+**Status**: Done
 **Priority**: P0
 **Estimated**: 5 days
 
@@ -14,13 +14,13 @@ Current implemented features are auth, category groups/onboarding, export, ts-re
 
 ## Acceptance Criteria
 
-- [ ] Account contract/schema/endpoints for list/create/update/archive or equivalent user-scoped lifecycle
-- [ ] Account API controller/use cases/repository methods with user_id scoping
-- [ ] Transaction contract/schema/endpoints for create/list basic transactions
-- [ ] Transaction API controller/use cases/repository methods enforcing integer cents, UUID v4 client-generated IDs, UTC timestamps, user scope, and double-entry lines summing to zero
-- [ ] Web account list/create/edit or archive UI using react-hook-form
-- [ ] Web transaction list and new transaction form using react-hook-form
-- [ ] Tests for cross-user isolation, money/integer cents, UUID and double-entry invariants
+- [x] Account contract/schema/endpoints for list/create/update/archive or equivalent user-scoped lifecycle
+- [x] Account API controller/use cases/repository methods with user_id scoping
+- [x] Transaction contract/schema/endpoints for create/list basic transactions
+- [x] Transaction API controller/use cases/repository methods enforcing integer cents, UUID v4 client-generated IDs, UTC timestamps, user scope, and double-entry lines summing to zero
+- [x] Web account list/create/edit or archive UI using react-hook-form
+- [x] Web transaction list and new transaction form using react-hook-form
+- [x] Tests for cross-user isolation, money/integer cents, UUID and double-entry invariants
 
 ## Technical Notes
 
@@ -52,5 +52,5 @@ Current implemented features are auth, category groups/onboarding, export, ts-re
 
 ## Done Checklist
 
-- [ ] All acceptance criteria met
-- [ ] Story reviewed and approved
+- [x] All acceptance criteria met
+- [x] Story reviewed and approved
