@@ -1,5 +1,6 @@
 export {
   TRANSACTION_TYPES,
+  TRANSACTION_LINE_TARGET_TYPES,
   TransactionLineSchema,
   TransactionSchema,
   CreateTransactionRequestSchema,
@@ -9,6 +10,7 @@ export {
 } from "./transaction.schemas";
 export type {
   TransactionType,
+  TransactionLineTargetType,
   TransactionLine,
   Transaction,
   CreateTransactionRequest,

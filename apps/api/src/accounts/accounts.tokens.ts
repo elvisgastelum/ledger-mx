@@ -1,0 +1,3 @@
+export const ACCOUNTS_TOKENS = {
+  ACCOUNT_REPOSITORY: Symbol("ACCOUNT_REPOSITORY"),
+} as const;

@@ -2,23 +2,44 @@ import { z } from "zod";
 import { UuidSchema, MoneySchema, SignedMoneySchema } from "../common.schemas";
 
 /**
- * Transaction type enum values
+ * Transaction type enum values (aligned with domain and database)
  */
-export const TRANSACTION_TYPES = ["expense", "income", "transfer", "debt_payment", "envelope_allocation"] as const;
+export const TRANSACTION_TYPES = ["income", "expense", "transfer", "adjustment", "reversal", "debt_payment"] as const;
 export type TransactionType = (typeof TRANSACTION_TYPES)[number];
+
+/**
+ * Transaction line target type enum values (aligned with domain and database)
+ */
+export const TRANSACTION_LINE_TARGET_TYPES = ["account", "envelope", "category"] as const;
+export type TransactionLineTargetType = (typeof TRANSACTION_LINE_TARGET_TYPES)[number];
 
 /**
  * Schema for a transaction line (double-entry)
  * Lines must sum to zero for a valid transaction
+ * Exactly one of accountId, categoryId, or envelopeId must be set based on targetType
  */
 export const TransactionLineSchema = z.object({
   id: UuidSchema,
-  accountId: UuidSchema.nullable().describe("Account ID (null for category lines)"),
-  categoryId: UuidSchema.nullable().describe("Category ID (null for account lines)"),
-  envelopeId: UuidSchema.nullable().describe("Envelope ID (for envelope allocations)"),
+  targetType: z.enum(TRANSACTION_LINE_TARGET_TYPES).describe("Type of target this line applies to"),
+  accountId: UuidSchema.nullable().describe("Account ID (set only when targetType is 'account')"),
+  categoryId: UuidSchema.nullable().describe("Category ID (set only when targetType is 'category')"),
+  envelopeId: UuidSchema.nullable().describe("Envelope ID (set only when targetType is 'envelope')"),
   amountCents: SignedMoneySchema,
   type: z.enum(TRANSACTION_TYPES),
-}).strict();
+}).strict().refine(
+  (line) => {
+    // Validate that exactly one ID is set based on targetType
+    if (line.targetType === "account") {
+      return line.accountId !== null && line.categoryId === null && line.envelopeId === null;
+    } else if (line.targetType === "category") {
+      return line.accountId === null && line.categoryId !== null && line.envelopeId === null;
+    } else if (line.targetType === "envelope") {
+      return line.accountId === null && line.categoryId === null && line.envelopeId !== null;
+    }
+    return false;
+  },
+  { message: "Exactly one of accountId, categoryId, or envelopeId must be set based on targetType" }
+);
 
 export type TransactionLine = z.infer<typeof TransactionLineSchema>;
 

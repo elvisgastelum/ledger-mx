@@ -73,3 +73,41 @@ export type { TransactionExportRow } from "./export/ports/transaction-export.rep
 
 // Export Utilities
 export { escapeCsvValue } from "./export/csv-utils";
+
+// Account Types
+export type {
+  CreateAccountInput,
+  UpdateAccountInput,
+  ListAccountsInput,
+} from "./accounts/account.types";
+
+// Account Use Cases
+export { CreateAccountUseCase } from "./accounts/use-cases/create-account.use-case";
+export { ListAccountsUseCase } from "./accounts/use-cases/list-accounts.use-case";
+export { UpdateAccountUseCase } from "./accounts/use-cases/update-account.use-case";
+export { ArchiveAccountUseCase } from "./accounts/use-cases/archive-account.use-case";
+
+// Account Errors
+export {
+  AccountApplicationError,
+  AccountNotFoundError,
+} from "./accounts/account.errors";
+
+// Transaction Types
+export type {
+  CreateTransactionInput,
+  ListTransactionsInput,
+  TransactionLineOutput,
+  CreateTransactionOutput,
+  ListTransactionsOutput,
+} from "./transactions/transaction.types";
+
+// Transaction Use Cases
+export { CreateTransactionUseCase } from "./transactions/use-cases/create-transaction.use-case";
+export { ListTransactionsUseCase } from "./transactions/use-cases/list-transactions.use-case";
+
+// Transaction Errors
+export {
+  TransactionApplicationError,
+  TransactionNotFoundError,
+} from "./transactions/transaction.errors";

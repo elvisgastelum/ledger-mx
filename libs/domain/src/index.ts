@@ -75,6 +75,7 @@ export type { TransactionLineProps } from "./ledger/transaction-line";
 export { Transaction } from "./ledger/transaction";
 export type { TransactionProps } from "./ledger/transaction";
 export type { CategoryGroup } from "./ledger/category-group";
+export type { Account } from "./ledger/account";
 
 // Auth Errors
 export {
@@ -109,3 +110,4 @@ export type {
 export type { SessionRepository } from "./repositories/session-repository";
 export type { AuthAuditLogRepository } from "./repositories/auth-audit-log-repository";
 export type { CategoryGroupRepository } from "./repositories/category-group-repository";
+export type { AccountRepository } from "./repositories/account-repository";

@@ -13,6 +13,8 @@ export interface TransactionProps {
   occurredAt: Date;
   description?: string;
   lines: TransactionLine[];
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
 /**
@@ -26,6 +28,8 @@ export class Transaction {
   public readonly occurredAt: Date;
   public readonly description?: string;
   public readonly lines: TransactionLine[];
+  public readonly createdAt: Date;
+  public readonly updatedAt: Date;
 
   constructor(props: TransactionProps) {
     if (!TRANSACTION_TYPES.includes(props.type)) {
@@ -64,6 +68,8 @@ export class Transaction {
     this.occurredAt = props.occurredAt;
     this.description = props.description;
     this.lines = [...props.lines]; // Immutable copy
+    this.createdAt = props.createdAt ?? new Date();
+    this.updatedAt = props.updatedAt ?? new Date();
   }
 }
 

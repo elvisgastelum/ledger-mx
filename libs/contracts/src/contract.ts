@@ -20,6 +20,17 @@ import {
   AuthSuccessResponseSchema,
   LogoutResponseSchema,
 } from "./auth";
+import {
+  AccountResponseSchema,
+  ListAccountsResponseSchema,
+  CreateAccountRequestSchema,
+  UpdateAccountRequestSchema,
+} from "./accounts/account.schemas";
+import {
+  TransactionResponseSchema,
+  ListTransactionsResponseSchema,
+  CreateTransactionRequestSchema,
+} from "./transactions/transaction.schemas";
 
 const c = initContract();
 
@@ -125,6 +136,84 @@ export const contract = c.router({
         401: ErrorResponseSchema,
         404: ErrorResponseSchema.describe("Category group not found or not owned by user") },
       summary: "Delete a category group by ID",
+      metadata: { implemented: true, auth: true, scopes: ["user:write"] },
+    },
+  }),
+
+  // ACCOUNTS ENDPOINTS (implemented)
+  accounts: c.router({
+    list: {
+      method: "GET",
+      path: "/accounts",
+      query: PaginationQuerySchema.optional(),
+      responses: {
+        200: ListAccountsResponseSchema,
+        401: ErrorResponseSchema,
+      },
+      summary: "List all accounts for the authenticated user",
+      metadata: { implemented: true, auth: true, scopes: ["user:read"] },
+    },
+    create: {
+      method: "POST",
+      path: "/accounts",
+      body: CreateAccountRequestSchema,
+      responses: {
+        201: AccountResponseSchema,
+        400: ErrorResponseSchema,
+        401: ErrorResponseSchema,
+      },
+      summary: "Create a new account for the authenticated user",
+      metadata: { implemented: true, auth: true, scopes: ["user:write"] },
+    },
+    update: {
+      method: "PATCH",
+      path: "/accounts/:id",
+      pathParams: z.object({ id: UuidSchema }),
+      body: UpdateAccountRequestSchema,
+      responses: {
+        200: AccountResponseSchema,
+        400: ErrorResponseSchema,
+        401: ErrorResponseSchema,
+        404: ErrorResponseSchema.describe("Account not found or not owned by user") },
+      summary: "Update an existing account by ID",
+      metadata: { implemented: true, auth: true, scopes: ["user:write"] },
+    },
+    archive: {
+      method: "DELETE",
+      path: "/accounts/:id",
+      pathParams: z.object({ id: UuidSchema }),
+      responses: {
+        204: c.noBody(),
+        401: ErrorResponseSchema,
+        404: ErrorResponseSchema.describe("Account not found or not owned by user") },
+      summary: "Archive an account by ID (soft delete)",
+      metadata: { implemented: true, auth: true, scopes: ["user:write"] },
+    },
+  }),
+
+  // TRANSACTIONS ENDPOINTS (implemented)
+  transactions: c.router({
+    list: {
+      method: "GET",
+      path: "/transactions",
+      query: PaginationQuerySchema.optional(),
+      responses: {
+        200: ListTransactionsResponseSchema,
+        401: ErrorResponseSchema,
+      },
+      summary: "List all transactions for the authenticated user",
+      metadata: { implemented: true, auth: true, scopes: ["user:read"] },
+    },
+    create: {
+      method: "POST",
+      path: "/transactions",
+      body: CreateTransactionRequestSchema,
+      responses: {
+        201: TransactionResponseSchema,
+        400: ErrorResponseSchema,
+        401: ErrorResponseSchema,
+      },
+      summary: "Create a new transaction (double-entry)",
       metadata: { implemented: true, auth: true, scopes: ["user:write"] },
     },
   }),

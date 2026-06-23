@@ -73,6 +73,7 @@ describe("Schema runtime validation", () => {
   describe("CreateTransactionRequestSchema", () => {
     const validLine = (overrides = {}) => ({
       id: "550e8400-e29b-41d4-a716-446655440001",
+      targetType: "account" as const,
       accountId: "660e8400-e29b-41d4-a716-446655440000",
       categoryId: null,
       envelopeId: null,
@@ -90,6 +91,7 @@ describe("Schema runtime validation", () => {
           validLine({ amountCents: -1234 }),
           validLine({
             id: "550e8400-e29b-41d4-a716-446655440002",
+            targetType: "category" as const,
             accountId: null,
             categoryId: "770e8400-e29b-41d4-a716-446655440000",
             amountCents: 1234,
@@ -98,6 +100,50 @@ describe("Schema runtime validation", () => {
       };
 
       expect(CreateTransactionRequestSchema.safeParse(validTransaction).success).toBe(true);
+    });
+
+    it("should reject transaction where lines do not sum to zero", () => {
+      const invalidTransaction = {
+        id: "550e8400-e29b-41d4-a716-446655440000",
+        transactionDate: new Date().toISOString(),
+        type: "expense" as const,
+        lines: [
+          validLine({ amountCents: -1234 }),
+          validLine({
+            id: "550e8400-e29b-41d4-a716-446655440002",
+            targetType: "category" as const,
+            accountId: null,
+            categoryId: "770e8400-e29b-41d4-a716-446655440000",
+            amountCents: 999, // Sum is -1234 + 999 = -235, not zero
+          }),
+        ],
+      };
+
+       const result = CreateTransactionRequestSchema.safeParse(invalidTransaction);
+       expect(result.success).toBe(false);
+       if (!result.success) {
+         expect(result.error.issues.some((issue) => issue.message.includes("sum to zero"))).toBe(true);
+       }
+     });
+
+    it("should reject transaction with float amounts in lines", () => {
+      const invalidTransaction = {
+        id: "550e8400-e29b-41d4-a716-446655440000",
+        transactionDate: new Date().toISOString(),
+        type: "expense" as const,
+        lines: [
+          validLine({ amountCents: -1234.50 }), // Float
+          validLine({
+            id: "550e8400-e29b-41d4-a716-446655440002",
+            targetType: "category" as const,
+            accountId: null,
+            categoryId: "770e8400-e29b-41d4-a716-446655440000",
+            amountCents: 1234.50, // Float
+          }),
+        ],
+      };
+
+      expect(CreateTransactionRequestSchema.safeParse(invalidTransaction).success).toBe(false);
     });
 
     it("should reject transaction where lines do not sum to zero", () => {
@@ -161,6 +207,7 @@ describe("Schema runtime validation", () => {
         lines: [
           {
             id: "550e8400-e29b-41d4-a716-446655440001",
+            targetType: "account" as const,
             accountId: "660e8400-e29b-41d4-a716-446655440000",
             categoryId: null,
             envelopeId: null,
@@ -169,6 +216,7 @@ describe("Schema runtime validation", () => {
           },
           {
             id: "550e8400-e29b-41d4-a716-446655440002",
+            targetType: "category" as const,
             accountId: null,
             categoryId: "770e8400-e29b-41d4-a716-446655440000",
             envelopeId: null,
@@ -186,6 +234,7 @@ describe("Schema runtime validation", () => {
         lines: [
           {
             id: "550e8400-e29b-41d4-a716-446655440001",
+            targetType: "account" as const,
             accountId: "660e8400-e29b-41d4-a716-446655440000",
             categoryId: null,
             envelopeId: null,
@@ -194,6 +243,7 @@ describe("Schema runtime validation", () => {
           },
           {
             id: "550e8400-e29b-41d4-a716-446655440002",
+            targetType: "category" as const,
             accountId: null,
             categoryId: "770e8400-e29b-41d4-a716-446655440000",
             envelopeId: null,

@@ -22,3 +22,5 @@ pnpm-debug.log*
 **/*.personal.ts
 **/*.personal.js
 
+**/test-results
+apps/web/playwright-report/

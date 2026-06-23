@@ -9,6 +9,8 @@ import {
 } from "@tanstack/react-router";
 import OnboardingWizard from "./routes/onboarding";
 import { ExportForm } from "./components/export-form";
+import AccountsPage from "./routes/accounts";
+import TransactionsPage from "./routes/transactions";
 
 // Home component for the '/' route
 function Home() {
@@ -43,8 +45,22 @@ const onboardingRoute = createRoute({
   component: OnboardingWizard,
 });
 
+// Create the accounts route ('/accounts')
+const accountsRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/accounts",
+  component: AccountsPage,
+});
+
+// Create the transactions route ('/transactions')
+const transactionsRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/transactions",
+  component: TransactionsPage,
+});
+
 // Build the route tree
-const routeTree = rootRoute.addChildren([indexRoute, onboardingRoute]);
+const routeTree = rootRoute.addChildren([indexRoute, onboardingRoute, accountsRoute, transactionsRoute]);
 
 // Create the router
 const router = createRouter({

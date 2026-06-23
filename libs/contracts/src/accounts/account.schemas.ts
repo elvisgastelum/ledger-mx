@@ -2,9 +2,9 @@ import { z } from "zod";
 import { UuidSchema, MoneySchema } from "../common.schemas";
 
 /**
- * Account type enum values
+ * Account type enum values (aligned with domain and database)
  */
-export const ACCOUNT_TYPES = ["checking", "savings", "credit", "cash", "investment"] as const;
+export const ACCOUNT_TYPES = ["debit", "credit", "loan", "savings", "cash"] as const;
 export type AccountType = (typeof ACCOUNT_TYPES)[number];
 
 /**
