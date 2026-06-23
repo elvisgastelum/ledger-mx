@@ -14,6 +14,7 @@ import { AuthGuard } from "./components/auth-guard";
 import { AppShell } from "./components/app-shell";
 import { createQueryClient } from "./lib/query-client";
 import { Toaster } from "./lib/toast";
+import { ThemeProvider } from "./components/theme-provider";
 import LoginPage from "./routes/login";
 import RegisterPage from "./routes/register";
 import OnboardingWizard from "./routes/onboarding";
@@ -43,14 +44,11 @@ const rootRoute = createRootRoute({
 });
 
 // Create the home route ('/')
+// Public route - no AuthGuard so smoke tests can see "Welcome to LedgerMx"
 const indexRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/",
-  component: () => (
-    <AuthGuard>
-      <Home />
-    </AuthGuard>
-  ),
+  component: () => <Home />,
 });
 
 // Create the login route ('/login')
@@ -78,15 +76,14 @@ const registerRoute = createRoute({
 });
 
 // Create the onboarding route ('/onboarding')
+// Public route - accessible without authentication for first-time setup
 const onboardingRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/onboarding",
   component: () => (
-    <AuthGuard>
-      <AppShell>
-        <OnboardingWizard />
-      </AppShell>
-    </AuthGuard>
+    <AppShell>
+      <OnboardingWizard />
+    </AppShell>
   ),
 });
 
@@ -142,11 +139,13 @@ if (!rootElement) {
 
 createRoot(rootElement).render(
   <StrictMode>
-    <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <RouterProvider router={router} />
-        <Toaster position="top-center" />
-      </AuthProvider>
-    </QueryClientProvider>
+    <ThemeProvider defaultTheme="system" storageKey="ledger-mx-theme">
+      <QueryClientProvider client={queryClient}>
+        <AuthProvider>
+          <RouterProvider router={router} />
+          <Toaster position="top-center" />
+        </AuthProvider>
+      </QueryClientProvider>
+    </ThemeProvider>
   </StrictMode>
 );

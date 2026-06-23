@@ -1,7 +1,21 @@
 import { useState, useEffect } from "react";
-import { useForm, useFieldArray } from "react-hook-form";
+import { useForm, useFieldArray, Controller } from "react-hook-form";
 import { useAuth } from "../lib/auth-context";
-import { LogoutButton } from "../components/logout-button";
+import { cn } from "../lib/utils";
+import { Button } from "../components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
+import { Input } from "../components/ui/input";
+import { Label } from "../components/ui/label";
+import { PageHeader } from "../components/ui/page-header";
+import { EmptyState } from "../components/ui/empty-state";
+import { LoadingState } from "../components/ui/loading-state";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../components/ui/select";
 
 interface TransactionLineFormValues {
 	id: string;
@@ -179,224 +193,304 @@ export function TransactionsPage() {
 	};
 
 	if (loading) {
-		return <div>Loading transactions...</div>;
+		return <LoadingState text="Loading transactions..." />;
 	}
 
 	return (
-		<div className="transactions-page">
-			<header>
-				<h1>Transactions</h1>
-				<div>
-					<button
-						type="button"
-						onClick={() => {
-							setShowCreateForm(!showCreateForm);
-							reset();
-						}}
-					>
-						{showCreateForm ? "Cancel" : "Create Transaction"}
-					</button>
-					<LogoutButton />
-				</div>
-			</header>
+		<div className="space-y-6">
+			<PageHeader
+				title="Transactions"
+				description="Manage your transactions"
+				action={
+					!showCreateForm
+						? {
+								label: "Create Transaction",
+								onClick: () => {
+									setShowCreateForm(true);
+									reset();
+								},
+							}
+						: undefined
+				}
+			/>
 
 			{submitError && (
-				<div className="error-message" role="alert">
+				<div className="rounded-md bg-destructive/15 p-3 text-sm text-destructive" role="alert">
 					{submitError}
 				</div>
 			)}
 
 			{showCreateForm && (
-				<form
-					onSubmit={handleSubmit(onSubmit)}
-					className="transaction-form"
-					aria-label="Create Transaction"
-				>
-					<h2>Create Transaction</h2>
-
-					<div>
-						<label htmlFor="transactionDate">Date:</label>
-						<input
-							type="date"
-							id="transactionDate"
-							disabled={isSubmitting}
-							{...register("transactionDate", { required: true })}
-						/>
-						{errors.transactionDate && (
-							<span className="error">Date is required</span>
-						)}
-					</div>
-
-					<div>
-						<label htmlFor="note">Note (optional):</label>
-						<input
-							type="text"
-							id="note"
-							disabled={isSubmitting}
-							{...register("note")}
-						/>
-					</div>
-
-					<div>
-						<label htmlFor="type">Type:</label>
-						<select
-							id="type"
-							disabled={isSubmitting}
-							{...register("type", { required: true })}
+				<Card>
+					<CardHeader>
+						<CardTitle>Create Transaction</CardTitle>
+						<CardDescription>
+							Add a new transaction with multiple lines
+						</CardDescription>
+					</CardHeader>
+					<CardContent>
+						<form
+							onSubmit={handleSubmit(onSubmit)}
+							className="space-y-4"
+							aria-label="Create Transaction"
 						>
-							<option value="income">Income</option>
-							<option value="expense">Expense</option>
-							<option value="transfer">Transfer</option>
-							<option value="adjustment">Adjustment</option>
-							<option value="reversal">Reversal</option>
-							<option value="debt_payment">Debt Payment</option>
-						</select>
-						{errors.type && <span className="error">Type is required</span>}
-					</div>
-
-					<h3>Lines (must sum to zero)</h3>
-					<fieldset>
-						<legend>
-							Transaction Lines (must sum to zero, minimum 2 lines)
-						</legend>
-						{fields.map((field, index) => (
-							<div key={field.id} className="transaction-line">
-								<div>
-									<label htmlFor={`lines.${index}.targetType`}>
-										Target Type:
-									</label>
-									<select
-										id={`lines.${index}.targetType`}
-										disabled={isSubmitting}
-										{...register(`lines.${index}.targetType` as const, {
-											required: true,
-										})}
-									>
-										<option value="account">Account</option>
-										<option value="category">Category</option>
-										<option value="envelope">Envelope</option>
-									</select>
-								</div>
-
-								{watch(`lines.${index}.targetType`) === "account" && (
-									<div>
-										<label htmlFor={`lines.${index}.accountId`}>
-											Account ID:
-										</label>
-										<input
-											type="text"
-											id={`lines.${index}.accountId`}
-											disabled={isSubmitting}
-											{...register(`lines.${index}.accountId` as const, {
-												required: true,
-											})}
-										/>
-									</div>
+							<div className="space-y-2">
+								<Label htmlFor="transactionDate">Date</Label>
+								<Input
+									id="transactionDate"
+									type="date"
+									disabled={isSubmitting}
+									error={!!errors.transactionDate}
+									{...register("transactionDate", { required: true })}
+								/>
+								{errors.transactionDate && (
+									<p className="text-sm text-destructive">Date is required</p>
 								)}
-
-								{watch(`lines.${index}.targetType`) === "category" && (
-									<div>
-										<label htmlFor={`lines.${index}.categoryId`}>
-											Category ID:
-										</label>
-										<input
-											type="text"
-											id={`lines.${index}.categoryId`}
-											disabled={isSubmitting}
-											{...register(`lines.${index}.categoryId` as const, {
-												required: true,
-											})}
-										/>
-									</div>
-								)}
-
-								{watch(`lines.${index}.targetType`) === "envelope" && (
-									<div>
-										<label htmlFor={`lines.${index}.envelopeId`}>
-											Envelope ID:
-										</label>
-										<input
-											type="text"
-											id={`lines.${index}.envelopeId`}
-											disabled={isSubmitting}
-											{...register(`lines.${index}.envelopeId` as const, {
-												required: true,
-											})}
-										/>
-									</div>
-								)}
-
-								<div>
-									<label htmlFor={`lines.${index}.amountCents`}>
-										Amount (cents, integer):
-									</label>
-									<input
-										type="number"
-										id={`lines.${index}.amountCents`}
-										disabled={isSubmitting}
-										{...register(`lines.${index}.amountCents` as const, {
-											required: true,
-											valueAsNumber: true,
-											validate: (value) =>
-												Number.isInteger(value) ||
-												"Amount must be an integer (no decimals)",
-										})}
-									/>
-									{errors.lines?.[index]?.amountCents && (
-										<span className="error">
-											{errors.lines[index]?.amountCents?.message}
-										</span>
-									)}
-								</div>
-
-								<button
-									type="button"
-									onClick={() => remove(index)}
-									disabled={isSubmitting || fields.length <= 2}
-								>
-									Remove
-								</button>
 							</div>
-						))}
-					</fieldset>
 
-					<button type="button" onClick={addLine} disabled={isSubmitting}>
-						Add Line
-					</button>
+							<div className="space-y-2">
+								<Label htmlFor="note">Note (optional)</Label>
+								<Input
+									id="note"
+									type="text"
+									disabled={isSubmitting}
+									{...register("note")}
+								/>
+							</div>
 
-					<button type="submit" disabled={isSubmitting}>
-						{isSubmitting ? "Creating..." : "Create Transaction"}
-					</button>
-				</form>
+							<div className="space-y-2">
+								<Label htmlFor="type">Type</Label>
+							<Controller
+								name="type"
+								control={control}
+								rules={{ required: true }}
+								render={({ field }) => (
+									<Select
+										onValueChange={field.onChange}
+										value={field.value}
+									>
+										<SelectTrigger id="type" aria-invalid={!!errors.type} className={errors.type ? "border-destructive" : ""}>
+											<SelectValue placeholder="Select type..." />
+										</SelectTrigger>
+											<SelectContent>
+												<SelectItem value="income">Income</SelectItem>
+												<SelectItem value="expense">Expense</SelectItem>
+												<SelectItem value="transfer">Transfer</SelectItem>
+												<SelectItem value="adjustment">Adjustment</SelectItem>
+												<SelectItem value="reversal">Reversal</SelectItem>
+												<SelectItem value="debt_payment">Debt Payment</SelectItem>
+											</SelectContent>
+										</Select>
+									)}
+								/>
+								{errors.type && (
+									<p className="text-sm text-destructive">Type is required</p>
+								)}
+							</div>
+
+							<div className="space-y-2">
+								<h3 className="text-sm font-semibold">Lines (must sum to zero)</h3>
+								<fieldset className="space-y-4">
+									<legend className="sr-only">
+										Transaction Lines (must sum to zero, minimum 2 lines)
+									</legend>
+									{fields.map((field, index) => (
+										<Card key={field.id} className="p-4">
+											<CardContent className="space-y-4 p-0">
+												<div className="space-y-2">
+													<Label htmlFor={`lines.${index}.targetType`}>Target Type</Label>
+												<Controller
+													name={`lines.${index}.targetType`}
+													control={control}
+													rules={{ required: true }}
+													render={({ field: targetField }) => (
+														<Select
+															onValueChange={targetField.onChange}
+															value={targetField.value}
+														>
+															<SelectTrigger id={`lines.${index}.targetType`} aria-invalid={!!errors.lines?.[index]?.targetType}>
+																<SelectValue placeholder="Select target type..." />
+															</SelectTrigger>
+																<SelectContent>
+																	<SelectItem value="account">Account</SelectItem>
+																	<SelectItem value="category">Category</SelectItem>
+																	<SelectItem value="envelope">Envelope</SelectItem>
+																</SelectContent>
+															</Select>
+														)}
+													/>
+												</div>
+
+												{watch(`lines.${index}.targetType`) === "account" && (
+													<div className="space-y-2">
+														<Label htmlFor={`lines.${index}.accountId`}>Account ID</Label>
+														<Input
+															id={`lines.${index}.accountId`}
+															type="text"
+															disabled={isSubmitting}
+															error={!!errors.lines?.[index]?.accountId}
+															{...register(`lines.${index}.accountId` as const, {
+																required: true,
+															})}
+														/>
+													</div>
+												)}
+
+												{watch(`lines.${index}.targetType`) === "category" && (
+													<div className="space-y-2">
+														<Label htmlFor={`lines.${index}.categoryId`}>Category ID</Label>
+														<Input
+															id={`lines.${index}.categoryId`}
+															type="text"
+															disabled={isSubmitting}
+															error={!!errors.lines?.[index]?.categoryId}
+															{...register(`lines.${index}.categoryId` as const, {
+																required: true,
+															})}
+														/>
+													</div>
+												)}
+
+												{watch(`lines.${index}.targetType`) === "envelope" && (
+													<div className="space-y-2">
+														<Label htmlFor={`lines.${index}.envelopeId`}>Envelope ID</Label>
+														<Input
+															id={`lines.${index}.envelopeId`}
+															type="text"
+															disabled={isSubmitting}
+															error={!!errors.lines?.[index]?.envelopeId}
+															{...register(`lines.${index}.envelopeId` as const, {
+																required: true,
+															})}
+														/>
+													</div>
+												)}
+
+												<div className="space-y-2">
+													<Label htmlFor={`lines.${index}.amountCents`}>
+														Amount (cents, integer)
+													</Label>
+													<Input
+														id={`lines.${index}.amountCents`}
+														type="number"
+														disabled={isSubmitting}
+														error={!!errors.lines?.[index]?.amountCents}
+														{...register(`lines.${index}.amountCents` as const, {
+															required: true,
+															valueAsNumber: true,
+															validate: (value) =>
+																Number.isInteger(value) ||
+																"Amount must be an integer (no decimals)",
+														})}
+													/>
+													{errors.lines?.[index]?.amountCents && (
+														<p className="text-sm text-destructive">
+															{errors.lines?.[index]?.amountCents?.message}
+														</p>
+													)}
+												</div>
+
+												<Button
+													type="button"
+													variant="outline"
+													onClick={() => remove(index)}
+													disabled={isSubmitting || fields.length <= 2}
+													className="w-full"
+												>
+													Remove Line
+												</Button>
+											</CardContent>
+										</Card>
+									))}
+								</fieldset>
+
+								<Button
+									type="button"
+									variant="outline"
+									onClick={addLine}
+									disabled={isSubmitting}
+									className="w-full"
+								>
+									Add Line
+								</Button>
+
+								<div className="flex gap-2">
+									<Button
+										type="button"
+										variant="outline"
+										onClick={() => {
+											setShowCreateForm(false);
+											reset();
+										}}
+										className="flex-1"
+									>
+										Cancel
+									</Button>
+									<Button type="submit" disabled={isSubmitting} className="flex-1">
+										{isSubmitting ? "Creating..." : "Create Transaction"}
+									</Button>
+								</div>
+							</div>
+						</form>
+					</CardContent>
+				</Card>
 			)}
 
-			<table>
-				<thead>
-					<tr>
-						<th>Date</th>
-						<th>Note</th>
-						<th>Type</th>
-						<th>Amount</th>
-						<th>Actions</th>
-					</tr>
-				</thead>
-				<tbody>
-					{transactions.map((tx) => (
-						<tr key={tx.id}>
-							<td>{new Date(tx.transactionDate).toLocaleDateString()}</td>
-							<td>{tx.note}</td>
-							<td>{tx.type}</td>
-							<td>{(tx.totalAmountCents / 100).toFixed(2)}</td>
-							<td>
-								<button type="button">View</button>
-							</td>
-						</tr>
-					))}
-				</tbody>
-			</table>
-
-			{transactions.length === 0 && !loading && (
-				<p>No transactions found. Create one to get started.</p>
+			{transactions.length > 0 ? (
+				<Card>
+					<CardContent className="p-0">
+						<div className="overflow-x-auto">
+							<table className="w-full" aria-label="Transactions list" data-testid="transactions-table">
+								<thead>
+									<tr className="border-b">
+										<th className="px-4 py-3 text-left text-sm font-medium">Date</th>
+										<th className="px-4 py-3 text-left text-sm font-medium">Note</th>
+										<th className="px-4 py-3 text-left text-sm font-medium">Type</th>
+										<th className="px-4 py-3 text-left text-sm font-medium">Amount</th>
+										<th className="px-4 py-3 text-left text-sm font-medium">Actions</th>
+									</tr>
+								</thead>
+								<tbody>
+									{transactions.map((tx) => (
+										<tr key={tx.id} className="border-b">
+											<td className="px-4 py-3">
+												{new Date(tx.transactionDate).toLocaleDateString()}
+											</td>
+											<td className="px-4 py-3">{tx.note}</td>
+											<td className="px-4 py-3 capitalize">{tx.type}</td>
+											<td className="px-4 py-3">
+												{(tx.totalAmountCents / 100).toFixed(2)}
+											</td>
+											<td className="px-4 py-3">
+												<Button
+													type="button"
+													variant="ghost"
+													size="sm"
+												>
+													View
+												</Button>
+											</td>
+										</tr>
+									))}
+								</tbody>
+							</table>
+						</div>
+					</CardContent>
+				</Card>
+			) : (
+				!showCreateForm && (
+					<EmptyState
+						title="No transactions found"
+						description="Create a transaction to get started with tracking your finances."
+						action={{
+							label: "Create Transaction",
+							onClick: () => {
+								setShowCreateForm(true);
+								reset();
+							},
+						}}
+					/>
+				)
 			)}
 		</div>
 	);

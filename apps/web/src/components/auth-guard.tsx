@@ -19,16 +19,16 @@ export function AuthGuard({ children }: AuthGuardProps) {
   useEffect(() => {
     // Only redirect after loading is complete and user is not authenticated
     if (!isLoading && !isAuthenticated) {
-      // Preserve current pathname as redirect query parameter
-      // Using pathname only (not search) to avoid issues with TanStack Router
-      // parsed search object serialization
-      const redirectPath = location.pathname;
+      // Capture redirect path from window.location before any navigation
+      // This avoids the issue where location.pathname may already be '/login'
+      // when using TanStack Router's useLocation()
+      const redirectPath = window.location.pathname;
       navigate({ 
         to: "/login", 
         search: { redirect: redirectPath },
       });
     }
-  }, [isLoading, isAuthenticated, navigate, location]);
+  }, [isLoading, isAuthenticated, navigate]);
 
   // Show loading state while checking authentication
   if (isLoading) {

@@ -4,7 +4,11 @@ import { useForm, type UseFormRegister } from "react-hook-form";
 import { z } from "zod";
 import { ApplyLayoutRequestSchema } from "@ledger-mx/contracts";
 import { useAuth } from "../lib/auth-context";
-import { LogoutButton } from "../components/logout-button";
+import { cn } from "../lib/utils";
+import { Button } from "../components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
+import { Label } from "../components/ui/label";
+import { PageHeader } from "../components/ui/page-header";
 
 // Helper to load persisted onboarding state from localStorage
 function loadPersistedState(): { wizardState: WizardState; selectedLayout: LayoutFormValues["selectedLayout"] } {
@@ -158,47 +162,62 @@ function OnboardingWizard() {
   // If completed, show success message
   if (wizardState.completed) {
     return (
-      <div className="onboarding-completed">
-        <h1>Setup Complete!</h1>
-        <p>Your category groups have been created.</p>
-        <button onClick={() => router.navigate({ to: "/" })}>
-          Go to Dashboard
-        </button>
-      </div>
+      <Card className="mx-auto max-w-lg">
+        <CardHeader>
+          <CardTitle>Setup Complete!</CardTitle>
+          <CardDescription>Your category groups have been created.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Button onClick={() => router.navigate({ to: "/" })} className="w-full">
+            Go to Dashboard
+          </Button>
+        </CardContent>
+      </Card>
     );
   }
 
   return (
-    <form
-      onSubmit={handleSubmit(onSubmit)}
-      className="onboarding-wizard"
-      aria-label="Onboarding Wizard"
-    >
-      <header>
-        <h1>LedgerMx Setup</h1>
-        <LogoutButton />
-        <nav aria-label="Wizard steps">
-          <ol className="step-indicator">
-            {STEPS.map((step) => (
-              <li
-                key={step.number}
-                className={
-                  wizardState.currentStep === step.number
-                    ? "active"
-                    : wizardState.currentStep > step.number
-                      ? "completed"
-                      : ""
-                }
-              >
-                <span className="step-number">{step.number}</span>
-                <span className="step-title">{step.title}</span>
-              </li>
-            ))}
-          </ol>
-        </nav>
-      </header>
+    <div className="mx-auto max-w-2xl space-y-6">
+      <PageHeader title="LedgerMx Setup" description="Configure your budget structure" />
 
-      <main>
+      {/* Step Indicator */}
+      <nav aria-label="Wizard steps" className="mb-8">
+        <ol className="flex items-center justify-between">
+          {STEPS.map((step) => (
+            <li
+              key={step.number}
+              className={cn(
+                "flex flex-col items-center",
+                wizardState.currentStep === step.number
+                  ? "text-primary"
+                  : wizardState.currentStep > step.number
+                  ? "text-success"
+                  : "text-muted-foreground"
+              )}
+            >
+              <span
+                className={cn(
+                  "flex h-10 w-10 items-center justify-center rounded-full border-2 text-sm font-semibold",
+                  wizardState.currentStep === step.number
+                    ? "border-primary bg-primary text-primary-foreground"
+                    : wizardState.currentStep > step.number
+                    ? "border-success bg-success text-success-foreground"
+                    : "border-muted"
+                )}
+              >
+                {step.number}
+              </span>
+              <span className="mt-2 text-xs">{step.title}</span>
+            </li>
+          ))}
+        </ol>
+      </nav>
+
+      <form
+        onSubmit={handleSubmit(onSubmit)}
+        className="space-y-6"
+        aria-label="Onboarding Wizard"
+      >
         {wizardState.currentStep === 1 && (
           <Step1Welcome onNext={goNext} />
         )}
@@ -221,29 +240,42 @@ function OnboardingWizard() {
             error={submitError}
           />
         )}
-      </main>
-    </form>
+      </form>
+    </div>
   );
 }
 
 // Step 1: Welcome
 function Step1Welcome({ onNext }: { onNext: () => void }) {
   return (
-    <section aria-labelledby="welcome-heading">
-      <h2 id="welcome-heading">Welcome to LedgerMx!</h2>
-      <p>
-        Let's set up your budget structure. This wizard will help you create
-        category groups for organizing your expenses.
-      </p>
-      <ul>
-        <li>Offline-first: Your data stays on your device</li>
-        <li>Double-entry: Every transaction balances</li>
-        <li>Envelopes: Allocate money to specific goals</li>
-      </ul>
-      <button type="button" onClick={onNext} aria-label="Start onboarding">
-        Get Started
-      </button>
-    </section>
+    <Card>
+      <CardHeader>
+        <CardTitle>Welcome to LedgerMx!</CardTitle>
+        <CardDescription>
+          Let's set up your budget structure. This wizard will help you create
+          category groups for organizing your expenses.
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <ul className="space-y-2">
+          <li className="flex items-center gap-2">
+            <span className="text-success">✓</span>
+            <span>Offline-first: Your data stays on your device</span>
+          </li>
+          <li className="flex items-center gap-2">
+            <span className="text-success">✓</span>
+            <span>Double-entry: Every transaction balances</span>
+          </li>
+          <li className="flex items-center gap-2">
+            <span className="text-success">✓</span>
+            <span>Envelopes: Allocate money to specific goals</span>
+          </li>
+        </ul>
+        <Button onClick={onNext} className="w-full" aria-label="Start onboarding">
+          Get Started
+        </Button>
+      </CardContent>
+    </Card>
   );
 }
 
@@ -266,54 +298,70 @@ function Step2LayoutSelection({
   };
 
   return (
-    <section aria-labelledby="layout-heading">
-      <h2 id="layout-heading">Choose Your Budget Layout</h2>
-
-      <div className="layout-options">
-        <fieldset>
-          <legend>Select a layout</legend>
-
-          <label className="layout-option">
+    <Card>
+      <CardHeader>
+        <CardTitle>Choose Your Budget Layout</CardTitle>
+        <CardDescription>
+          Select a layout that best fits your budgeting style.
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="space-y-4">
+          <label
+            className={cn(
+              "flex cursor-pointer items-start space-x-3 rounded-lg border p-4 transition-colors hover:bg-accent",
+              selectedLayout === "blank" && "border-primary bg-accent"
+            )}
+          >
             <input
               type="radio"
               value="blank"
+              className="mt-1 h-4 w-4"
               {...register("selectedLayout", { required: true })}
               aria-describedby="blank-description"
             />
-            <div>
-              <strong>Blank Layout</strong>
-              <p id="blank-description">
+            <div className="space-y-1">
+              <strong className="block">Blank Layout</strong>
+              <p id="blank-description" className="text-sm text-muted-foreground">
                 Start fresh with a single "General" group. Perfect for full
                 customization.
               </p>
             </div>
           </label>
 
-          <label className="layout-option">
+          <label
+            className={cn(
+              "flex cursor-pointer items-start space-x-3 rounded-lg border p-4 transition-colors hover:bg-accent",
+              selectedLayout === "50-30-20" && "border-primary bg-accent"
+            )}
+          >
             <input
               type="radio"
               value="50-30-20"
+              className="mt-1 h-4 w-4"
               {...register("selectedLayout", { required: true })}
               aria-describedby="503020-description"
             />
-            <div>
-              <strong>50/30/20 Layout</strong>
-              <p id="503020-description">
+            <div className="space-y-1">
+              <strong className="block">50/30/20 Layout</strong>
+              <p id="503020-description" className="text-sm text-muted-foreground">
                 Popular budgeting method: Need (50%), Want (30%), Savings (20%).
                 Great for beginners.
               </p>
             </div>
           </label>
-        </fieldset>
-      </div>
+        </div>
 
-       <div className="wizard-actions">
-         <button type="button" onClick={onBack}>Back</button>
-         <button type="button" onClick={handleContinue} disabled={!selectedLayout}>
-           Next
-         </button>
-       </div>
-    </section>
+        <div className="flex gap-2">
+          <Button type="button" variant="outline" onClick={onBack} className="flex-1">
+            Back
+          </Button>
+          <Button type="button" onClick={handleContinue} disabled={!selectedLayout} className="flex-1">
+            Next
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
   );
 }
 
@@ -326,27 +374,46 @@ function Step3IncomeGroup({
   onBack: () => void;
 }) {
   return (
-    <section aria-labelledby="income-heading">
-      <h2 id="income-heading">Income Categories</h2>
-      <p>
-        Income categories are separate from expense categories. You can create an
-        "Income" group to track different income sources like:
-      </p>
-      <ul>
-        <li>Salary</li>
-        <li>Freelance</li>
-        <li>Investments</li>
-      </ul>
-      <p>
-        You can set this up later in Settings. For now, let's continue with the
-        category groups.
-      </p>
+    <Card>
+      <CardHeader>
+        <CardTitle>Income Categories</CardTitle>
+        <CardDescription>
+          Income categories are separate from expense categories.
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <p className="text-sm text-muted-foreground">
+          You can create an "Income" group to track different income sources like:
+        </p>
+        <ul className="space-y-2">
+          <li className="flex items-center gap-2">
+            <span className="h-2 w-2 rounded-full bg-primary" />
+            <span>Salary</span>
+          </li>
+          <li className="flex items-center gap-2">
+            <span className="h-2 w-2 rounded-full bg-primary" />
+            <span>Freelance</span>
+          </li>
+          <li className="flex items-center gap-2">
+            <span className="h-2 w-2 rounded-full bg-primary" />
+            <span>Investments</span>
+          </li>
+        </ul>
+        <p className="text-sm text-muted-foreground">
+          You can set this up later in Settings. For now, let's continue with the
+          category groups.
+        </p>
 
-       <div className="wizard-actions">
-         <button type="button" onClick={onBack}>Back</button>
-         <button type="button" onClick={onNext}>Next</button>
-       </div>
-    </section>
+        <div className="flex gap-2">
+          <Button type="button" variant="outline" onClick={onBack} className="flex-1">
+            Back
+          </Button>
+          <Button type="button" onClick={onNext} className="flex-1">
+            Next
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
   );
 }
 
@@ -378,37 +445,62 @@ function Step4Summary({
         };
 
   return (
-    <section aria-labelledby="summary-heading">
-      <h2 id="summary-heading">Summary</h2>
-
-      <p>
-        You selected: <strong>{layoutInfo.name}</strong>
-      </p>
-
-      <h3>Category Groups to be created:</h3>
-      <ul>
-        {layoutInfo.groups.map((group) => (
-          <li key={group.name}>
-            <strong>{group.name}</strong>: {group.description}
-          </li>
-        ))}
-      </ul>
-
-      {error && (
-        <div className="error-message" role="alert">
-          {error}
+    <Card>
+      <CardHeader>
+        <CardTitle>Summary</CardTitle>
+        <CardDescription>
+          Review your selection before creating category groups.
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div>
+          <p className="text-sm text-muted-foreground">
+            You selected: <strong className="text-foreground">{layoutInfo.name}</strong>
+          </p>
         </div>
-      )}
 
-      <div className="wizard-actions">
-        <button type="button" onClick={onBack} disabled={isSubmitting}>
-          Back
-        </button>
-        <button type="submit" disabled={isSubmitting} aria-label="Create category groups">
-          {isSubmitting ? "Creating..." : "Create Groups"}
-        </button>
-      </div>
-    </section>
+        <div>
+          <h3 className="mb-2 text-sm font-semibold">Category Groups to be created:</h3>
+          <ul className="space-y-2">
+            {layoutInfo.groups.map((group) => (
+              <li key={group.name} className="flex items-start gap-2">
+                <span className="mt-1 h-2 w-2 rounded-full bg-primary" />
+                <div>
+                  <strong className="text-sm">{group.name}</strong>
+                  <p className="text-xs text-muted-foreground">{group.description}</p>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        {error && (
+          <div className="rounded-md bg-destructive/15 p-3 text-sm text-destructive" role="alert">
+            {error}
+          </div>
+        )}
+
+        <div className="flex gap-2">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={onBack}
+            disabled={isSubmitting}
+            className="flex-1"
+          >
+            Back
+          </Button>
+          <Button
+            type="submit"
+            disabled={isSubmitting}
+            aria-label="Create category groups"
+            className="flex-1"
+          >
+            {isSubmitting ? "Creating..." : "Create Groups"}
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
   );
 }
 

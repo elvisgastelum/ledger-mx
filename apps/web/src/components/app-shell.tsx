@@ -8,6 +8,8 @@ import { Link, useLocation } from "@tanstack/react-router";
 import { cn } from "../lib/utils";
 import { MobileNav } from "./mobile-nav";
 import { LogoutButton } from "./logout-button";
+import { ThemeToggle } from "./theme-toggle";
+import { Menu } from "lucide-react";
 
 interface AppShellProps {
   children: React.ReactNode;
@@ -36,20 +38,7 @@ export function AppShell({ children }: AppShellProps) {
             aria-label="Open navigation menu"
             aria-expanded={mobileMenuOpen}
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth={1.5}
-              stroke="currentColor"
-              className="h-6 w-6"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"
-              />
-            </svg>
+            <Menu className="h-6 w-6" />
           </button>
 
           {/* Logo - centered on mobile, left on desktop */}
@@ -78,8 +67,9 @@ export function AppShell({ children }: AppShellProps) {
             ))}
           </nav>
 
-          {/* Logout button */}
-          <div className="flex items-center">
+          {/* Logout button and theme toggle */}
+          <div className="flex items-center gap-2">
+            <ThemeToggle />
             <LogoutButton />
           </div>
         </div>

@@ -1,42 +1,77 @@
 /**
  * Tailwind CSS configuration.
  * Defines content paths and theme customizations.
+ * Uses CSS variables for theming support.
  */
 import type { Config } from "tailwindcss";
 
 const config: Config = {
+  darkMode: ["class"],
   content: ["./index.html", "./src/**/*.{ts,tsx}"],
   theme: {
     extend: {
       colors: {
-        primary: "#000000",
-        "primary-foreground": "#ffffff",
-        destructive: "#ef4444",
-        "destructive-foreground": "#ffffff",
-        background: "#ffffff",
-        foreground: "#0f172a",
-        card: "#ffffff",
-        "card-foreground": "#0f172a",
-        popover: "#ffffff",
-        "popover-foreground": "#0f172a",
-        secondary: "#f1f5f9",
-        "secondary-foreground": "#1e293b",
-        muted: "#f1f5f9",
-        "muted-foreground": "#64748b",
-        accent: "#f1f5f9",
-        "accent-foreground": "#1e293b",
-        border: "#e2e8f0",
-        input: "#e2e8f0",
-        ring: "#0f172a",
+        border: "hsl(var(--border))",
+        background: "hsl(var(--background))",
+        foreground: "hsl(var(--foreground))",
+        card: {
+          DEFAULT: "hsl(var(--card))",
+          foreground: "hsl(var(--card-foreground))",
+        },
+        popover: {
+          DEFAULT: "hsl(var(--popover))",
+          foreground: "hsl(var(--popover-foreground))",
+        },
+        primary: {
+          DEFAULT: "hsl(var(--primary))",
+          foreground: "hsl(var(--primary-foreground))",
+        },
+        secondary: {
+          DEFAULT: "hsl(var(--secondary))",
+          foreground: "hsl(var(--secondary-foreground))",
+        },
+        muted: {
+          DEFAULT: "hsl(var(--muted))",
+          foreground: "hsl(var(--muted-foreground))",
+        },
+        accent: {
+          DEFAULT: "hsl(var(--accent))",
+          foreground: "hsl(var(--accent-foreground))",
+        },
+        destructive: {
+          DEFAULT: "hsl(var(--destructive))",
+          foreground: "hsl(var(--destructive-foreground))",
+        },
+        success: {
+          DEFAULT: "hsl(var(--success))",
+          foreground: "hsl(var(--success-foreground))",
+        },
+        warning: {
+          DEFAULT: "hsl(var(--warning))",
+          foreground: "hsl(var(--warning-foreground))",
+        },
+        ring: "hsl(var(--ring))",
+        input: "hsl(var(--input))",
       },
       borderRadius: {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
       },
+      fontFamily: {
+        sans: [
+          "-apple-system",
+          "BlinkMacSystemFont",
+          '"Segoe UI"',
+          "Roboto",
+          '"Helvetica Neue"',
+          "Arial",
+          "sans-serif",
+        ],
+      },
     },
   },
-  plugins: [],
+  plugins: [require("tailwindcss-animate")],
 };
 
 export default config;

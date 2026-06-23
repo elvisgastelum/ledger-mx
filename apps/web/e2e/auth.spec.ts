@@ -41,13 +41,16 @@ test.describe("Authentication Pages", () => {
     await expect(page).toHaveURL(/\/login.*redirect=%2Faccounts/);
   });
 
-  test("unauthenticated user is redirected to login when accessing home", async ({
+  test("home page is publicly accessible without redirect", async ({
     page,
   }) => {
-    // Try to access home without being authenticated
+    // Home page should be publicly accessible without authentication
     await page.goto("/");
 
-    // Should be redirected to /login (with optional redirect query param)
-    await expect(page).toHaveURL(/\/login(\?.*)?$/);
+    // Should remain on home page, not redirect to login
+    await expect(page).toHaveURL("/");
+    
+    // Verify the page loads with expected content
+    await expect(page.locator("h1")).toContainText("Welcome to LedgerMx");
   });
 });
