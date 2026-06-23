@@ -4,23 +4,22 @@ import cookieParser from "cookie-parser";
 import { AppModule } from "./app.module";
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+	const app = await NestFactory.create(AppModule);
 
-  // Enable cookie parsing
-  app.use(cookieParser());
+	// Enable cookie parsing
+	app.use(cookieParser());
 
-  // Global prefix and URI versioning: produces /api/v1/... paths
-  app.setGlobalPrefix("api");
-  app.enableVersioning({ type: VersioningType.URI });
+	// Global prefix and URI versioning: produces /api/v1/... paths
+	app.enableVersioning({ type: VersioningType.URI });
 
-  // Auth routes use explicit ZodValidationPipe on parameters; no global validation pipe
+	// Auth routes use explicit ZodValidationPipe on parameters; no global validation pipe
 
-  const port = process.env.PORT ?? 3000;
-  await app.listen(port);
-  console.log(`API server running on http://localhost:${port}`);
+	const port = process.env.PORT ?? 3000;
+	await app.listen(port);
+	console.log(`API server running on http://localhost:${port}`);
 }
 
 bootstrap().catch((err) => {
-  console.error("Failed to start API server:", err);
-  process.exit(1);
+	console.error("Failed to start API server:", err);
+	process.exit(1);
 });

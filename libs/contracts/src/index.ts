@@ -47,6 +47,3 @@ export * from "./onboarding";
 
 // ts-rest contract (single source of truth for API shape)
 export { contract, type Contract } from "./contract";
-
-// Generated OpenAPI document (single source of truth for API documentation)
-export { openApiDocument, writeOpenApiJson } from "./openapi";
