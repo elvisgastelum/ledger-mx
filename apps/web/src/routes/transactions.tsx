@@ -1,6 +1,7 @@
 import { useState, useMemo } from "react";
-import { useForm, useFieldArray, Controller } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { tsr } from "../lib/ts-rest-client";
+import type { AccountType } from "@ledger-mx/contracts";
 import { dateInputToISOString, getTodayString } from "../lib/date-format";
 import { Button } from "../components/ui/button";
 import {
@@ -25,33 +26,15 @@ import {
 } from "../components/ui/select";
 import { WebCryptoIdGenerator } from "../lib/web-crypto-id-generator";
 
-interface TransactionLineFormValues {
-  id: string;
-  targetType: "account" | "envelope" | "category";
-  accountId: string;
-  categoryId: string;
-  envelopeId: string;
-  amountCents: number;
-  type:
-    | "income"
-    | "expense"
-    | "transfer"
-    | "adjustment"
-    | "reversal"
-    | "debt_payment";
-}
-
 interface TransactionFormValues {
   transactionDate: string;
   note: string;
-  type:
-    | "income"
-    | "expense"
-    | "transfer"
-    | "adjustment"
-    | "reversal"
-    | "debt_payment";
-  lines: TransactionLineFormValues[];
+  type: "expense" | "transfer";
+  amount: string;
+  expenseAccountId: string;
+  expenseCategoryId: string;
+  transferFromAccountId: string;
+  transferToAccountId: string;
 }
 
 interface Transaction {
@@ -71,6 +54,56 @@ interface Transaction {
   }>;
   createdAt: string;
   updatedAt: string;
+}
+
+interface Account {
+  id: string;
+  name: string;
+  type: AccountType;
+  balanceCents: number;
+  currency: string;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+function formatAccountTypeLabel(type: AccountType): string {
+  return type.charAt(0).toUpperCase() + type.slice(1);
+}
+
+function formatCentsForDisplay(balanceCents: number): string {
+  const sign = balanceCents < 0 ? "-" : "";
+  const absCents = Math.abs(balanceCents);
+  const dollars = Math.trunc(absCents / 100);
+  const cents = absCents % 100;
+  const centsStr = cents.toString().padStart(2, "0");
+  return `${sign}${dollars}.${centsStr}`;
+}
+
+function formatAccountLabel(account: Account): string {
+  const balanceDisplay = formatCentsForDisplay(account.balanceCents);
+  return `${account.name} (${formatAccountTypeLabel(account.type)}) - ${account.currency} ${balanceDisplay}`;
+}
+
+const UUID_V4_PATTERN =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+function parseMoneyAmountToCents(value: string): number | null {
+  const trimmed = value.trim();
+  if (!trimmed) return null;
+
+  // Accept only digits with optional single dot and 1-2 decimal digits
+  if (!/^\d+(\.\d{1,2})?$/.test(trimmed)) return null;
+
+  const [dollars, centsRaw] = trimmed.split(".");
+  const dollarsNum = parseInt(dollars, 10);
+  const centsPart = (centsRaw ?? "").padEnd(2, "0");
+  const centsNum = parseInt(centsPart, 10);
+
+  const totalCents = dollarsNum * 100 + centsNum;
+
+  if (totalCents <= 0) return null;
+  return totalCents;
 }
 
 export function TransactionsPage() {
@@ -93,6 +126,23 @@ export function TransactionsPage() {
   const transactions = (transactionsData?.body?.transactions ??
     []) as Transaction[];
 
+  // Fetch accounts for the account select dropdown
+  const {
+    data: accountsData,
+    isLoading: isAccountsLoading,
+    error: accountsError,
+  } = tsr.accounts.list.useQuery({
+    queryKey: ["accounts"],
+    queryData: { query: {} },
+  });
+
+  const activeAccounts = (
+    (accountsData?.body?.accounts ?? []) as Account[]
+  ).filter((account) => account.isActive === true);
+
+  const isActiveAccountId = (accountId: string) =>
+    activeAccounts.some((account) => account.id === accountId);
+
   // Use ts-rest mutation for creating transactions
   const createMutation = tsr.transactions.create.useMutation();
 
@@ -109,39 +159,126 @@ export function TransactionsPage() {
       transactionDate: getTodayString(),
       note: "",
       type: "expense",
-      lines: [
-        {
-          id: idGenerator.uuid(),
-          targetType: "account",
-          accountId: "",
-          categoryId: "",
-          envelopeId: "",
-          amountCents: 0,
-          type: "expense",
-        },
-        {
-          id: idGenerator.uuid(),
-          targetType: "account",
-          accountId: "",
-          categoryId: "",
-          envelopeId: "",
-          amountCents: 0,
-          type: "expense",
-        },
-      ],
+      amount: "",
+      expenseAccountId: "",
+      expenseCategoryId: "",
+      transferFromAccountId: "",
+      transferToAccountId: "",
     },
   });
 
-  const { fields, append, remove } = useFieldArray({
-    control,
-    name: "lines",
-  });
-
   const onSubmit = async (data: TransactionFormValues) => {
-    // Validate lines sum to zero
-    const sum = data.lines.reduce((acc, line) => acc + line.amountCents, 0);
+    setSubmitError(null);
+
+    // Parse amount
+    const amountCents = parseMoneyAmountToCents(data.amount);
+    if (amountCents === null) {
+      setError("amount", {
+        type: "manual",
+        message: "Enter a valid amount greater than zero",
+      });
+      return;
+    }
+
+    // Build exactly two lines based on type
+    const lines: Array<{
+      id: string;
+      targetType: "account" | "category";
+      accountId: string | null;
+      categoryId: string | null;
+      envelopeId: string | null;
+      amountCents: number;
+      type: "expense" | "transfer";
+    }> = [];
+
+    if (data.type === "expense") {
+      // Validate account ID is an active account
+      if (!isActiveAccountId(data.expenseAccountId)) {
+        setError("expenseAccountId", {
+          type: "manual",
+          message: "Select an active account",
+        });
+        return;
+      }
+
+      // Validate category ID is a valid UUID v4
+      if (!UUID_V4_PATTERN.test(data.expenseCategoryId)) {
+        setError("expenseCategoryId", {
+          type: "manual",
+          message: "Enter a valid category UUID",
+        });
+        return;
+      }
+
+      // Expense: account (negative) + category (positive)
+      lines.push({
+        id: idGenerator.uuid(),
+        targetType: "account",
+        accountId: data.expenseAccountId,
+        categoryId: null,
+        envelopeId: null,
+        amountCents: -amountCents,
+        type: "expense",
+      });
+      lines.push({
+        id: idGenerator.uuid(),
+        targetType: "category",
+        accountId: null,
+        categoryId: data.expenseCategoryId,
+        envelopeId: null,
+        amountCents: amountCents,
+        type: "expense",
+      });
+    } else {
+      // Validate account IDs are active accounts
+      if (!isActiveAccountId(data.transferFromAccountId)) {
+        setError("transferFromAccountId", {
+          type: "manual",
+          message: "Select an active source account",
+        });
+        return;
+      }
+      if (!isActiveAccountId(data.transferToAccountId)) {
+        setError("transferToAccountId", {
+          type: "manual",
+          message: "Select an active destination account",
+        });
+        return;
+      }
+
+      // Transfer: from account (negative) + to account (positive)
+      if (data.transferFromAccountId === data.transferToAccountId) {
+        setError("transferToAccountId", {
+          type: "manual",
+          message: "Choose a different destination account",
+        });
+        return;
+      }
+
+      lines.push({
+        id: idGenerator.uuid(),
+        targetType: "account",
+        accountId: data.transferFromAccountId,
+        categoryId: null,
+        envelopeId: null,
+        amountCents: -amountCents,
+        type: "transfer",
+      });
+      lines.push({
+        id: idGenerator.uuid(),
+        targetType: "account",
+        accountId: data.transferToAccountId,
+        categoryId: null,
+        envelopeId: null,
+        amountCents: amountCents,
+        type: "transfer",
+      });
+    }
+
+    // Defensive sum check
+    const sum = lines.reduce((acc, line) => acc + line.amountCents, 0);
     if (sum !== 0) {
-      setError("lines", {
+      setError("amount", {
         type: "manual",
         message: "Transaction lines must sum to zero",
       });
@@ -155,15 +292,7 @@ export function TransactionsPage() {
           transactionDate: dateInputToISOString(data.transactionDate),
           note: data.note || null,
           type: data.type,
-          lines: data.lines.map((line) => ({
-            id: idGenerator.uuid(),
-            targetType: line.targetType,
-            accountId: line.targetType === "account" ? line.accountId : null,
-            categoryId: line.targetType === "category" ? line.categoryId : null,
-            envelopeId: line.targetType === "envelope" ? line.envelopeId : null,
-            amountCents: line.amountCents,
-            type: data.type,
-          })),
+          lines,
         },
       });
 
@@ -182,18 +311,6 @@ export function TransactionsPage() {
         err instanceof Error ? err.message : "Failed to create transaction",
       );
     }
-  };
-
-  const addLine = () => {
-    append({
-      id: idGenerator.uuid(),
-      targetType: "account",
-      accountId: "",
-      categoryId: "",
-      envelopeId: "",
-      amountCents: 0,
-      type: watch("type"),
-    });
   };
 
   if (isLoading) {
@@ -232,7 +349,7 @@ export function TransactionsPage() {
           <CardHeader>
             <CardTitle>Create Transaction</CardTitle>
             <CardDescription>
-              Add a new transaction with multiple lines
+              Enter one amount and the app creates the balancing lines.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -289,14 +406,8 @@ export function TransactionsPage() {
                         <SelectValue placeholder="Select type..." />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="income">Income</SelectItem>
                         <SelectItem value="expense">Expense</SelectItem>
                         <SelectItem value="transfer">Transfer</SelectItem>
-                        <SelectItem value="adjustment">Adjustment</SelectItem>
-                        <SelectItem value="reversal">Reversal</SelectItem>
-                        <SelectItem value="debt_payment">
-                          Debt Payment
-                        </SelectItem>
                       </SelectContent>
                     </Select>
                   )}
@@ -307,184 +418,258 @@ export function TransactionsPage() {
               </div>
 
               <div className="space-y-2">
-                <h3 className="text-sm font-semibold">
-                  Lines (must sum to zero)
-                </h3>
-                <fieldset className="space-y-4">
-                  <legend className="sr-only">
-                    Transaction Lines (must sum to zero, minimum 2 lines)
-                  </legend>
-                  {fields.map((field, index) => (
-                    <Card key={field.id} className="p-4">
-                      <CardContent className="space-y-4 p-0">
-                        <div className="space-y-2">
-                          <Label htmlFor={`lines.${index}.targetType`}>
-                            Target Type
-                          </Label>
-                          <Controller
-                            name={`lines.${index}.targetType`}
-                            control={control}
-                            rules={{ required: true }}
-                            render={({ field: targetField }) => (
-                              <Select
-                                onValueChange={targetField.onChange}
-                                value={targetField.value}
-                              >
-                                <SelectTrigger
-                                  id={`lines.${index}.targetType`}
-                                  aria-invalid={
-                                    !!errors.lines?.[index]?.targetType
-                                  }
-                                >
-                                  <SelectValue placeholder="Select target type..." />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  <SelectItem value="account">
-                                    Account
-                                  </SelectItem>
-                                  <SelectItem value="category">
-                                    Category
-                                  </SelectItem>
-                                  <SelectItem value="envelope">
-                                    Envelope
-                                  </SelectItem>
-                                </SelectContent>
-                              </Select>
-                            )}
-                          />
-                        </div>
+                <Label htmlFor="amount">Amount</Label>
+                <Input
+                  id="amount"
+                  type="text"
+                  inputMode="decimal"
+                  placeholder="123.45"
+                  disabled={isSubmitting}
+                  {...register("amount", {
+                    required: "Amount is required",
+                    validate: (value) => {
+                      const cents = parseMoneyAmountToCents(value);
+                      return (
+                        cents !== null ||
+                        "Enter a valid amount greater than zero"
+                      );
+                    },
+                  })}
+                />
+                {errors.amount && (
+                  <p className="text-sm text-destructive">
+                    {errors.amount.message}
+                  </p>
+                )}
+              </div>
 
-                        {watch(`lines.${index}.targetType`) === "account" && (
-                          <div className="space-y-2">
-                            <Label htmlFor={`lines.${index}.accountId`}>
-                              Account ID
-                            </Label>
-                            <Input
-                              id={`lines.${index}.accountId`}
-                              type="text"
-                              disabled={isSubmitting}
-                              error={!!errors.lines?.[index]?.accountId}
-                              {...register(
-                                `lines.${index}.accountId` as const,
-                                {
-                                  required: true,
-                                },
-                              )}
-                            />
-                          </div>
+              {watch("type") === "expense" && (
+                <>
+                  <div className="space-y-2">
+                    <Label htmlFor="expenseAccountId">Account</Label>
+                    {accountsError ? (
+                      <p className="text-sm text-destructive py-2">
+                        Failed to load accounts. Please try again.
+                      </p>
+                    ) : isAccountsLoading ? (
+                      <p className="text-sm text-muted-foreground py-2">
+                        Loading accounts…
+                      </p>
+                    ) : activeAccounts.length === 0 ? (
+                      <p className="text-sm text-muted-foreground py-2">
+                        No active accounts found. Create or activate an account
+                        first.
+                      </p>
+                    ) : (
+                      <Controller
+                        control={control}
+                        name="expenseAccountId"
+                        rules={{ required: "Select an account" }}
+                        render={({ field }) => (
+                          <Select
+                            value={field.value}
+                            onValueChange={field.onChange}
+                            disabled={isSubmitting || !!accountsError}
+                          >
+                            <SelectTrigger
+                              id="expenseAccountId"
+                              aria-invalid={!!errors.expenseAccountId}
+                              className={
+                                errors.expenseAccountId
+                                  ? "border-destructive"
+                                  : ""
+                              }
+                            >
+                              <SelectValue placeholder="Choose an active account" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {activeAccounts.map((account) => (
+                                <SelectItem key={account.id} value={account.id}>
+                                  {formatAccountLabel(account)}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
                         )}
+                      />
+                    )}
+                    {errors.expenseAccountId && (
+                      <p className="text-sm text-destructive">
+                        {errors.expenseAccountId.message ||
+                          "Account is required"}
+                      </p>
+                    )}
+                  </div>
 
-                        {watch(`lines.${index}.targetType`) === "category" && (
-                          <div className="space-y-2">
-                            <Label htmlFor={`lines.${index}.categoryId`}>
-                              Category ID
-                            </Label>
-                            <Input
-                              id={`lines.${index}.categoryId`}
-                              type="text"
-                              disabled={isSubmitting}
-                              error={!!errors.lines?.[index]?.categoryId}
-                              {...register(
-                                `lines.${index}.categoryId` as const,
-                                {
-                                  required: true,
-                                },
-                              )}
-                            />
-                          </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="expenseCategoryId">
+                      Expense category ID
+                    </Label>
+                    <Input
+                      id="expenseCategoryId"
+                      type="text"
+                      disabled={isSubmitting}
+                      {...register("expenseCategoryId", {
+                        required: "Category ID is required",
+                        pattern: {
+                          value: UUID_V4_PATTERN,
+                          message: "Enter a valid category UUID",
+                        },
+                      })}
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      Temporary: categories do not yet have a selectable API in
+                      the web client.
+                    </p>
+                    {errors.expenseCategoryId && (
+                      <p className="text-sm text-destructive">
+                        {errors.expenseCategoryId.message}
+                      </p>
+                    )}
+                  </div>
+                </>
+              )}
+
+              {watch("type") === "transfer" && (
+                <>
+                  <div className="space-y-2">
+                    <Label htmlFor="transferFromAccountId">From account</Label>
+                    {accountsError ? (
+                      <p className="text-sm text-destructive py-2">
+                        Failed to load accounts. Please try again.
+                      </p>
+                    ) : isAccountsLoading ? (
+                      <p className="text-sm text-muted-foreground py-2">
+                        Loading accounts…
+                      </p>
+                    ) : activeAccounts.length === 0 ? (
+                      <p className="text-sm text-muted-foreground py-2">
+                        No active accounts found. Create or activate an account
+                        first.
+                      </p>
+                    ) : (
+                      <Controller
+                        control={control}
+                        name="transferFromAccountId"
+                        rules={{ required: "Select a source account" }}
+                        render={({ field }) => (
+                          <Select
+                            value={field.value}
+                            onValueChange={field.onChange}
+                            disabled={isSubmitting || !!accountsError}
+                          >
+                            <SelectTrigger
+                              id="transferFromAccountId"
+                              aria-invalid={!!errors.transferFromAccountId}
+                              className={
+                                errors.transferFromAccountId
+                                  ? "border-destructive"
+                                  : ""
+                              }
+                            >
+                              <SelectValue placeholder="Choose source account" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {activeAccounts.map((account) => (
+                                <SelectItem key={account.id} value={account.id}>
+                                  {formatAccountLabel(account)}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
                         )}
+                      />
+                    )}
+                    {errors.transferFromAccountId && (
+                      <p className="text-sm text-destructive">
+                        {errors.transferFromAccountId.message ||
+                          "Source account is required"}
+                      </p>
+                    )}
+                  </div>
 
-                        {watch(`lines.${index}.targetType`) === "envelope" && (
-                          <div className="space-y-2">
-                            <Label htmlFor={`lines.${index}.envelopeId`}>
-                              Envelope ID
-                            </Label>
-                            <Input
-                              id={`lines.${index}.envelopeId`}
-                              type="text"
-                              disabled={isSubmitting}
-                              error={!!errors.lines?.[index]?.envelopeId}
-                              {...register(
-                                `lines.${index}.envelopeId` as const,
-                                {
-                                  required: true,
-                                },
-                              )}
-                            />
-                          </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="transferToAccountId">To account</Label>
+                    {accountsError ? (
+                      <p className="text-sm text-destructive py-2">
+                        Failed to load accounts. Please try again.
+                      </p>
+                    ) : isAccountsLoading ? (
+                      <p className="text-sm text-muted-foreground py-2">
+                        Loading accounts…
+                      </p>
+                    ) : activeAccounts.length === 0 ? (
+                      <p className="text-sm text-muted-foreground py-2">
+                        No active accounts found. Create or activate an account
+                        first.
+                      </p>
+                    ) : (
+                      <Controller
+                        control={control}
+                        name="transferToAccountId"
+                        rules={{
+                          required: "Select a destination account",
+                          validate: (value) =>
+                            value !== watch("transferFromAccountId") ||
+                            "Choose a different destination account",
+                        }}
+                        render={({ field }) => (
+                          <Select
+                            value={field.value}
+                            onValueChange={field.onChange}
+                            disabled={isSubmitting || !!accountsError}
+                          >
+                            <SelectTrigger
+                              id="transferToAccountId"
+                              aria-invalid={!!errors.transferToAccountId}
+                              className={
+                                errors.transferToAccountId
+                                  ? "border-destructive"
+                                  : ""
+                              }
+                            >
+                              <SelectValue placeholder="Choose destination account" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {activeAccounts.map((account) => (
+                                <SelectItem key={account.id} value={account.id}>
+                                  {formatAccountLabel(account)}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
                         )}
+                      />
+                    )}
+                    {errors.transferToAccountId && (
+                      <p className="text-sm text-destructive">
+                        {errors.transferToAccountId.message ||
+                          "Destination account is required"}
+                      </p>
+                    )}
+                  </div>
+                </>
+              )}
 
-                        <div className="space-y-2">
-                          <Label htmlFor={`lines.${index}.amountCents`}>
-                            Amount (cents, integer)
-                          </Label>
-                          <Input
-                            id={`lines.${index}.amountCents`}
-                            type="number"
-                            disabled={isSubmitting}
-                            error={!!errors.lines?.[index]?.amountCents}
-                            {...register(
-                              `lines.${index}.amountCents` as const,
-                              {
-                                required: true,
-                                valueAsNumber: true,
-                                validate: (value) =>
-                                  Number.isInteger(value) ||
-                                  "Amount must be an integer (no decimals)",
-                              },
-                            )}
-                          />
-                          {errors.lines?.[index]?.amountCents && (
-                            <p className="text-sm text-destructive">
-                              {errors.lines?.[index]?.amountCents?.message}
-                            </p>
-                          )}
-                        </div>
-
-                        <Button
-                          type="button"
-                          variant="outline"
-                          onClick={() => remove(index)}
-                          disabled={isSubmitting || fields.length <= 2}
-                          className="w-full"
-                        >
-                          Remove Line
-                        </Button>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </fieldset>
-
+              <div className="flex gap-2">
                 <Button
                   type="button"
                   variant="outline"
-                  onClick={addLine}
-                  disabled={isSubmitting}
-                  className="w-full"
+                  onClick={() => {
+                    setShowCreateForm(false);
+                    reset();
+                  }}
+                  className="flex-1"
                 >
-                  Add Line
+                  Cancel
                 </Button>
-
-                <div className="flex gap-2">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => {
-                      setShowCreateForm(false);
-                      reset();
-                    }}
-                    className="flex-1"
-                  >
-                    Cancel
-                  </Button>
-                  <Button
-                    type="submit"
-                    disabled={isSubmitting}
-                    className="flex-1"
-                  >
-                    {isSubmitting ? "Creating..." : "Create Transaction"}
-                  </Button>
-                </div>
+                <Button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="flex-1"
+                >
+                  {isSubmitting ? "Creating..." : "Create Transaction"}
+                </Button>
               </div>
             </form>
           </CardContent>
