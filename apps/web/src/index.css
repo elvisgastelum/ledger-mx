@@ -122,15 +122,17 @@ body {
 }
 
 /* Touch target helpers - 44px minimum for all interactive elements */
-button,
-[type="button"],
-[type="reset"],
-[type="submit"],
-[role="button"],
-input:not([type="hidden"]),
-select,
-textarea {
-  min-height: 44px;
+@layer base {
+  button,
+  [type="button"],
+  [type="reset"],
+  [type="submit"],
+  [role="button"],
+  input:not([type="hidden"]),
+  select,
+  textarea {
+    min-height: 44px;
+  }
 }
 
 /* Custom component styles */

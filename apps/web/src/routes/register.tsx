@@ -5,11 +5,12 @@
  */
 import { useEffect } from "react";
 import { useNavigate, useSearch } from "@tanstack/react-router";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { useAuth } from "../lib/auth-context";
 import { getSafeRedirect } from "../lib/auth-utils";
 import { Button } from "../components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
 
@@ -30,6 +31,7 @@ export function RegisterPage() {
     register,
     handleSubmit,
     watch,
+    control,
     setError,
     formState: { errors, isSubmitting },
   } = useForm<RegisterFormValues>({
@@ -185,15 +187,22 @@ export function RegisterPage() {
               )}
             </div>
 
-            <label className="flex min-h-[44px] items-center space-x-2 cursor-pointer">
-              <input
-                type="checkbox"
-                disabled={isSubmitting}
-                className="h-4 w-4 rounded border-input"
-                {...register("rememberMe")}
-              />
-              <span className="text-sm">Remember me (extends session to 30 days)</span>
-            </label>
+            <Controller
+              name="rememberMe"
+              control={control}
+              render={({ field }) => (
+                <label htmlFor="rememberMe" className="flex min-h-[44px] items-center space-x-2 cursor-pointer">
+                  <Checkbox
+                    id="rememberMe"
+                    checked={field.value === true}
+                    onCheckedChange={(checked) => field.onChange(checked === true)}
+                    disabled={isSubmitting}
+                    aria-invalid={!!errors.rememberMe}
+                  />
+                  <span className="text-sm">Remember me (extends session to 30 days)</span>
+                </label>
+              )}
+            />
 
             <Button type="submit" disabled={isSubmitting} className="w-full">
               {isSubmitting ? "Creating account..." : "Create Account"}

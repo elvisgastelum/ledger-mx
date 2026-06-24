@@ -8,7 +8,8 @@
     "jsx": "react-jsx",
     "lib": ["ES2020", "DOM", "DOM.Iterable"],
     "target": "ES2020",
-    "moduleDetection": "force"
+    "moduleDetection": "force",
+    "paths": { "@/*": ["./src/*"] }
   },
   "include": ["src/**/*.tsx", "src/**/*.ts"],
   "exclude": [
