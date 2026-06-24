@@ -1,51 +1,50 @@
 /**
- * API client for authentication endpoints.
- * All fetches use credentials: 'include' for httpOnly cookie support.
+ * API client for authentication endpoints using @ts-rest/core.
+ * All requests use credentials: 'include' for httpOnly cookie support.
  * Refresh deduplication is handled in AuthContext using useRef.
  */
 import type {
-  RegisterRequest,
-  LoginRequest,
-  AuthSuccessResponse,
-  LogoutResponse,
-  ErrorResponse,
+	AuthSuccessResponse,
+	LoginRequest,
+	LogoutResponse,
+	RegisterRequest,
 } from "@ledger-mx/contracts";
+import { contract } from "@ledger-mx/contracts";
+import { initClient } from "@ts-rest/core";
 
-const API_BASE = "/api/v1/auth";
+const baseUrl = import.meta.env.VITE_API_BASE_URL;
 
 /**
- * Parses error response from API and returns a useful error message.
+ * Creates a ts-rest client for auth endpoints with credentials: 'include'.
  */
-async function parseError(response: Response): Promise<string> {
-  try {
-    const data: ErrorResponse = await response.json();
-    return data.message || `Request failed with status ${response.status}`;
-  } catch {
-    return `Request failed with status ${response.status}`;
-  }
-}
+const authClient = initClient(contract, {
+	baseUrl,
+	baseHeaders: {},
+	credentials: "include" as RequestCredentials,
+});
 
 /**
  * Registers a new user.
  * POST /api/v1/auth/register
  */
 export async function registerApi(
-  data: RegisterRequest,
+	data: RegisterRequest,
 ): Promise<AuthSuccessResponse> {
-  const response = await fetch(`${API_BASE}/register`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(data),
-    credentials: "include",
-  });
+	const result = await authClient.auth.register({ body: data });
 
-  if (!response.ok) {
-    throw new Error(await parseError(response));
-  }
+	if (result.status === 201) {
+		return result.body;
+	}
 
-  return response.json();
+	if (result.status === 400 || result.status === 409) {
+		const body = result.body;
+
+		throw new Error(
+			body?.message || `Request failed with status ${result.status}`,
+		);
+	}
+
+	throw new Error(`Request failed with status ${result.status}`);
 }
 
 /**
@@ -53,22 +52,22 @@ export async function registerApi(
  * POST /api/v1/auth/login
  */
 export async function loginApi(
-  data: LoginRequest,
+	data: LoginRequest,
 ): Promise<AuthSuccessResponse> {
-  const response = await fetch(`${API_BASE}/login`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(data),
-    credentials: "include",
-  });
+	const result = await authClient.auth.login({ body: data });
 
-  if (!response.ok) {
-    throw new Error(await parseError(response));
-  }
+	if (result.status === 200) {
+		return result.body;
+	}
 
-  return response.json();
+	if (result.status === 400 || result.status === 401) {
+		const body = result.body;
+		throw new Error(
+			body?.message || `Request failed with status ${result.status}`,
+		);
+	}
+
+	throw new Error(`Request failed with status ${result.status}`);
 }
 
 /**
@@ -77,19 +76,20 @@ export async function loginApi(
  * Note: Deduplication is now handled in AuthContext with useRef.
  */
 export async function refreshApi(): Promise<AuthSuccessResponse> {
-  const response = await fetch(`${API_BASE}/refresh`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    credentials: "include",
-  });
+	const result = await authClient.auth.refresh();
 
-  if (!response.ok) {
-    throw new Error(await parseError(response));
-  }
+	if (result.status === 200) {
+		return result.body;
+	}
 
-  return response.json();
+	if (result.status === 401) {
+		const body = result.body;
+		throw new Error(
+			body?.message || `Request failed with status ${result.status}`,
+		);
+	}
+
+	throw new Error(`Request failed with status ${result.status}`);
 }
 
 /**
@@ -97,17 +97,18 @@ export async function refreshApi(): Promise<AuthSuccessResponse> {
  * POST /api/v1/auth/logout
  */
 export async function logoutApi(): Promise<LogoutResponse> {
-  const response = await fetch(`${API_BASE}/logout`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    credentials: "include",
-  });
+	const result = await authClient.auth.logout();
 
-  if (!response.ok) {
-    throw new Error(await parseError(response));
-  }
+	if (result.status === 200) {
+		return result.body;
+	}
 
-  return response.json();
+	if (result.status === 401) {
+		const body = result.body;
+		throw new Error(
+			body?.message || `Request failed with status ${result.status}`,
+		);
+	}
+
+	throw new Error(`Request failed with status ${result.status}`);
 }

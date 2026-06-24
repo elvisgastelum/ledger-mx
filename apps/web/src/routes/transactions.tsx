@@ -1,6 +1,6 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useMemo } from "react";
 import { useForm, useFieldArray, Controller } from "react-hook-form";
-import { useAuth } from "../lib/auth-context";
+import { tsr } from "../lib/ts-rest-client";
 import { dateInputToISOString, getTodayString } from "../lib/date-format";
 import { Button } from "../components/ui/button";
 import {
@@ -32,13 +32,25 @@ interface TransactionLineFormValues {
   categoryId: string;
   envelopeId: string;
   amountCents: number;
-  type: string;
+  type:
+    | "income"
+    | "expense"
+    | "transfer"
+    | "adjustment"
+    | "reversal"
+    | "debt_payment";
 }
 
 interface TransactionFormValues {
   transactionDate: string;
   note: string;
-  type: string;
+  type:
+    | "income"
+    | "expense"
+    | "transfer"
+    | "adjustment"
+    | "reversal"
+    | "debt_payment";
   lines: TransactionLineFormValues[];
 }
 
@@ -62,13 +74,27 @@ interface Transaction {
 }
 
 export function TransactionsPage() {
-  const [transactions, setTransactions] = useState<Transaction[]>([]);
-  const [loading, setLoading] = useState(true);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [showCreateForm, setShowCreateForm] = useState(false);
 
-  const { authFetch } = useAuth();
   const idGenerator = useMemo(() => new WebCryptoIdGenerator(), []);
+
+  // Use ts-rest query for loading transactions
+  const {
+    data: transactionsData,
+    isLoading,
+    error: queryError,
+    refetch,
+  } = tsr.transactions.list.useQuery({
+    queryKey: ["transactions"],
+    queryData: { query: {} },
+  });
+
+  const transactions = (transactionsData?.body?.transactions ??
+    []) as Transaction[];
+
+  // Use ts-rest mutation for creating transactions
+  const createMutation = tsr.transactions.create.useMutation();
 
   const {
     register,
@@ -77,7 +103,6 @@ export function TransactionsPage() {
     formState: { errors, isSubmitting },
     watch,
     setError,
-    clearErrors,
     reset,
   } = useForm<TransactionFormValues>({
     defaultValues: {
@@ -112,35 +137,6 @@ export function TransactionsPage() {
     name: "lines",
   });
 
-  // Load transactions using authFetch
-  const loadTransactions = async () => {
-    setLoading(true);
-    clearErrors();
-
-    try {
-      const response = await authFetch("/api/v1/transactions", {
-        method: "GET",
-      });
-
-      if (!response.ok) {
-        throw new Error(`Failed to load transactions: ${response.status}`);
-      }
-
-      const data = await response.json();
-      setTransactions(data.transactions ?? []);
-    } catch (err: unknown) {
-      setSubmitError(
-        err instanceof Error ? err.message : "Failed to load transactions",
-      );
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    loadTransactions();
-  }, []);
-
   const onSubmit = async (data: TransactionFormValues) => {
     // Validate lines sum to zero
     const sum = data.lines.reduce((acc, line) => acc + line.amountCents, 0);
@@ -153,9 +149,8 @@ export function TransactionsPage() {
     }
 
     try {
-      const response = await authFetch("/api/v1/transactions", {
-        method: "POST",
-        body: JSON.stringify({
+      const result = await createMutation.mutateAsync({
+        body: {
           id: idGenerator.uuid(),
           transactionDate: dateInputToISOString(data.transactionDate),
           note: data.note || null,
@@ -169,20 +164,19 @@ export function TransactionsPage() {
             amountCents: line.amountCents,
             type: data.type,
           })),
-        }),
+        },
       });
 
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => null);
+      if (result.status !== 201) {
+        const body = result.body as { message?: string };
         throw new Error(
-          errorData?.message ||
-            `Failed to create transaction: ${response.status}`,
+          body?.message || `Failed to create transaction: ${result.status}`,
         );
       }
 
       setShowCreateForm(false);
       reset();
-      loadTransactions();
+      refetch();
     } catch (err: unknown) {
       setSubmitError(
         err instanceof Error ? err.message : "Failed to create transaction",
@@ -202,7 +196,7 @@ export function TransactionsPage() {
     });
   };
 
-  if (loading) {
+  if (isLoading) {
     return <LoadingState text="Loading transactions..." />;
   }
 
@@ -224,12 +218,12 @@ export function TransactionsPage() {
         }
       />
 
-      {submitError && (
+      {(submitError || queryError) && (
         <div
           className="rounded-md bg-destructive/15 p-3 text-sm text-destructive"
           role="alert"
         >
-          {submitError}
+          {submitError || (queryError as Error)?.message || "An error occurred"}
         </div>
       )}
 
@@ -526,7 +520,7 @@ export function TransactionsPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {transactions.map((tx) => (
+                  {transactions.map((tx: Transaction) => (
                     <tr key={tx.id} className="border-b">
                       <td className="px-4 py-3">
                         {new Date(tx.transactionDate).toLocaleDateString()}

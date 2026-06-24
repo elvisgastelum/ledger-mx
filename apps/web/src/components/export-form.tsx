@@ -1,6 +1,6 @@
 import { useForm, Controller } from "react-hook-form";
-import { useAuth } from "../lib/auth-context";
 import { dateInputToISOString } from "../lib/date-format";
+import { contractClient, extractFilename } from "../lib/ts-rest-client";
 import { DatePicker } from "./ui/date-picker";
 
 interface ExportFormValues {
@@ -13,7 +13,6 @@ interface ExportFormValues {
  * Allows users to download transactions as CSV with optional date range.
  */
 export function ExportForm() {
-  const { authFetch } = useAuth();
   const {
     handleSubmit,
     control,
@@ -24,49 +23,35 @@ export function ExportForm() {
 
   const onSubmit = async (data: ExportFormValues) => {
     try {
-      // Build query string
-      const params = new URLSearchParams();
+      // Build query parameters
+      const query: Record<string, string> = {};
       if (data.startDate) {
-        params.append("startDate", dateInputToISOString(data.startDate));
+        query.startDate = dateInputToISOString(data.startDate);
       }
       if (data.endDate) {
-        params.append("endDate", dateInputToISOString(data.endDate));
+        query.endDate = dateInputToISOString(data.endDate);
       }
 
-      const queryString = params.toString();
-      const url = `/api/v1/export/csv${queryString ? `?${queryString}` : ""}`;
-
-      // Fetch the CSV file using authFetch
-      const response = await authFetch(url, {
-        method: "GET",
-        headers: {
-          Accept: "text/csv",
-        },
+      // Call API using contractClient
+      const result = await contractClient.export.downloadCsv({
+        query,
       });
 
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => null);
-        throw new Error(
-          errorData?.message || `Export failed: ${response.status}`,
-        );
+      if (result.status !== 200) {
+        const body = result.body as { message?: string };
+        throw new Error(body?.message || `Export failed: ${result.status}`);
       }
 
-      // Get the CSV content
-      const csvContent = await response.text();
+      // Get the CSV content (should be a string for CSV)
+      const csvContent = result.body as string;
 
       // Create a blob and download
       const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
       const downloadUrl = URL.createObjectURL(blob);
 
       // Get filename from Content-Disposition header or use default
-      const contentDisposition = response.headers.get("Content-Disposition");
-      let filename = "transactions.csv";
-      if (contentDisposition) {
-        const filenameMatch = contentDisposition.match(/filename="?(.+?)"?$/);
-        if (filenameMatch) {
-          filename = filenameMatch[1] ?? "transactions.csv";
-        }
-      }
+      const contentDisposition = result.headers.get("Content-Disposition");
+      const filename = extractFilename(contentDisposition);
 
       // Trigger download
       const link = document.createElement("a");

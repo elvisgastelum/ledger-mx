@@ -25,6 +25,11 @@ export const envSchema = z.object({
   AUTH_REFRESH_COOKIE_SAME_SITE: z
     .enum(["strict", "lax", "none"])
     .default("lax"),
+
+  CORS_ORIGIN: z
+    .string()
+    .url({ message: "CORS_ORIGIN must be a valid URL" })
+    .default("http://localhost:5173"),
 });
 
 export type EnvConfig = z.infer<typeof envSchema>;

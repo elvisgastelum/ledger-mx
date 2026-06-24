@@ -3,15 +3,23 @@ import { useState, useEffect, useRef } from "react";
 import { useForm, type UseFormRegister } from "react-hook-form";
 import { z } from "zod";
 import { ApplyLayoutRequestSchema } from "@ledger-mx/contracts";
-import { useAuth } from "../lib/auth-context";
+import { tsr } from "../lib/ts-rest-client";
 import { cn } from "../lib/utils";
 import { Button } from "../components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
-import { Label } from "../components/ui/label";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "../components/ui/card";
 import { PageHeader } from "../components/ui/page-header";
 
 // Helper to load persisted onboarding state from localStorage
-function loadPersistedState(): { wizardState: WizardState; selectedLayout: LayoutFormValues["selectedLayout"] } {
+function loadPersistedState(): {
+  wizardState: WizardState;
+  selectedLayout: LayoutFormValues["selectedLayout"];
+} {
   const saved = localStorage.getItem(WIZARD_STORAGE_KEY);
   if (saved) {
     try {
@@ -56,15 +64,19 @@ const STEPS: { number: WizardStep; title: string }[] = [
 
 function OnboardingWizard() {
   const router = useRouter();
-  const { authFetch } = useAuth();
 
   // Load persisted state ONCE using useRef to avoid calling loadPersistedState on every render
-  const initialPersistedState = useRef<{ wizardState: WizardState; selectedLayout: LayoutFormValues["selectedLayout"] } | null>(null);
+  const initialPersistedState = useRef<{
+    wizardState: WizardState;
+    selectedLayout: LayoutFormValues["selectedLayout"];
+  } | null>(null);
   if (initialPersistedState.current === null) {
     initialPersistedState.current = loadPersistedState();
   }
 
-  const [wizardState, setWizardState] = useState<WizardState>(initialPersistedState.current.wizardState);
+  const [wizardState, setWizardState] = useState<WizardState>(
+    initialPersistedState.current.wizardState,
+  );
 
   const [submitError, setSubmitError] = useState<string | null>(null);
 
@@ -83,6 +95,9 @@ function OnboardingWizard() {
   });
 
   const selectedLayout = watch("selectedLayout");
+
+  // Use ts-rest mutation for applying layout
+  const applyLayoutMutation = tsr.onboarding.applyLayout.useMutation();
 
   // Persist wizard state and selectedLayout to localStorage (skip if submit was successful)
   useEffect(() => {
@@ -124,16 +139,15 @@ function OnboardingWizard() {
         layout: data.selectedLayout,
       });
 
-      // Call API using authFetch
-      const response = await authFetch("/api/v1/onboarding/layout", {
-        method: "POST",
-        body: JSON.stringify(validated),
+      // Call API using ts-rest mutation
+      const result = await applyLayoutMutation.mutateAsync({
+        body: validated,
       });
 
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => null);
+      if (result.status !== 200) {
+        const body = result.body as { message?: string };
         throw new Error(
-          errorData?.message || `Failed to apply layout: ${response.status}`,
+          body?.message || `Failed to apply layout: ${result.status}`,
         );
       }
 
@@ -165,10 +179,15 @@ function OnboardingWizard() {
       <Card className="mx-auto max-w-lg">
         <CardHeader>
           <CardTitle>Setup Complete!</CardTitle>
-          <CardDescription>Your category groups have been created.</CardDescription>
+          <CardDescription>
+            Your category groups have been created.
+          </CardDescription>
         </CardHeader>
         <CardContent>
-          <Button onClick={() => router.navigate({ to: "/" })} className="w-full">
+          <Button
+            onClick={() => router.navigate({ to: "/" })}
+            className="w-full"
+          >
             Go to Dashboard
           </Button>
         </CardContent>
@@ -178,7 +197,10 @@ function OnboardingWizard() {
 
   return (
     <div className="mx-auto max-w-2xl space-y-6">
-      <PageHeader title="LedgerMx Setup" description="Configure your budget structure" />
+      <PageHeader
+        title="LedgerMx Setup"
+        description="Configure your budget structure"
+      />
 
       {/* Step Indicator */}
       <nav aria-label="Wizard steps" className="mb-8">
@@ -191,8 +213,8 @@ function OnboardingWizard() {
                 wizardState.currentStep === step.number
                   ? "text-primary"
                   : wizardState.currentStep > step.number
-                  ? "text-success"
-                  : "text-muted-foreground"
+                    ? "text-success"
+                    : "text-muted-foreground",
               )}
             >
               <span
@@ -201,8 +223,8 @@ function OnboardingWizard() {
                   wizardState.currentStep === step.number
                     ? "border-primary bg-primary text-primary-foreground"
                     : wizardState.currentStep > step.number
-                    ? "border-success bg-success text-success-foreground"
-                    : "border-muted"
+                      ? "border-success bg-success text-success-foreground"
+                      : "border-muted",
                 )}
               >
                 {step.number}
@@ -218,9 +240,7 @@ function OnboardingWizard() {
         className="space-y-6"
         aria-label="Onboarding Wizard"
       >
-        {wizardState.currentStep === 1 && (
-          <Step1Welcome onNext={goNext} />
-        )}
+        {wizardState.currentStep === 1 && <Step1Welcome onNext={goNext} />}
         {wizardState.currentStep === 2 && (
           <Step2LayoutSelection
             register={register}
@@ -271,7 +291,11 @@ function Step1Welcome({ onNext }: { onNext: () => void }) {
             <span>Envelopes: Allocate money to specific goals</span>
           </li>
         </ul>
-        <Button onClick={onNext} className="w-full" aria-label="Start onboarding">
+        <Button
+          onClick={onNext}
+          className="w-full"
+          aria-label="Start onboarding"
+        >
           Get Started
         </Button>
       </CardContent>
@@ -310,7 +334,7 @@ function Step2LayoutSelection({
           <label
             className={cn(
               "flex cursor-pointer items-start space-x-3 rounded-lg border p-4 transition-colors hover:bg-accent",
-              selectedLayout === "blank" && "border-primary bg-accent"
+              selectedLayout === "blank" && "border-primary bg-accent",
             )}
           >
             <input
@@ -322,7 +346,10 @@ function Step2LayoutSelection({
             />
             <div className="space-y-1">
               <strong className="block">Blank Layout</strong>
-              <p id="blank-description" className="text-sm text-muted-foreground">
+              <p
+                id="blank-description"
+                className="text-sm text-muted-foreground"
+              >
                 Start fresh with a single "General" group. Perfect for full
                 customization.
               </p>
@@ -332,7 +359,7 @@ function Step2LayoutSelection({
           <label
             className={cn(
               "flex cursor-pointer items-start space-x-3 rounded-lg border p-4 transition-colors hover:bg-accent",
-              selectedLayout === "50-30-20" && "border-primary bg-accent"
+              selectedLayout === "50-30-20" && "border-primary bg-accent",
             )}
           >
             <input
@@ -344,7 +371,10 @@ function Step2LayoutSelection({
             />
             <div className="space-y-1">
               <strong className="block">50/30/20 Layout</strong>
-              <p id="503020-description" className="text-sm text-muted-foreground">
+              <p
+                id="503020-description"
+                className="text-sm text-muted-foreground"
+              >
                 Popular budgeting method: Need (50%), Want (30%), Savings (20%).
                 Great for beginners.
               </p>
@@ -353,10 +383,20 @@ function Step2LayoutSelection({
         </div>
 
         <div className="flex gap-2">
-          <Button type="button" variant="outline" onClick={onBack} className="flex-1">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={onBack}
+            className="flex-1"
+          >
             Back
           </Button>
-          <Button type="button" onClick={handleContinue} disabled={!selectedLayout} className="flex-1">
+          <Button
+            type="button"
+            onClick={handleContinue}
+            disabled={!selectedLayout}
+            className="flex-1"
+          >
             Next
           </Button>
         </div>
@@ -383,7 +423,8 @@ function Step3IncomeGroup({
       </CardHeader>
       <CardContent className="space-y-4">
         <p className="text-sm text-muted-foreground">
-          You can create an "Income" group to track different income sources like:
+          You can create an "Income" group to track different income sources
+          like:
         </p>
         <ul className="space-y-2">
           <li className="flex items-center gap-2">
@@ -400,12 +441,17 @@ function Step3IncomeGroup({
           </li>
         </ul>
         <p className="text-sm text-muted-foreground">
-          You can set this up later in Settings. For now, let's continue with the
-          category groups.
+          You can set this up later in Settings. For now, let's continue with
+          the category groups.
         </p>
 
         <div className="flex gap-2">
-          <Button type="button" variant="outline" onClick={onBack} className="flex-1">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={onBack}
+            className="flex-1"
+          >
             Back
           </Button>
           <Button type="button" onClick={onNext} className="flex-1">
@@ -455,19 +501,24 @@ function Step4Summary({
       <CardContent className="space-y-4">
         <div>
           <p className="text-sm text-muted-foreground">
-            You selected: <strong className="text-foreground">{layoutInfo.name}</strong>
+            You selected:{" "}
+            <strong className="text-foreground">{layoutInfo.name}</strong>
           </p>
         </div>
 
         <div>
-          <h3 className="mb-2 text-sm font-semibold">Category Groups to be created:</h3>
+          <h3 className="mb-2 text-sm font-semibold">
+            Category Groups to be created:
+          </h3>
           <ul className="space-y-2">
             {layoutInfo.groups.map((group) => (
               <li key={group.name} className="flex items-start gap-2">
                 <span className="mt-1 h-2 w-2 rounded-full bg-primary" />
                 <div>
                   <strong className="text-sm">{group.name}</strong>
-                  <p className="text-xs text-muted-foreground">{group.description}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {group.description}
+                  </p>
                 </div>
               </li>
             ))}
@@ -475,7 +526,10 @@ function Step4Summary({
         </div>
 
         {error && (
-          <div className="rounded-md bg-destructive/15 p-3 text-sm text-destructive" role="alert">
+          <div
+            className="rounded-md bg-destructive/15 p-3 text-sm text-destructive"
+            role="alert"
+          >
             {error}
           </div>
         )}

@@ -1,10 +1,16 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 import type { AccountType } from "@ledger-mx/contracts";
-import { useAuth } from "../lib/auth-context";
+import { tsr } from "../lib/ts-rest-client";
 import { cn } from "../lib/utils";
 import { Button } from "../components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "../components/ui/card";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
 import { PageHeader } from "../components/ui/page-header";
@@ -36,57 +42,53 @@ interface Account {
 }
 
 export function AccountsPage() {
-  const [accounts, setAccounts] = useState<Account[]>([]);
-  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [editingAccount, setEditingAccount] = useState<Account | null>(null);
 
-  const { authFetch } = useAuth();
-  const { register, handleSubmit, control, formState: { errors, isSubmitting }, reset } = useForm<AccountFormValues>();
+  // Use ts-rest query for loading accounts
+  const {
+    data: accountsData,
+    isLoading,
+    error: queryError,
+    refetch,
+  } = tsr.accounts.list.useQuery({
+    queryKey: ["accounts"],
+    queryData: { query: {} },
+  });
 
-  // Load accounts using authFetch
-  const loadAccounts = async () => {
-    setLoading(true);
-    setError(null);
+  const accounts = (accountsData?.body?.accounts ?? []) as Account[];
 
-    try {
-      const response = await authFetch("/api/v1/accounts", {
-        method: "GET",
-      });
+  // Use ts-rest mutations
+  const createMutation = tsr.accounts.create.useMutation();
+  const updateMutation = tsr.accounts.update.useMutation();
+  const archiveMutation = tsr.accounts.archive.useMutation();
 
-      if (!response.ok) {
-        throw new Error(`Failed to load accounts: ${response.status}`);
-      }
-
-      const data = await response.json();
-      setAccounts(data.accounts ?? []);
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Failed to load accounts");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    loadAccounts();
-  }, []);
+  const {
+    register,
+    handleSubmit,
+    control,
+    formState: { errors, isSubmitting },
+    reset,
+    setValue,
+  } = useForm<AccountFormValues>();
 
   const onCreateSubmit = async (data: AccountFormValues) => {
     try {
-      const response = await authFetch("/api/v1/accounts", {
-        method: "POST",
-        body: JSON.stringify(data),
+      const result = await createMutation.mutateAsync({
+        body: data,
       });
 
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => null);
-        throw new Error(errorData?.message || `Failed to create account: ${response.status}`);
+      if (result.status !== 201) {
+        const body = result.body as { message?: string };
+        throw new Error(
+          body?.message || `Failed to create account: ${result.status}`,
+        );
       }
 
       setShowCreateForm(false);
       reset();
-      loadAccounts();
+      refetch();
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Failed to create account");
     }
@@ -96,19 +98,21 @@ export function AccountsPage() {
     if (!editingAccount) return;
 
     try {
-      const response = await authFetch(`/api/v1/accounts/${editingAccount.id}`, {
-        method: "PATCH",
-        body: JSON.stringify(data),
+      const result = await updateMutation.mutateAsync({
+        params: { id: editingAccount.id },
+        body: data,
       });
 
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => null);
-        throw new Error(errorData?.message || `Failed to update account: ${response.status}`);
+      if (result.status !== 200) {
+        const body = result.body as { message?: string };
+        throw new Error(
+          body?.message || `Failed to update account: ${result.status}`,
+        );
       }
 
       setEditingAccount(null);
       reset();
-      loadAccounts();
+      refetch();
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Failed to update account");
     }
@@ -120,30 +124,33 @@ export function AccountsPage() {
     }
 
     try {
-      const response = await authFetch(`/api/v1/accounts/${accountId}`, {
-        method: "DELETE",
+      const result = await archiveMutation.mutateAsync({
+        params: { id: accountId },
       });
 
-      if (!response.ok) {
-        throw new Error(`Failed to archive account: ${response.status}`);
+      if (result.status !== 204) {
+        const body = (result.body ?? {}) as { message?: string };
+        throw new Error(
+          body?.message || `Failed to archive account: ${result.status}`,
+        );
       }
 
-      loadAccounts();
+      refetch();
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Failed to archive account");
+      setError(
+        err instanceof Error ? err.message : "Failed to archive account",
+      );
     }
   };
 
   const startEdit = (account: Account) => {
     setEditingAccount(account);
-    reset({
-      name: account.name,
-      type: account.type,
-      currency: account.currency,
-    });
+    setValue("name", account.name);
+    setValue("type", account.type);
+    setValue("currency", account.currency);
   };
 
-  if (loading) {
+  if (isLoading) {
     return <LoadingState text="Loading accounts..." />;
   }
 
@@ -166,23 +173,32 @@ export function AccountsPage() {
         }
       />
 
-      {error && (
-        <div className="rounded-md bg-destructive/15 p-3 text-sm text-destructive" role="alert">
-          {error}
+      {(error || queryError) && (
+        <div
+          className="rounded-md bg-destructive/15 p-3 text-sm text-destructive"
+          role="alert"
+        >
+          {error || (queryError as Error)?.message || "An error occurred"}
         </div>
       )}
 
       {(showCreateForm || editingAccount) && (
         <Card>
           <CardHeader>
-            <CardTitle>{editingAccount ? "Edit Account" : "Create Account"}</CardTitle>
+            <CardTitle>
+              {editingAccount ? "Edit Account" : "Create Account"}
+            </CardTitle>
             <CardDescription>
-              {editingAccount ? "Update account details" : "Add a new account to track your finances"}
+              {editingAccount
+                ? "Update account details"
+                : "Add a new account to track your finances"}
             </CardDescription>
           </CardHeader>
           <CardContent>
             <form
-              onSubmit={handleSubmit(editingAccount ? onUpdateSubmit : onCreateSubmit)}
+              onSubmit={handleSubmit(
+                editingAccount ? onUpdateSubmit : onCreateSubmit,
+              )}
               className="space-y-4"
               aria-label={editingAccount ? "Edit Account" : "Create Account"}
             >
@@ -195,7 +211,9 @@ export function AccountsPage() {
                   {...register("name", { required: true, maxLength: 100 })}
                 />
                 {errors.name && (
-                  <p className="text-sm text-destructive">Name is required (max 100 chars)</p>
+                  <p className="text-sm text-destructive">
+                    Name is required (max 100 chars)
+                  </p>
                 )}
               </div>
 
@@ -206,11 +224,12 @@ export function AccountsPage() {
                   control={control}
                   rules={{ required: true }}
                   render={({ field }) => (
-                    <Select
-                      onValueChange={field.onChange}
-                      value={field.value}
-                    >
-                      <SelectTrigger id="type" aria-invalid={!!errors.type} className={errors.type ? "border-destructive" : ""}>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <SelectTrigger
+                        id="type"
+                        aria-invalid={!!errors.type}
+                        className={errors.type ? "border-destructive" : ""}
+                      >
                         <SelectValue placeholder="Select type..." />
                       </SelectTrigger>
                       <SelectContent>
@@ -234,22 +253,39 @@ export function AccountsPage() {
                   id="currency"
                   disabled={isSubmitting}
                   error={!!errors.currency}
-                  {...register("currency", { required: true, minLength: 3, maxLength: 3 })}
+                  {...register("currency", {
+                    required: true,
+                    minLength: 3,
+                    maxLength: 3,
+                  })}
                 />
                 {errors.currency && (
-                  <p className="text-sm text-destructive">Currency must be 3 characters (e.g., MXN)</p>
+                  <p className="text-sm text-destructive">
+                    Currency must be 3 characters (e.g., MXN)
+                  </p>
                 )}
               </div>
 
               <div className="flex gap-2">
-                <Button type="submit" disabled={isSubmitting} className="flex-1">
-                  {isSubmitting ? "Saving..." : editingAccount ? "Update" : "Create"}
+                <Button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="flex-1"
+                >
+                  {isSubmitting
+                    ? "Saving..."
+                    : editingAccount
+                      ? "Update"
+                      : "Create"}
                 </Button>
                 {editingAccount && (
                   <Button
                     type="button"
                     variant="outline"
-                    onClick={() => { setEditingAccount(null); reset(); }}
+                    onClick={() => {
+                      setEditingAccount(null);
+                      reset();
+                    }}
                     className="flex-1"
                   >
                     Cancel
@@ -259,7 +295,10 @@ export function AccountsPage() {
                   <Button
                     type="button"
                     variant="outline"
-                    onClick={() => { setShowCreateForm(false); reset(); }}
+                    onClick={() => {
+                      setShowCreateForm(false);
+                      reset();
+                    }}
                     className="flex-1"
                   >
                     Cancel
@@ -275,31 +314,51 @@ export function AccountsPage() {
         <Card>
           <CardContent className="p-0">
             <div className="overflow-x-auto">
-              <table className="w-full" aria-label="Accounts list" data-testid="accounts-table">
+              <table
+                className="w-full"
+                aria-label="Accounts list"
+                data-testid="accounts-table"
+              >
                 <thead>
                   <tr className="border-b">
-                    <th className="px-4 py-3 text-left text-sm font-medium">Name</th>
-                    <th className="px-4 py-3 text-left text-sm font-medium">Type</th>
-                    <th className="px-4 py-3 text-left text-sm font-medium">Currency</th>
-                    <th className="px-4 py-3 text-left text-sm font-medium">Balance</th>
-                    <th className="px-4 py-3 text-left text-sm font-medium">Status</th>
-                    <th className="px-4 py-3 text-left text-sm font-medium">Actions</th>
+                    <th className="px-4 py-3 text-left text-sm font-medium">
+                      Name
+                    </th>
+                    <th className="px-4 py-3 text-left text-sm font-medium">
+                      Type
+                    </th>
+                    <th className="px-4 py-3 text-left text-sm font-medium">
+                      Currency
+                    </th>
+                    <th className="px-4 py-3 text-left text-sm font-medium">
+                      Balance
+                    </th>
+                    <th className="px-4 py-3 text-left text-sm font-medium">
+                      Status
+                    </th>
+                    <th className="px-4 py-3 text-left text-sm font-medium">
+                      Actions
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
-                  {accounts.map((account) => (
+                  {accounts.map((account: Account) => (
                     <tr key={account.id} className="border-b">
                       <td className="px-4 py-3">{account.name}</td>
                       <td className="px-4 py-3 capitalize">{account.type}</td>
                       <td className="px-4 py-3">{account.currency}</td>
-                      <td className="px-4 py-3">{(account.balanceCents / 100).toFixed(2)}</td>
                       <td className="px-4 py-3">
-                        <span className={cn(
-                          "inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold",
-                          account.isActive 
-                            ? "bg-success/20 text-success" 
-                            : "bg-muted text-muted-foreground"
-                        )}>
+                        {(account.balanceCents / 100).toFixed(2)}
+                      </td>
+                      <td className="px-4 py-3">
+                        <span
+                          className={cn(
+                            "inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold",
+                            account.isActive
+                              ? "bg-success/20 text-success"
+                              : "bg-muted text-muted-foreground",
+                          )}
+                        >
                           {account.isActive ? "Active" : "Archived"}
                         </span>
                       </td>
@@ -333,7 +392,8 @@ export function AccountsPage() {
           </CardContent>
         </Card>
       ) : (
-        !showCreateForm && !editingAccount && (
+        !showCreateForm &&
+        !editingAccount && (
           <EmptyState
             title="No accounts found"
             description="Create an account to get started with tracking your finances."

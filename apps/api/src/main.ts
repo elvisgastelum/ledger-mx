@@ -9,6 +9,12 @@ async function bootstrap() {
 	// Enable cookie parsing
 	app.use(cookieParser());
 
+	// Enable CORS to allow the Vite web app to send cookie credentials
+	app.enableCors({
+		origin: process.env.CORS_ORIGIN ?? "http://localhost:5173",
+		credentials: true,
+	});
+
 	// Global prefix and URI versioning: produces /api/v1/... paths
 	app.enableVersioning({ type: VersioningType.URI });
 

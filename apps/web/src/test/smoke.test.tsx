@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, screen, fireEvent, cleanup } from "@testing-library/react";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import OnboardingWizard from "../routes/onboarding";
 
 // Mock router
@@ -24,6 +25,23 @@ vi.mock("../lib/auth-context", () => ({
   }),
 }));
 
+// Mock ts-rest client
+vi.mock("../lib/ts-rest-client", () => ({
+  tsr: {
+    onboarding: {
+      applyLayout: {
+        useMutation: () => ({
+          mutateAsync: vi.fn().mockResolvedValue({ status: 200, body: {} }),
+        }),
+      },
+    },
+  },
+  contractClient: {},
+  extractFilename: vi.fn(
+    (header: string | null) => header || "transactions.csv",
+  ),
+}));
+
 // Mock localStorage
 const localStorageMock = (() => {
   let store: Record<string, string> = {};
@@ -44,7 +62,15 @@ const localStorageMock = (() => {
 Object.defineProperty(window, "localStorage", { value: localStorageMock });
 
 describe("Onboarding Wizard", () => {
+  let queryClient: QueryClient;
+
   beforeEach(() => {
+    queryClient = new QueryClient({
+      defaultOptions: {
+        queries: { retry: false },
+        mutations: { retry: false },
+      },
+    });
     localStorageMock.clear();
     vi.clearAllMocks();
   });
@@ -54,31 +80,51 @@ describe("Onboarding Wizard", () => {
   });
 
   it("renders the onboarding wizard with welcome step", () => {
-    render(<OnboardingWizard />);
+    render(
+      <QueryClientProvider client={queryClient}>
+        <OnboardingWizard />
+      </QueryClientProvider>,
+    );
 
     // Use getAllByRole and take first match to handle potential duplicates
-    const headings = screen.getAllByRole("heading", { name: /welcome to ledgermx/i });
+    const headings = screen.getAllByRole("heading", {
+      name: /welcome to ledgermx/i,
+    });
     expect(headings.length).toBeGreaterThan(0);
     expect(screen.getByText(/offline-first/i)).toBeInTheDocument();
   });
 
   it("navigates to layout selection step when clicking Get Started", () => {
-    render(<OnboardingWizard />);
+    render(
+      <QueryClientProvider client={queryClient}>
+        <OnboardingWizard />
+      </QueryClientProvider>,
+    );
 
     // Find and click the "Get Started" button
-    const buttons = screen.getAllByRole("button", { name: /start onboarding/i });
+    const buttons = screen.getAllByRole("button", {
+      name: /start onboarding/i,
+    });
     fireEvent.click(buttons[0]);
 
     // Verify we're on the layout selection step
-    const layoutHeadings = screen.getAllByRole("heading", { name: /choose your budget layout/i });
+    const layoutHeadings = screen.getAllByRole("heading", {
+      name: /choose your budget layout/i,
+    });
     expect(layoutHeadings.length).toBeGreaterThan(0);
   });
 
   it("shows layout options on step 2", () => {
-    render(<OnboardingWizard />);
+    render(
+      <QueryClientProvider client={queryClient}>
+        <OnboardingWizard />
+      </QueryClientProvider>,
+    );
 
     // Navigate to step 2
-    const buttons = screen.getAllByRole("button", { name: /start onboarding/i });
+    const buttons = screen.getAllByRole("button", {
+      name: /start onboarding/i,
+    });
     fireEvent.click(buttons[0]);
 
     // Check layout options are visible

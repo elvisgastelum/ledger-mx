@@ -1,6 +1,7 @@
 /**
  * Auth context provider for managing authentication state.
  * Uses in-memory state (no localStorage for tokens).
+ * Integrates with ts-rest client for authenticated API calls.
  */
 import {
   createContext,
@@ -14,6 +15,7 @@ import {
 } from "react";
 import type { AuthSuccessResponse } from "@ledger-mx/contracts";
 import { registerApi, loginApi, refreshApi, logoutApi } from "./api-client";
+import { registerAuthHandlers } from "./ts-rest-client";
 
 interface User {
   id: string;
@@ -33,25 +35,15 @@ interface AuthContextValue extends AuthState {
     email: string,
     password: string,
     displayName?: string,
-    rememberMe?: boolean
+    rememberMe?: boolean,
   ) => Promise<void>;
   login: (
     email: string,
     password: string,
-    rememberMe?: boolean
+    rememberMe?: boolean,
   ) => Promise<void>;
   logout: () => Promise<void>;
   refreshToken: () => Promise<void>;
-  /**
-   * Authenticated fetch wrapper that adds credentials: 'include' and
-   * Authorization: Bearer header when accessToken exists.
-   * On 401, attempts to refresh token and retry once.
-   * If refresh fails, clears auth state and throws.
-   */
-  authFetch: (
-    input: RequestInfo | URL,
-    init?: RequestInit
-  ) => Promise<Response>;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -65,7 +57,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Ref to always have current accessToken for authFetch
+  // Ref to always have current accessToken for ts-rest client
   const accessTokenRef = useRef<string | null>(null);
 
   // Ref for deduplicating concurrent refresh calls
@@ -82,21 +74,42 @@ export function AuthProvider({ children }: AuthProviderProps) {
    * Deduplicated refresh API call. Returns the in-flight promise if present,
    * otherwise calls refreshApi() and clears the ref in finally.
    */
-  const refreshApiDeduped = useCallback(async (): Promise<AuthSuccessResponse> => {
-    if (refreshPromiseRef.current) {
-      return refreshPromiseRef.current;
-    }
-
-    refreshPromiseRef.current = (async () => {
-      try {
-        return await refreshApi();
-      } finally {
-        refreshPromiseRef.current = null;
+  const refreshApiDeduped =
+    useCallback(async (): Promise<AuthSuccessResponse> => {
+      if (refreshPromiseRef.current) {
+        return refreshPromiseRef.current;
       }
-    })();
 
-    return refreshPromiseRef.current;
-  }, []);
+      refreshPromiseRef.current = (async () => {
+        try {
+          return await refreshApi();
+        } finally {
+          refreshPromiseRef.current = null;
+        }
+      })();
+
+      return refreshPromiseRef.current;
+    }, []);
+
+  /**
+   * Register auth handlers for ts-rest client.
+   * This wires the ts-rest client to use our auth state and refresh logic.
+   */
+  useEffect(() => {
+    registerAuthHandlers({
+      getToken: () => accessTokenRef.current,
+      refresh: async () => {
+        const result = await refreshApiDeduped();
+        setAccessToken(result.accessToken);
+        setUser(result.user);
+        return result;
+      },
+      clearAuth: () => {
+        setAccessToken(null);
+        setUser(null);
+      },
+    });
+  }, [refreshApiDeduped]);
 
   /**
    * Attempts to restore session by refreshing the access token.
@@ -124,7 +137,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       email: string,
       password: string,
       displayName?: string,
-      rememberMe?: boolean
+      rememberMe?: boolean,
     ) => {
       const response = await registerApi({
         email,
@@ -136,7 +149,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       setAccessToken(response.accessToken);
       setUser(response.user);
     },
-    []
+    [],
   );
 
   /**
@@ -153,7 +166,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       setAccessToken(response.accessToken);
       setUser(response.user);
     },
-    []
+    [],
   );
 
   /**
@@ -170,67 +183,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
   }, []);
 
-  /**
-   * Authenticated fetch wrapper.
-   * Adds credentials: 'include' and Authorization: Bearer header when token exists.
-   * On 401, attempts to refresh token and retry once.
-   * If refresh fails, clears auth state and throws.
-   */
-  const authFetch = useCallback(
-    async (input: RequestInfo | URL, init?: RequestInit): Promise<Response> => {
-      const makeRequest = async (token: string | null): Promise<Response> => {
-        const headers = new Headers(init?.headers);
-        
-        // Add Content-Type if not present and body exists
-        if (init?.body && !headers.has("Content-Type")) {
-          headers.set("Content-Type", "application/json");
-        }
-        
-        // Add Authorization header if token exists
-        if (token) {
-          headers.set("Authorization", `Bearer ${token}`);
-        }
-        
-        return fetch(input, {
-          ...init,
-          headers,
-          credentials: "include",
-        });
-      };
-
-      // First attempt
-      let response = await makeRequest(accessTokenRef.current);
-
-      // If 401, try to refresh token and retry once
-      if (response.status === 401) {
-        try {
-          const refreshResponse = await refreshApiDeduped();
-          // Update auth state with new token
-          setAccessToken(refreshResponse.accessToken);
-          setUser(refreshResponse.user);
-          
-          // Retry with new token
-          response = await makeRequest(refreshResponse.accessToken);
-          
-          // If retry also returns 401, clear auth state
-          if (response.status === 401) {
-            setAccessToken(null);
-            setUser(null);
-            throw new Error("Session expired. Please log in again.");
-          }
-        } catch (error) {
-          // Refresh failed or retry returned 401, clear auth state
-          setAccessToken(null);
-          setUser(null);
-          throw new Error("Session expired. Please log in again.");
-        }
-      }
-
-      return response;
-    },
-    []
-  );
-
   // Attempt to restore session on mount
   useEffect(() => {
     refreshToken();
@@ -246,9 +198,17 @@ export function AuthProvider({ children }: AuthProviderProps) {
       login,
       logout,
       refreshToken,
-      authFetch,
     }),
-    [user, accessToken, isAuthenticated, isLoading, register, login, logout, refreshToken, authFetch]
+    [
+      user,
+      accessToken,
+      isAuthenticated,
+      isLoading,
+      register,
+      login,
+      logout,
+      refreshToken,
+    ],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
