@@ -8,12 +8,13 @@ import { JwtAccessModule } from "../auth/jwt-access.module";
 import { ConfigModule } from "@nestjs/config";
 import { OnboardingController } from "./onboarding.controller";
 import type { CategoryGroupRepository } from "@ledger-mx/domain";
-import {
-  ApplyDefaultCategoryGroupLayoutUseCase,
-} from "@ledger-mx/application";
+import { ApplyDefaultCategoryGroupLayoutUseCase } from "@ledger-mx/application";
 import { UuidIdGenerator } from "../auth/infrastructure/uuid-id-generator";
 import { SystemClock } from "@ledger-mx/application";
-import { createDatabase, DrizzleCategoryGroupRepository } from "@ledger-mx/database";
+import {
+  createDatabase,
+  DrizzleCategoryGroupRepository,
+} from "@ledger-mx/database";
 
 // Internal token for shared database connection
 const ONBOARDING_DATABASE = Symbol("ONBOARDING_DATABASE");
@@ -43,7 +44,8 @@ function createDefaultCategoryGroupRepoProvider(): FactoryProvider {
 export class OnboardingModule {
   static forRoot(options?: OnboardingModuleOptions): DynamicModule {
     const categoryGroupRepoProvider =
-      options?.categoryGroupRepository ?? createDefaultCategoryGroupRepoProvider();
+      options?.categoryGroupRepository ??
+      createDefaultCategoryGroupRepoProvider();
 
     // Only provide shared database if using default repo provider
     const needsDatabase = !options?.categoryGroupRepository;
@@ -51,10 +53,7 @@ export class OnboardingModule {
     return {
       module: OnboardingModule,
       controllers: [OnboardingController],
-      imports: [
-        ConfigModule,
-        JwtAccessModule,
-      ],
+      imports: [ConfigModule, JwtAccessModule],
       providers: [
         categoryGroupRepoProvider,
         ...(needsDatabase ? [createDefaultDatabaseProvider()] : []),
@@ -81,11 +80,7 @@ export class OnboardingModule {
               clock,
             );
           },
-          inject: [
-            "CATEGORY_GROUP_REPOSITORY",
-            UuidIdGenerator,
-            SystemClock,
-          ],
+          inject: ["CATEGORY_GROUP_REPOSITORY", UuidIdGenerator, SystemClock],
         },
       ],
       exports: [],

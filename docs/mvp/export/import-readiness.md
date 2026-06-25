@@ -21,6 +21,7 @@ User uploads file → Map columns → Preview → Import.
 ### Duplicate Detection
 
 Match on:
+
 - Date
 - Amount
 - Description

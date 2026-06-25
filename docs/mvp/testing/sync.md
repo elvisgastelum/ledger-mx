@@ -34,14 +34,14 @@ export const mockElectric = {
 ### Test Offline Queue
 
 ```typescript
-test('offline write queues', async () => {
+test("offline write queues", async () => {
   const db = createTestDb({ offline: true });
-  
+
   await db.transactions.create({
-    id: 'tx-1',
+    id: "tx-1",
     amountCents: 10000,
   });
-  
+
   const queue = await db.getSyncQueue();
   expect(queue).toHaveLength(1);
 });
@@ -52,14 +52,14 @@ test('offline write queues', async () => {
 Use Playwright to test offline→online transition:
 
 ```typescript
-test('offline to online sync', async ({ page }) => {
+test("offline to online sync", async ({ page }) => {
   await page.context().setOffline(true);
-  await page.goto('/transactions/new');
-  await page.fill('[name="amount"]', '100');
+  await page.goto("/transactions/new");
+  await page.fill('[name="amount"]', "100");
   await page.click('button[type="submit"]');
-  
+
   await page.context().setOffline(false);
   // Wait for sync
-  await page.waitForSelector('text=Synced');
+  await page.waitForSelector("text=Synced");
 });
 ```

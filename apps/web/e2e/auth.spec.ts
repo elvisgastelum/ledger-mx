@@ -10,9 +10,11 @@ test.describe("Authentication Pages", () => {
 
     // Check page title or header
     await expect(page).toHaveURL("/register");
-    
+
     // Check for registration form elements
-    await expect(page.locator("form[aria-label='Registration Form']")).toBeVisible();
+    await expect(
+      page.locator("form[aria-label='Registration Form']"),
+    ).toBeVisible();
     await expect(page.locator("input[type='email']")).toBeVisible();
     await expect(page.locator("input[type='password']").first()).toBeVisible();
     await expect(page.locator("button[type='submit']")).toBeVisible();
@@ -23,7 +25,7 @@ test.describe("Authentication Pages", () => {
 
     // Check page title or header
     await expect(page).toHaveURL("/login");
-    
+
     // Check for login form elements
     await expect(page.locator("form[aria-label='Login Form']")).toBeVisible();
     await expect(page.locator("input[type='email']")).toBeVisible();
@@ -49,7 +51,7 @@ test.describe("Authentication Pages", () => {
 
     // Should remain on home page, not redirect to login
     await expect(page).toHaveURL("/");
-    
+
     // Verify the page loads with expected content
     await expect(page.locator("h1")).toContainText("Welcome to LedgerMx");
   });

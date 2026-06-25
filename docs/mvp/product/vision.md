@@ -7,6 +7,7 @@ LedgerMx enables individuals with irregular income to take control of their fina
 ## Problem
 
 Traditional budgeting apps assume steady monthly income. They fail users with:
+
 - Biweekly paychecks (every second Friday)
 - Variable income amounts
 - Three-paycheck months (reduced third paycheck)
@@ -16,6 +17,7 @@ Traditional budgeting apps assume steady monthly income. They fail users with:
 ## Solution
 
 A personal finance app that:
+
 1. Schedules income occurrences (biweekly, specific dates)
 2. Creates paycheck plans allocating income to envelopes
 3. Tracks protected envelopes separately from spendable balance
@@ -26,6 +28,7 @@ A personal finance app that:
 ## Target User Persona
 
 **Primary**: Mexican professional with biweekly income
+
 - Receives paycheck every second Friday
 - Manages 3-5 bank accounts and credit cards
 - Has debt (credit cards, loans)

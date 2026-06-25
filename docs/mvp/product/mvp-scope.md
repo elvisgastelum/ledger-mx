@@ -3,6 +3,7 @@
 ## In Scope
 
 ### Core Financial Features
+
 - Accounts management (BBVA Debit, BBVA Credit, Nu Credit, etc.)
 - Envelopes/protected allocations
 - Transaction entry (expense, income, transfer, debt payment, envelope allocation)
@@ -18,6 +19,7 @@
 - New user onboarding with category layout selection (blank or 50/30/20)
 
 ### Technical Features
+
 - Offline-first architecture with PGlite/IndexedDB
 - Electric sync with TanStack DB Shape API
 - React PWA with TanStack Router and Query
@@ -30,6 +32,7 @@
 - Reports (spendable balance, expenses by category, debt progress)
 
 ### Testing and Quality
+
 - Strict TDD workflow
 - Vitest + Testing Library + Playwright
 - Testcontainers PostgreSQL for backend tests

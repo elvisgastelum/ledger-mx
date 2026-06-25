@@ -21,6 +21,7 @@ Users should regularly export their data as a manual backup:
 After each manual backup:
 
 1. **Checksum verification** (optional):
+
    ```bash
    sha256sum ledger-mx-backup-20240101.zip
    # Save checksum for integrity verification

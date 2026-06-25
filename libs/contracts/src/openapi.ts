@@ -57,7 +57,8 @@ Planned endpoints are included in this spec for documentation purposes but retur
         type: "http",
         scheme: "bearer",
         bearerFormat: "JWT",
-        description: "JWT access token (obtained from /auth/login or /auth/register)",
+        description:
+          "JWT access token (obtained from /auth/login or /auth/register)",
       },
     },
   },
@@ -82,7 +83,7 @@ function getRepoRoot(): string {
 /**
  * Helper function to write the OpenAPI document to a file.
  * Intended for use in scripts or build tools.
- * 
+ *
  * @param outputPath - File path for output. If relative, resolves from repo root.
  *                     If absolute, uses as-is.
  */
@@ -102,7 +103,11 @@ export async function writeOpenApiJson(outputPath: string): Promise<void> {
   const dir = path.dirname(resolvedPath);
 
   await fs.mkdir(dir, { recursive: true });
-  await fs.writeFile(resolvedPath, JSON.stringify(openApiDocument, null, 2), "utf-8");
+  await fs.writeFile(
+    resolvedPath,
+    JSON.stringify(openApiDocument, null, 2),
+    "utf-8",
+  );
 
   console.log(`OpenAPI document written to: ${resolvedPath}`);
 }

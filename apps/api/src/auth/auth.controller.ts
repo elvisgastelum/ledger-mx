@@ -53,14 +53,23 @@ export class AuthController {
     refreshToken: string,
     rememberMe?: boolean,
   ): void {
-    const isProduction = this.configService.get<string>("NODE_ENV") === "production";
+    const isProduction =
+      this.configService.get<string>("NODE_ENV") === "production";
     const cookieName =
-      this.configService.get<string>("AUTH_REFRESH_COOKIE_NAME") ?? REFRESH_COOKIE_NAME;
-    const secure = this.configService.get<boolean>("AUTH_REFRESH_COOKIE_SECURE") ?? isProduction;
+      this.configService.get<string>("AUTH_REFRESH_COOKIE_NAME") ??
+      REFRESH_COOKIE_NAME;
+    const secure =
+      this.configService.get<boolean>("AUTH_REFRESH_COOKIE_SECURE") ??
+      isProduction;
     const sameSite =
-      (this.configService.get<string>("AUTH_REFRESH_COOKIE_SAME_SITE") as "strict" | "lax" | "none") ?? "lax";
+      (this.configService.get<string>("AUTH_REFRESH_COOKIE_SAME_SITE") as
+        | "strict"
+        | "lax"
+        | "none") ?? "lax";
 
-    const maxAge = rememberMe ? 30 * 24 * 60 * 60 * 1000 : 7 * 24 * 60 * 60 * 1000;
+    const maxAge = rememberMe
+      ? 30 * 24 * 60 * 60 * 1000
+      : 7 * 24 * 60 * 60 * 1000;
 
     res.cookie(cookieName, refreshToken, {
       httpOnly: true,
@@ -73,11 +82,18 @@ export class AuthController {
 
   private clearRefreshTokenCookie(res: Response): void {
     const cookieName =
-      this.configService.get<string>("AUTH_REFRESH_COOKIE_NAME") ?? REFRESH_COOKIE_NAME;
-    const isProduction = this.configService.get<string>("NODE_ENV") === "production";
-    const secure = this.configService.get<boolean>("AUTH_REFRESH_COOKIE_SECURE") ?? isProduction;
+      this.configService.get<string>("AUTH_REFRESH_COOKIE_NAME") ??
+      REFRESH_COOKIE_NAME;
+    const isProduction =
+      this.configService.get<string>("NODE_ENV") === "production";
+    const secure =
+      this.configService.get<boolean>("AUTH_REFRESH_COOKIE_SECURE") ??
+      isProduction;
     const sameSite =
-      (this.configService.get<string>("AUTH_REFRESH_COOKIE_SAME_SITE") as "strict" | "lax" | "none") ?? "lax";
+      (this.configService.get<string>("AUTH_REFRESH_COOKIE_SAME_SITE") as
+        | "strict"
+        | "lax"
+        | "none") ?? "lax";
 
     res.cookie(cookieName, "", {
       httpOnly: true,
@@ -90,7 +106,8 @@ export class AuthController {
 
   private getRefreshTokenFromRequest(req: Request): string | undefined {
     const cookieName =
-      this.configService.get<string>("AUTH_REFRESH_COOKIE_NAME") ?? REFRESH_COOKIE_NAME;
+      this.configService.get<string>("AUTH_REFRESH_COOKIE_NAME") ??
+      REFRESH_COOKIE_NAME;
     return req.cookies?.[cookieName];
   }
 
@@ -112,7 +129,10 @@ export class AuthController {
   }
 
   @TsRestHandler(contract.auth.register)
-  async register(@Req() req: Request, @Res({ passthrough: true }) res: Response): Promise<unknown> {
+  async register(
+    @Req() req: Request,
+    @Res({ passthrough: true }) res: Response,
+  ): Promise<unknown> {
     return tsRestHandler(contract.auth.register, async ({ body }) => {
       const context: AuthRequestContext = {
         ipAddress: req.ip,
@@ -144,7 +164,10 @@ export class AuthController {
   }
 
   @TsRestHandler(contract.auth.login)
-  async login(@Req() req: Request, @Res({ passthrough: true }) res: Response): Promise<unknown> {
+  async login(
+    @Req() req: Request,
+    @Res({ passthrough: true }) res: Response,
+  ): Promise<unknown> {
     return tsRestHandler(contract.auth.login, async ({ body }) => {
       const context: AuthRequestContext = {
         ipAddress: req.ip,
@@ -175,7 +198,10 @@ export class AuthController {
   }
 
   @TsRestHandler(contract.auth.refresh)
-  async refresh(@Req() req: Request, @Res({ passthrough: true }) res: Response): Promise<unknown> {
+  async refresh(
+    @Req() req: Request,
+    @Res({ passthrough: true }) res: Response,
+  ): Promise<unknown> {
     return tsRestHandler(contract.auth.refresh, async () => {
       const refreshToken = this.getRefreshTokenFromRequest(req);
 
@@ -200,7 +226,10 @@ export class AuthController {
   }
 
   @TsRestHandler(contract.auth.logout)
-  async logout(@Req() req: Request, @Res({ passthrough: true }) res: Response): Promise<unknown> {
+  async logout(
+    @Req() req: Request,
+    @Res({ passthrough: true }) res: Response,
+  ): Promise<unknown> {
     return tsRestHandler(contract.auth.logout, async () => {
       const refreshToken = this.getRefreshTokenFromRequest(req);
 

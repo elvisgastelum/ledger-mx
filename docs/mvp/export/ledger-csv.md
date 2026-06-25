@@ -8,16 +8,16 @@ CSV format for LedgerMx export (simple transaction CSV).
 
 ## Columns
 
-| Column | Type | Description |
-|--------|------|-------------|
-| Date | YYYY-MM-DD | Transaction date |
-| Amount_Cents | integer | Amount in cents (always positive) |
-| Debit_Credit | string | "debit" (money out) or "credit" (money in) |
-| Account | string | Account name |
-| Envelope | string | Envelope name (optional) |
-| Category | string | Category name (optional) |
-| Note | string | Transaction note |
-| Type | enum | expense/income/transfer/debt_payment |
+| Column       | Type       | Description                                |
+| ------------ | ---------- | ------------------------------------------ |
+| Date         | YYYY-MM-DD | Transaction date                           |
+| Amount_Cents | integer    | Amount in cents (always positive)          |
+| Debit_Credit | string     | "debit" (money out) or "credit" (money in) |
+| Account      | string     | Account name                               |
+| Envelope     | string     | Envelope name (optional)                   |
+| Category     | string     | Category name (optional)                   |
+| Note         | string     | Transaction note                           |
+| Type         | enum       | expense/income/transfer/debt_payment       |
 
 ## Example
 

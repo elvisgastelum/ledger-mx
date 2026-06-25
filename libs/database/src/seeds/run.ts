@@ -34,11 +34,9 @@ const SEED_ALLOW_RESET = process.env.SEED_ALLOW_RESET === "true";
  */
 export function validateTransactionLines(seedData: SeedData): void {
   for (const line of seedData.transactionLines) {
-    const targets = [
-      line.accountId,
-      line.envelopeId,
-      line.categoryId,
-    ].filter(Boolean);
+    const targets = [line.accountId, line.envelopeId, line.categoryId].filter(
+      Boolean,
+    );
 
     if (targets.length !== 1) {
       throw new Error(
@@ -95,14 +93,9 @@ export async function seedDatabase(
     await db.insert(schema.users).values(user).onConflictDoNothing();
   }
 
-  console.log(
-    `Inserting ${seedData.categoryGroups.length} category groups...`,
-  );
+  console.log(`Inserting ${seedData.categoryGroups.length} category groups...`);
   for (const cg of seedData.categoryGroups) {
-    await db
-      .insert(schema.categoryGroups)
-      .values(cg)
-      .onConflictDoNothing();
+    await db.insert(schema.categoryGroups).values(cg).onConflictDoNothing();
   }
 
   console.log(`Inserting ${seedData.categories.length} categories...`);
@@ -129,10 +122,7 @@ export async function seedDatabase(
     `Inserting ${seedData.transactionLines.length} transaction lines...`,
   );
   for (const line of seedData.transactionLines) {
-    await db
-      .insert(schema.transactionLines)
-      .values(line)
-      .onConflictDoNothing();
+    await db.insert(schema.transactionLines).values(line).onConflictDoNothing();
   }
 
   console.log("Seed operation completed successfully!");
@@ -173,9 +163,7 @@ export async function resetUser(
     .where(eq(schema.transactions.userId, userId));
   console.log("  Cleared transactions");
 
-  await db
-    .delete(schema.envelopes)
-    .where(eq(schema.envelopes.userId, userId));
+  await db.delete(schema.envelopes).where(eq(schema.envelopes.userId, userId));
   console.log("  Cleared envelopes");
 
   await db.delete(schema.accounts).where(eq(schema.accounts.userId, userId));
@@ -210,7 +198,7 @@ export async function seedDemo(db: Database): Promise<void> {
   if (process.env.NODE_ENV === "production" && !process.env.SEED_ALLOW_RESET) {
     throw new Error(
       "Seed operation blocked in production environment. " +
-      "Set SEED_ALLOW_RESET=true to override this safety check.",
+        "Set SEED_ALLOW_RESET=true to override this safety check.",
     );
   }
 
@@ -243,7 +231,7 @@ export async function seedPersonal(db: Database): Promise<void> {
   if (process.env.NODE_ENV === "production" && !process.env.SEED_ALLOW_RESET) {
     throw new Error(
       "Seed operation blocked in production environment. " +
-      "Set SEED_ALLOW_RESET=true to override this safety check.",
+        "Set SEED_ALLOW_RESET=true to override this safety check.",
     );
   }
 

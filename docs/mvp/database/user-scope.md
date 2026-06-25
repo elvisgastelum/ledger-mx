@@ -9,9 +9,11 @@ All financial data scoped to user_id. No cross-user data leakage.
 Every financial table has user_id:
 
 ```typescript
-export const transactions = pgTable('transactions', {
-  id: uuid('id').primaryKey(),
-  userId: uuid('user_id').notNull().references(() => users.id),
+export const transactions = pgTable("transactions", {
+  id: uuid("id").primaryKey(),
+  userId: uuid("user_id")
+    .notNull()
+    .references(() => users.id),
 });
 ```
 
@@ -32,7 +34,7 @@ Shapes user-scoped:
 
 ```typescript
 const shape = {
-  table: 'transactions',
+  table: "transactions",
   where: `user_id = '${userId}'`,
 };
 ```

@@ -15,7 +15,7 @@ MVP uses PGlite (PostgreSQL in browser via IndexedDB).
 
 ```typescript
 const db = createDb({
-  adapter: pgLite({ dataDir: 'idb://ledger-mx' }),
+  adapter: pgLite({ dataDir: "idb://ledger-mx" }),
 });
 ```
 
@@ -44,7 +44,7 @@ Future consideration. PGlite/IndexedDB is MVP direction.
 try {
   await db.transaction.save(data);
 } catch (error) {
-  if (error.name === 'QuotaExceededError' || error.code === 22) {
+  if (error.name === "QuotaExceededError" || error.code === 22) {
     await handleStorageFull();
   }
 }
@@ -58,12 +58,12 @@ Use `navigator.storage.estimate()` to monitor usage:
 async function checkStorage() {
   const estimate = await navigator.storage.estimate();
   const usageRatio = estimate.usage / estimate.quota;
-  
+
   if (usageRatio > 0.8) {
     // Warning at 80% usage
     showStorageWarning(estimate);
   }
-  
+
   return { usage: estimate.usage, quota: estimate.quota, ratio: usageRatio };
 }
 ```
@@ -79,7 +79,7 @@ async function checkStorage() {
 ```typescript
 function StorageWarning({ usage, quota }) {
   const freeMB = (quota - usage) / 1024 / 1024;
-  
+
   return (
     <Alert variant="warning">
       <h4>Storage Almost Full</h4>
@@ -92,6 +92,7 @@ function StorageWarning({ usage, quota }) {
 ```
 
 Recommended cleanup options:
+
 1. Export full backup (ZIP)
 2. Delete old attachments (> 1 year)
 3. Compress/archive old transactions (future)

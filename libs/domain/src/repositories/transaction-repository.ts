@@ -10,7 +10,10 @@ export interface TransactionRepository {
   save(transaction: Transaction): Promise<void>;
 
   /** Retrieves a transaction by user ID and transaction ID, returns null if not found. */
-  findById(userId: UserId, transactionId: TransactionId): Promise<Transaction | null>;
+  findById(
+    userId: UserId,
+    transactionId: TransactionId,
+  ): Promise<Transaction | null>;
 
   /** Lists all transactions for a user, ordered by occurredAt descending. */
   listByUserId(userId: UserId): Promise<Transaction[]>;

@@ -14,10 +14,16 @@ import {
   CreateTransactionUseCase,
   ListTransactionsUseCase,
 } from "@ledger-mx/application";
-import type { CreateTransactionInput, ListTransactionsInput } from "@ledger-mx/application";
+import type {
+  CreateTransactionInput,
+  ListTransactionsInput,
+} from "@ledger-mx/application";
 import { contract } from "@ledger-mx/contracts";
 import { TsRestHandler, tsRestHandler } from "@ts-rest/nest";
-import type { TransactionType, TransactionLineTargetType } from "@ledger-mx/contracts";
+import type {
+  TransactionType,
+  TransactionLineTargetType,
+} from "@ledger-mx/contracts";
 
 // Extend Express Request type to include user property added by JWT guard
 interface RequestWithUser extends Request {
@@ -58,15 +64,15 @@ export class TransactionsController {
             note: tx.note,
             type: tx.type as TransactionType,
             totalAmountCents: tx.totalAmountCents,
-             lines: tx.lines.map((line) => ({
-                id: line.id,
-                targetType: line.targetType as TransactionLineTargetType,
-                accountId: line.accountId,
-                categoryId: line.categoryId,
-                envelopeId: line.envelopeId,
-                amountCents: line.amountCents,
-                type: line.type as TransactionType,
-              })),
+            lines: tx.lines.map((line) => ({
+              id: line.id,
+              targetType: line.targetType as TransactionLineTargetType,
+              accountId: line.accountId,
+              categoryId: line.categoryId,
+              envelopeId: line.envelopeId,
+              amountCents: line.amountCents,
+              type: line.type as TransactionType,
+            })),
             createdAt: toIsoString(tx.createdAt),
             updatedAt: toIsoString(tx.updatedAt),
           })),
@@ -119,7 +125,10 @@ export class TransactionsController {
   }
 
   private handleError(error: unknown): never {
-    if (error instanceof NotFoundException || error instanceof ConflictException) {
+    if (
+      error instanceof NotFoundException ||
+      error instanceof ConflictException
+    ) {
       throw error;
     }
 

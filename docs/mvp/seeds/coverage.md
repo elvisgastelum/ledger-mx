@@ -46,6 +46,7 @@ Every use case must have seed data for testing.
 ## E2E Coverage
 
 E2E tests use demo seed. Must cover:
+
 - Creating transaction
 - Viewing balance
 - Allocating to envelope

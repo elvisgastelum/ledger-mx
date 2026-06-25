@@ -17,8 +17,8 @@ export class CategoryGroupLayoutConflictError extends OnboardingApplicationError
   constructor(existingGroupNames: string[]) {
     super(
       `Cannot apply layout: user already has existing category groups that don't match the requested layout. ` +
-      `Existing groups: ${existingGroupNames.join(", ")}. ` +
-      `Delete or reassign existing groups first, or use a different layout.`,
+        `Existing groups: ${existingGroupNames.join(", ")}. ` +
+        `Delete or reassign existing groups first, or use a different layout.`,
     );
   }
 }

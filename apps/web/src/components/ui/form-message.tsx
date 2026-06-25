@@ -9,7 +9,12 @@ interface FormMessageProps extends HTMLAttributes<HTMLParagraphElement> {
   type?: "error" | "success" | "info";
 }
 
-function FormMessage({ className, type = "error", children, ...props }: FormMessageProps) {
+function FormMessage({
+  className,
+  type = "error",
+  children,
+  ...props
+}: FormMessageProps) {
   if (!children) return null;
 
   const variantClasses = {

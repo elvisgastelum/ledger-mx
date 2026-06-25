@@ -19,12 +19,14 @@ Electric + TanStack DB Shape API is the official MVP sync path. All sync documen
 ## Sync Technology
 
 ### Electric (Sync Server)
+
 - Real-time sync for PostgreSQL
 - Self-hosted alongside API
 - Shape-based subscriptions
 - User-scoped data
 
 ### TanStack DB (Client)
+
 - Local-first database
 - Shape API for Electric integration
 - Reactive queries
@@ -49,18 +51,21 @@ Electric + TanStack DB Shape API is the official MVP sync path. All sync documen
 ## Core Concepts
 
 ### Shapes
+
 - Subset of database tables/rows
 - User-scoped (where user_id = current user)
 - Subscribed via Electric client
 - Changes pushed in real-time
 
 ### Offline Writes
+
 - Write to local DB (PGlite) immediately
 - Queue write for sync
 - Retry when online
 - No data loss
 
 ### Conflicts
+
 - Electric detects conflicts
 - Client resolves per user choice
 - Options: Keep A, Keep B, Keep Both

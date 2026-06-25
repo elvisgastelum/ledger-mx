@@ -11,22 +11,22 @@ Overview: [Sync Conflicts](./conflicts.md)
 ```typescript
 function ConflictNotification({ conflict }) {
   const [confirmKeepBoth, setConfirmKeepBoth] = useState(false);
-  
+
   return (
     <Card>
       <h3>Conflict Detected</h3>
-      
+
       <ConflictDiff versionA={conflict.versionA} versionB={conflict.versionB} />
-      
+
       <Button onClick={() => resolve('keep_a')}>Keep A</Button>
       <Button onClick={() => resolve('keep_b')}>Keep B</Button>
-      
+
       {conflict.option === 'keep_both' && !confirmKeepBoth && (
         <KeepBothPreview versionA={conflict.versionA} versionB={conflict.versionB} />
       )}
-      
+
       <Button onClick={() => setConfirmKeepBoth(true)}>Keep Both</Button>
-      
+
       {hasFieldLevelDifferences(conflict.versionA, conflict.versionB) && (
         <Button onClick={() => resolve('merge')}>Merge Fields</Button>
       )}

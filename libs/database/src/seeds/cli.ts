@@ -35,7 +35,9 @@ async function main() {
   if (!process.env.DATABASE_URL) {
     console.error("Error: DATABASE_URL environment variable is required");
     console.error("Set it in your .env file or pass it directly:");
-    console.error("  DATABASE_URL=postgresql://user:pass@localhost:5432/db pnpm seed:demo");
+    console.error(
+      "  DATABASE_URL=postgresql://user:pass@localhost:5432/db pnpm seed:demo",
+    );
     process.exit(1);
   }
 
@@ -43,8 +45,8 @@ async function main() {
   if (process.env.NODE_ENV === "production" && !process.env.SEED_ALLOW_RESET) {
     console.error(
       "Error: Seed operations are blocked in production environment.\n" +
-      "Set SEED_ALLOW_RESET=true to override this safety check.\n" +
-      "This prevents accidental data modification in production.",
+        "Set SEED_ALLOW_RESET=true to override this safety check.\n" +
+        "This prevents accidental data modification in production.",
     );
     process.exit(1);
   }
@@ -93,15 +95,22 @@ async function main() {
       default: {
         console.log("Usage:");
         console.log("  pnpm seed:demo      - Seed demo data");
-        console.log("  pnpm seed:personal  - Seed personal data (requires personal.ts)");
-        console.log("  pnpm seed:reset     - Reset demo user data (requires SEED_ALLOW_RESET=true)");
+        console.log(
+          "  pnpm seed:personal  - Seed personal data (requires personal.ts)",
+        );
+        console.log(
+          "  pnpm seed:reset     - Reset demo user data (requires SEED_ALLOW_RESET=true)",
+        );
         console.log("  pnpm seed:verify    - Verify demo seed data");
         exitCode = 1;
         break;
       }
     }
   } catch (error) {
-    console.error("Error:", error instanceof Error ? error.message : String(error));
+    console.error(
+      "Error:",
+      error instanceof Error ? error.message : String(error),
+    );
     exitCode = 1;
   }
 

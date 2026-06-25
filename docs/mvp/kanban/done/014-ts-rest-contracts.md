@@ -48,12 +48,14 @@ ts-rest provides type-safe, contract-first API definitions shared between `apps/
 ## Implementation Notes
 
 ### Already Implemented (Before This Story)
+
 - `libs/contracts` package with `@ts-rest/core`, Zod, `@ts-rest/open-api`
 - Auth, category groups, onboarding, export, reports, health contracts defined
 - OpenAPI generation via `pnpm generate:openapi` in `libs/contracts`
 - Auth and category-groups controllers using Zod schemas from contracts
 
 ### Newly Added (This Story)
+
 - Updated auth paths from `/auth/*` to `/api/v1/auth/*`
 - Updated category-groups paths from `/category-groups*` to `/api/v1/category-groups*`
 - Updated health paths from `/health/*` to `/api/v1/health/*`
@@ -65,6 +67,7 @@ ts-rest provides type-safe, contract-first API definitions shared between `apps/
 - Added runtime validation tests for schema enforcement
 
 ### Follow-up Items
+
 - Consider adopting `@ts-rest/nest` for type-safe controller implementation
 - Implement accounts, envelopes, and transactions API controllers
 - Add web app fetches for new endpoints when implemented

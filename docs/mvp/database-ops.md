@@ -35,7 +35,9 @@ After these steps, the local database is ready for development.
 ## Migration Commands
 
 ### `pnpm db:generate`
+
 Generate migration files from schema changes.
+
 - **When to use:** After modifying `libs/database/src/schema/**` files
 - **Output:** New SQL file in `libs/database/drizzle/migrations/`
 - **Required before:** Committing schema changes
@@ -45,7 +47,9 @@ pnpm db:generate
 ```
 
 ### `pnpm db:migrate`
+
 Apply pending migrations to the database.
+
 - **When to use:** Normal local development, MVP validation, CI
 - **Safe for:** Shared databases, committed validation
 - **Recommended:** Default choice for applying schema changes
@@ -55,7 +59,9 @@ pnpm db:migrate
 ```
 
 ### `pnpm db:push`
+
 Push schema changes directly to database (no migration files).
+
 - **When to use:** Disposable local DB prototyping only
 - **NOT for:** Committed validation, shared databases, CI
 - **Warning:** Changes are not tracked as migration files
@@ -67,7 +73,9 @@ pnpm db:push
 ## Seed Data Commands
 
 ### `pnpm db:seed:demo`
+
 Load demo seed data (realistic transactions, accounts, categories).
+
 - **Use case:** Development, MVP demonstration
 - **Idempotent:** Safe to run multiple times
 
@@ -76,7 +84,9 @@ pnpm db:seed:demo
 ```
 
 ### `pnpm db:seed:personal`
+
 Load personal seed data (customized to your finances).
+
 - **Use case:** Personal local development
 - **Note:** Requires `SEED_PERSONAL_*` env vars (see `docs/mvp/seeds/personal.md`)
 
@@ -85,7 +95,9 @@ pnpm db:seed:personal
 ```
 
 ### `pnpm db:seed:verify`
+
 Verify seed data integrity (checks counts, invariants, balances).
+
 - **Run after:** Any seed command
 - **CI:** Included in validation pipeline
 
@@ -94,7 +106,9 @@ pnpm db:seed:verify
 ```
 
 ### `pnpm db:seed:reset`
+
 Reset/Destroy seed data.
+
 - **Requires explicit confirmation:** `SEED_ALLOW_RESET=true`
 - **Destructive:** Removes seeded data
 - **Safety:** Never runs automatically; always requires env flag
@@ -157,16 +171,19 @@ DATABASE_URL=postgresql://postgres:postgres@localhost:5432/ledger_mx_dev
 ## Troubleshooting
 
 ### "DATABASE_URL environment variable is required"
+
 - Ensure `.env` exists (copy from `.env.example`)
 - Check that `POSTGRES_*` and `DATABASE_URL` are set
 - Verify no syntax errors in `.env`
 
 ### Migration fails with connection error
+
 - Ensure `pnpm db:up` has been run
 - Check `POSTGRES_PORT` matches `DATABASE_URL` port
 - Verify Docker is running: `docker ps`
 
 ### Seed verification fails
+
 - Run `pnpm db:migrate` to ensure schema is up-to-date
 - Check seed data was loaded: `pnpm db:seed:demo`
 - Review specific errors in verification output

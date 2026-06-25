@@ -58,31 +58,31 @@ transactions (1) ─── (N) transaction_lines
 
 ### categories
 
-| Column             | Type        | Notes                                        |
-| ------------------ | ----------- | -------------------------------------------- |
-| id                 | UUID PK     |                                              |
-| user_id            | UUID FK     | User scoping                                 |
-| name               | text        | "Groceries"                                  |
-| category_group_id  | UUID FK     | Required; links to `category_groups`         |
-| parent_id          | UUID FK     | Optional; subcategory hierarchy              |
-| deleted_at         | timestamptz | Nullable; soft delete                        |
+| Column            | Type        | Notes                                |
+| ----------------- | ----------- | ------------------------------------ |
+| id                | UUID PK     |                                      |
+| user_id           | UUID FK     | User scoping                         |
+| name              | text        | "Groceries"                          |
+| category_group_id | UUID FK     | Required; links to `category_groups` |
+| parent_id         | UUID FK     | Optional; subcategory hierarchy      |
+| deleted_at        | timestamptz | Nullable; soft delete                |
 
 **Note**: Optional responsibility-related columns (`responsibility_group_id`) are documented separately in `responsibility-groups.md`.
 
 ### category_groups
 
-| Column                          | Type        | Notes                                      |
-| ------------------------------- | ----------- | ------------------------------------------ |
-| id                              | UUID PK     |                                            |
-| user_id                         | UUID FK     | User scoping                               |
-| name                            | text        | "Need", "Want", "Savings"                  |
-| kind                            | enum        | income/expense/savings/general              |
-| ideal_percentage_basis_points   | integer     | Nullable; 5000 = 50%                       |
-| sort_order                      | integer     | Display order                              |
-| is_system                       | boolean     | Default groups, not user-deletable         |
-| created_at                      | timestamptz |                                          |
-| updated_at                      | timestamptz |                                          |
-| deleted_at                      | timestamptz | Nullable; soft delete                   |
+| Column                        | Type        | Notes                              |
+| ----------------------------- | ----------- | ---------------------------------- |
+| id                            | UUID PK     |                                    |
+| user_id                       | UUID FK     | User scoping                       |
+| name                          | text        | "Need", "Want", "Savings"          |
+| kind                          | enum        | income/expense/savings/general     |
+| ideal_percentage_basis_points | integer     | Nullable; 5000 = 50%               |
+| sort_order                    | integer     | Display order                      |
+| is_system                     | boolean     | Default groups, not user-deletable |
+| created_at                    | timestamptz |                                    |
+| updated_at                    | timestamptz |                                    |
+| deleted_at                    | timestamptz | Nullable; soft delete              |
 
 ### transaction_lines
 

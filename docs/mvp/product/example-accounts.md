@@ -5,6 +5,7 @@ Initial account setup for LedgerMx MVP. Users can modify, add, or remove.
 ## Canonical MVP Accounts
 
 The following four accounts are the core, required example accounts for the MVP:
+
 - **BBVA Debit** - Primary checking account
 - **BBVA Credit** - Primary credit card
 - **Nu Credit** - Digital credit card
@@ -13,6 +14,7 @@ The following four accounts are the core, required example accounts for the MVP:
 ## Account Properties
 
 Each account has:
+
 - UUID v4 identifier
 - Name (user-defined)
 - Type: debit | credit | loan | savings | investment | cash
@@ -33,12 +35,12 @@ accounts:
   - name: BBVA Credit
     type: credit
     currency: MXN
-    credit_limit_cents: 500000  # $5,000 MXN
+    credit_limit_cents: 500000 # $5,000 MXN
 
   - name: Nu Credit
     type: credit
     currency: MXN
-    credit_limit_cents: 300000  # $3,000 MXN
+    credit_limit_cents: 300000 # $3,000 MXN
 
   - name: Cash
     type: cash
@@ -48,6 +50,7 @@ accounts:
 ## Usage in Spendable Balance
 
 Real account balance (debit accounts)
+
 - Protected envelopes
 - Upcoming required payments (credit cards, loans)
-= Real spendable balance
+  = Real spendable balance

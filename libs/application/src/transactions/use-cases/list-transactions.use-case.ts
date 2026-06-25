@@ -1,19 +1,25 @@
 import type { TransactionRepository, UserId } from "@ledger-mx/domain";
-import type { ListTransactionsInput, ListTransactionsOutput } from "../transaction.types";
+import type {
+  ListTransactionsInput,
+  ListTransactionsOutput,
+} from "../transaction.types";
 
 export class ListTransactionsUseCase {
-  constructor(
-    private readonly transactionRepository: TransactionRepository,
-  ) {}
+  constructor(private readonly transactionRepository: TransactionRepository) {}
 
   async execute(input: ListTransactionsInput): Promise<ListTransactionsOutput> {
-    const transactions = await this.transactionRepository.listByUserId(input.userId as UserId);
+    const transactions = await this.transactionRepository.listByUserId(
+      input.userId as UserId,
+    );
 
     return {
       transactions: transactions.map((tx) => {
         // Compute totalAmountCents as the sum of positive lines
         const totalAmountCents = Math.abs(
-          tx.lines.reduce((sum, line) => sum + (line.amountCents > 0 ? line.amountCents : 0),0)
+          tx.lines.reduce(
+            (sum, line) => sum + (line.amountCents > 0 ? line.amountCents : 0),
+            0,
+          ),
         );
 
         return {

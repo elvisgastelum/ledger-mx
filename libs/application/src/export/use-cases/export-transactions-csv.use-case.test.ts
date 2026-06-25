@@ -1,10 +1,17 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { ExportTransactionsCsvUseCase } from "./export-transactions-csv.use-case";
-import type { TransactionExportRepository, TransactionExportRow } from "../ports/transaction-export.repository.port";
+import type {
+  TransactionExportRepository,
+  TransactionExportRow,
+} from "../ports/transaction-export.repository.port";
 import type { UserId } from "@ledger-mx/domain";
 
 describe("ExportTransactionsCsvUseCase", () => {
-  let mockRepository: { fetchForExport: ReturnType<typeof vi.fn<TransactionExportRepository["fetchForExport"]>> };
+  let mockRepository: {
+    fetchForExport: ReturnType<
+      typeof vi.fn<TransactionExportRepository["fetchForExport"]>
+    >;
+  };
   let useCase: ExportTransactionsCsvUseCase;
   const mockUserId: UserId = "user-123" as UserId;
 
@@ -14,7 +21,9 @@ describe("ExportTransactionsCsvUseCase", () => {
       fetchForExport: vi.fn<TransactionExportRepository["fetchForExport"]>(),
     };
 
-    useCase = new ExportTransactionsCsvUseCase(mockRepository as unknown as TransactionExportRepository);
+    useCase = new ExportTransactionsCsvUseCase(
+      mockRepository as unknown as TransactionExportRepository,
+    );
   });
 
   describe("CSV generation", () => {

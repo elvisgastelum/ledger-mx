@@ -20,15 +20,28 @@ void _client;
 
 // Check endpoint response shapes
 type RegisterResponse = Contract["auth"]["register"]["responses"][201];
-type _RegisterResponseCheck = RegisterResponse extends { accessToken: string } ? true : never;
+type _RegisterResponseCheck = RegisterResponse extends { accessToken: string }
+  ? true
+  : never;
 void ({} as _RegisterResponseCheck);
 
-type ListCategoriesResponse = Contract["categoryGroups"]["list"]["responses"][200];
-type _ListCategoriesCheck = ListCategoriesResponse extends { categoryGroups: unknown[] } ? true : never;
+type ListCategoriesResponse =
+  Contract["categoryGroups"]["list"]["responses"][200];
+type _ListCategoriesCheck = ListCategoriesResponse extends {
+  categoryGroups: unknown[];
+}
+  ? true
+  : never;
 void ({} as _ListCategoriesCheck);
 
-type ApplyLayoutResponse = Contract["onboarding"]["applyLayout"]["responses"][200];
-type _ApplyLayoutCheck = ApplyLayoutResponse extends { categoryGroups: unknown[]; created: boolean } ? true : never;
+type ApplyLayoutResponse =
+  Contract["onboarding"]["applyLayout"]["responses"][200];
+type _ApplyLayoutCheck = ApplyLayoutResponse extends {
+  categoryGroups: unknown[];
+  created: boolean;
+}
+  ? true
+  : never;
 void ({} as _ApplyLayoutCheck);
 
 // Runtime validation tests
@@ -59,13 +72,19 @@ describe("Schema runtime validation", () => {
 
   describe("UuidSchema", () => {
     it("should accept valid UUID v4", () => {
-      expect(UuidSchema.safeParse("550e8400-e29b-41d4-a716-446655440000").success).toBe(true);
-      expect(UuidSchema.safeParse("6ba7b810-9dad-11d1-80b4-00c04fd430c8").success).toBe(true);
+      expect(
+        UuidSchema.safeParse("550e8400-e29b-41d4-a716-446655440000").success,
+      ).toBe(true);
+      expect(
+        UuidSchema.safeParse("6ba7b810-9dad-11d1-80b4-00c04fd430c8").success,
+      ).toBe(true);
     });
 
     it("should reject invalid UUIDs", () => {
       expect(UuidSchema.safeParse("not-a-uuid").success).toBe(false);
-      expect(UuidSchema.safeParse("550e8400-e29b-41d4-a716").success).toBe(false);
+      expect(UuidSchema.safeParse("550e8400-e29b-41d4-a716").success).toBe(
+        false,
+      );
       expect(UuidSchema.safeParse("").success).toBe(false);
     });
   });
@@ -99,7 +118,9 @@ describe("Schema runtime validation", () => {
         ],
       };
 
-      expect(CreateTransactionRequestSchema.safeParse(validTransaction).success).toBe(true);
+      expect(
+        CreateTransactionRequestSchema.safeParse(validTransaction).success,
+      ).toBe(true);
     });
 
     it("should reject transaction where lines do not sum to zero", () => {
@@ -119,12 +140,17 @@ describe("Schema runtime validation", () => {
         ],
       };
 
-       const result = CreateTransactionRequestSchema.safeParse(invalidTransaction);
-       expect(result.success).toBe(false);
-       if (!result.success) {
-         expect(result.error.issues.some((issue) => issue.message.includes("sum to zero"))).toBe(true);
-       }
-     });
+      const result =
+        CreateTransactionRequestSchema.safeParse(invalidTransaction);
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(
+          result.error.issues.some((issue) =>
+            issue.message.includes("sum to zero"),
+          ),
+        ).toBe(true);
+      }
+    });
 
     it("should reject transaction with float amounts in lines", () => {
       const invalidTransaction = {
@@ -132,18 +158,20 @@ describe("Schema runtime validation", () => {
         transactionDate: new Date().toISOString(),
         type: "expense" as const,
         lines: [
-          validLine({ amountCents: -1234.50 }), // Float
+          validLine({ amountCents: -1234.5 }), // Float
           validLine({
             id: "550e8400-e29b-41d4-a716-446655440002",
             targetType: "category" as const,
             accountId: null,
             categoryId: "770e8400-e29b-41d4-a716-446655440000",
-            amountCents: 1234.50, // Float
+            amountCents: 1234.5, // Float
           }),
         ],
       };
 
-      expect(CreateTransactionRequestSchema.safeParse(invalidTransaction).success).toBe(false);
+      expect(
+        CreateTransactionRequestSchema.safeParse(invalidTransaction).success,
+      ).toBe(false);
     });
 
     it("should reject transaction where lines do not sum to zero", () => {
@@ -162,12 +190,17 @@ describe("Schema runtime validation", () => {
         ],
       };
 
-       const result = CreateTransactionRequestSchema.safeParse(invalidTransaction);
-       expect(result.success).toBe(false);
-       if (!result.success) {
-         expect(result.error.issues.some((issue) => issue.message.includes("sum to zero"))).toBe(true);
-       }
-     });
+      const result =
+        CreateTransactionRequestSchema.safeParse(invalidTransaction);
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(
+          result.error.issues.some((issue) =>
+            issue.message.includes("sum to zero"),
+          ),
+        ).toBe(true);
+      }
+    });
 
     it("should reject transaction with less than 2 lines", () => {
       const invalidTransaction = {
@@ -177,7 +210,9 @@ describe("Schema runtime validation", () => {
         lines: [validLine()], // Only 1 line
       };
 
-      expect(CreateTransactionRequestSchema.safeParse(invalidTransaction).success).toBe(false);
+      expect(
+        CreateTransactionRequestSchema.safeParse(invalidTransaction).success,
+      ).toBe(false);
     });
 
     it("should reject transaction with float amounts in lines", () => {
@@ -186,17 +221,19 @@ describe("Schema runtime validation", () => {
         transactionDate: new Date().toISOString(),
         type: "expense" as const,
         lines: [
-          validLine({ amountCents: -1234.50 }), // Float
+          validLine({ amountCents: -1234.5 }), // Float
           validLine({
             id: "550e8400-e29b-41d4-a716-446655440002",
             accountId: null,
             categoryId: "770e8400-e29b-41d4-a716-446655440000",
-            amountCents: 1234.50, // Float
+            amountCents: 1234.5, // Float
           }),
         ],
       };
 
-      expect(CreateTransactionRequestSchema.safeParse(invalidTransaction).success).toBe(false);
+      expect(
+        CreateTransactionRequestSchema.safeParse(invalidTransaction).success,
+      ).toBe(false);
     });
   });
 
@@ -226,7 +263,9 @@ describe("Schema runtime validation", () => {
         ],
       };
 
-      expect(UpdateTransactionRequestSchema.safeParse(validUpdate).success).toBe(true);
+      expect(
+        UpdateTransactionRequestSchema.safeParse(validUpdate).success,
+      ).toBe(true);
     });
 
     it("should reject update where lines do not sum to zero", () => {
@@ -253,12 +292,16 @@ describe("Schema runtime validation", () => {
         ],
       };
 
-       const result = UpdateTransactionRequestSchema.safeParse(invalidUpdate);
-       expect(result.success).toBe(false);
-       if (!result.success) {
-         expect(result.error.issues.some((issue) => issue.message.includes("sum to zero"))).toBe(true);
-       }
-     });
+      const result = UpdateTransactionRequestSchema.safeParse(invalidUpdate);
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(
+          result.error.issues.some((issue) =>
+            issue.message.includes("sum to zero"),
+          ),
+        ).toBe(true);
+      }
+    });
 
     it("should reject empty update object", () => {
       const emptyUpdate = {};
@@ -266,9 +309,14 @@ describe("Schema runtime validation", () => {
       const result = UpdateTransactionRequestSchema.safeParse(emptyUpdate);
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(result.error.issues.some((issue) => issue.message.toLowerCase().includes("at least one updatable field"))).toBe(true);
+        expect(
+          result.error.issues.some((issue) =>
+            issue.message
+              .toLowerCase()
+              .includes("at least one updatable field"),
+          ),
+        ).toBe(true);
       }
     });
   });
 });
-

@@ -20,12 +20,12 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
           // Mobile-first: min 44px touch target
           "min-h-[44px]",
           error && "border-destructive focus-visible:ring-destructive",
-          className
+          className,
         )}
         {...props}
       />
     );
-  }
+  },
 );
 
 Input.displayName = "Input";

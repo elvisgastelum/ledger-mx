@@ -9,7 +9,13 @@ import { Controller, useForm } from "react-hook-form";
 import { useAuth } from "../lib/auth-context";
 import { getSafeRedirect } from "../lib/auth-utils";
 import { Button } from "../components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "../components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
@@ -60,7 +66,7 @@ export function RegisterPage() {
         data.email,
         data.password,
         data.displayName || undefined,
-        data.rememberMe
+        data.rememberMe,
       );
       // Navigate to redirect target or fallback to /onboarding
       const redirectTo = getSafeRedirect(search.redirect);
@@ -83,7 +89,9 @@ export function RegisterPage() {
     <div className="flex min-h-screen items-center justify-center px-4 py-12 sm:px-6 lg:px-8">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <CardTitle className="text-3xl font-bold tracking-tight">Create Your LedgerMx Account</CardTitle>
+          <CardTitle className="text-3xl font-bold tracking-tight">
+            Create Your LedgerMx Account
+          </CardTitle>
           <CardDescription>
             Sign up to start managing your finances
           </CardDescription>
@@ -95,7 +103,10 @@ export function RegisterPage() {
             aria-label="Registration Form"
           >
             {errors.root && (
-              <div className="rounded-md bg-destructive/15 p-3 text-sm text-destructive" role="alert">
+              <div
+                className="rounded-md bg-destructive/15 p-3 text-sm text-destructive"
+                role="alert"
+              >
                 {errors.root.message}
               </div>
             )}
@@ -117,7 +128,9 @@ export function RegisterPage() {
                 })}
               />
               {errors.email && (
-                <p className="text-sm text-destructive">{errors.email.message}</p>
+                <p className="text-sm text-destructive">
+                  {errors.email.message}
+                </p>
               )}
             </div>
 
@@ -144,7 +157,9 @@ export function RegisterPage() {
                 })}
               />
               {errors.password && (
-                <p className="text-sm text-destructive">{errors.password.message}</p>
+                <p className="text-sm text-destructive">
+                  {errors.password.message}
+                </p>
               )}
             </div>
 
@@ -163,7 +178,9 @@ export function RegisterPage() {
                 })}
               />
               {errors.confirmPassword && (
-                <p className="text-sm text-destructive">{errors.confirmPassword.message}</p>
+                <p className="text-sm text-destructive">
+                  {errors.confirmPassword.message}
+                </p>
               )}
             </div>
 
@@ -183,7 +200,9 @@ export function RegisterPage() {
                 })}
               />
               {errors.displayName && (
-                <p className="text-sm text-destructive">{errors.displayName.message}</p>
+                <p className="text-sm text-destructive">
+                  {errors.displayName.message}
+                </p>
               )}
             </div>
 
@@ -191,15 +210,22 @@ export function RegisterPage() {
               name="rememberMe"
               control={control}
               render={({ field }) => (
-                <label htmlFor="rememberMe" className="flex min-h-[44px] items-center space-x-2 cursor-pointer">
+                <label
+                  htmlFor="rememberMe"
+                  className="flex min-h-[44px] items-center space-x-2 cursor-pointer"
+                >
                   <Checkbox
                     id="rememberMe"
                     checked={field.value === true}
-                    onCheckedChange={(checked) => field.onChange(checked === true)}
+                    onCheckedChange={(checked) =>
+                      field.onChange(checked === true)
+                    }
                     disabled={isSubmitting}
                     aria-invalid={!!errors.rememberMe}
                   />
-                  <span className="text-sm">Remember me (extends session to 30 days)</span>
+                  <span className="text-sm">
+                    Remember me (extends session to 30 days)
+                  </span>
                 </label>
               )}
             />
@@ -210,7 +236,10 @@ export function RegisterPage() {
           </form>
 
           <p className="mt-6 text-center text-sm">
-            Already have an account? <a href="/login" className="text-primary hover:underline">Login here</a>
+            Already have an account?{" "}
+            <a href="/login" className="text-primary hover:underline">
+              Login here
+            </a>
           </p>
         </CardContent>
       </Card>

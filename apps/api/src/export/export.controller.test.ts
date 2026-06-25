@@ -53,7 +53,8 @@ describe("ExportController", () => {
   describe("GET /api/v1/export/csv", () => {
     it("should return CSV content", async () => {
       // Arrange
-      const csvContent = "date,amount,category,note,account\n2024-01-15,50.00,Groceries,Weekly shopping,Checking";
+      const csvContent =
+        "date,amount,category,note,account\n2024-01-15,50.00,Groceries,Weekly shopping,Checking";
       mockUseCase.execute.mockResolvedValue({ csv: csvContent });
 
       // Act & Assert
@@ -71,7 +72,9 @@ describe("ExportController", () => {
 
     it("should handle date range query parameters", async () => {
       // Arrange
-      mockUseCase.execute.mockResolvedValue({ csv: "date,amount,category,note,account" });
+      mockUseCase.execute.mockResolvedValue({
+        csv: "date,amount,category,note,account",
+      });
 
       // Act & Assert
       await request(app.getHttpServer())

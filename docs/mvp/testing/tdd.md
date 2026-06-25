@@ -6,15 +6,15 @@
 
 ```typescript
 // libs/domain/__tests__/transaction.test.ts
-test('transaction must balance', () => {
+test("transaction must balance", () => {
   const tx = new Transaction({
     amountCents: 10000,
     lines: [
-      { accountId: 'a1', amountCents: -10000 },
+      { accountId: "a1", amountCents: -10000 },
       // Missing second line - unbalanced
     ],
   });
-  
+
   expect(() => tx.validate()).toThrow();
 });
 ```

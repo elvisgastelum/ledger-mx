@@ -17,19 +17,22 @@ export const transactions = pgTable(
       .references(() => users.id)
       .notNull(),
     type: transactionTypeEnum("type").notNull(),
-    occurredAt: timestamp("occurred_at", { withTimezone: true, mode: 'date' }).notNull(),
+    occurredAt: timestamp("occurred_at", {
+      withTimezone: true,
+      mode: "date",
+    }).notNull(),
     description: text("description"),
     externalId: text("external_id"),
     reversalOfTransactionId: uuid("reversal_of_transaction_id").references(
       (): AnyPgColumn => transactions.id,
     ),
-    createdAt: timestamp("created_at", { withTimezone: true, mode: 'date' })
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "date" })
       .defaultNow()
       .notNull(),
-    updatedAt: timestamp("updated_at", { withTimezone: true, mode: 'date' })
+    updatedAt: timestamp("updated_at", { withTimezone: true, mode: "date" })
       .defaultNow()
       .notNull(),
-    deletedAt: timestamp("deleted_at", { withTimezone: true, mode: 'date' }),
+    deletedAt: timestamp("deleted_at", { withTimezone: true, mode: "date" }),
   },
   (table) => ({
     transactionsUserIdIdx: index("transactions_user_id_idx").on(table.userId),

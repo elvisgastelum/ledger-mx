@@ -28,12 +28,10 @@ function EmptyState({
     <div
       className={cn(
         "flex min-h-[400px] flex-col items-center justify-center rounded-lg border border-dashed p-8 text-center",
-        className
+        className,
       )}
     >
-      {icon && (
-        <div className="mb-4 text-muted-foreground">{icon}</div>
-      )}
+      {icon && <div className="mb-4 text-muted-foreground">{icon}</div>}
       <h3 className="mb-2 text-lg font-semibold">{title}</h3>
       {description && (
         <p className="mb-6 max-w-sm text-sm text-muted-foreground">

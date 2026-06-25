@@ -23,8 +23,8 @@ export function AuthGuard({ children }: AuthGuardProps) {
       // This avoids the issue where location.pathname may already be '/login'
       // when using TanStack Router's useLocation()
       const redirectPath = window.location.pathname;
-      navigate({ 
-        to: "/login", 
+      navigate({
+        to: "/login",
         search: { redirect: redirectPath },
       });
     }

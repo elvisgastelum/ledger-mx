@@ -13,7 +13,10 @@ import {
   CreateTransactionUseCase,
   ListTransactionsUseCase,
 } from "@ledger-mx/application";
-import { createDatabase, DrizzleTransactionRepository } from "@ledger-mx/database";
+import {
+  createDatabase,
+  DrizzleTransactionRepository,
+} from "@ledger-mx/database";
 
 // Internal token for shared database connection
 const TRANSACTIONS_DATABASE = Symbol("TRANSACTIONS_DATABASE");
@@ -51,10 +54,7 @@ export class TransactionsModule {
     return {
       module: TransactionsModule,
       controllers: [TransactionsController],
-      imports: [
-        ConfigModule,
-        JwtAccessModule,
-      ],
+      imports: [ConfigModule, JwtAccessModule],
       providers: [
         transactionRepoProvider,
         ...(needsDatabase ? [createDefaultDatabaseProvider()] : []),

@@ -37,31 +37,33 @@ async function rotateRefreshToken(oldToken: string, sessionId: string) {
   // 1. Validate
   const payload = verify(oldToken);
   const session = await db.findSession(sessionId);
-  
+
   if (!session || session.refreshTokenHash !== hash(oldToken)) {
-    throw new UnauthorizedException('Invalid refresh token');
+    throw new UnauthorizedException("Invalid refresh token");
   }
-  
+
   // 2. Replay detection
   if (session.rotatedAt) {
     // Token already used! Possible theft.
     await db.invalidateAllUserSessions(session.userId);
-    throw new UnauthorizedException('Token reuse detected - session invalidated');
+    throw new UnauthorizedException(
+      "Token reuse detected - session invalidated",
+    );
   }
-  
+
   // 3. Invalidate old
   await db.markTokenRotated(sessionId);
-  
+
   // 4-6. Issue new
-  const newToken = sign({ sub: payload.sub }, { expiresIn: '7d' });
+  const newToken = sign({ sub: payload.sub }, { expiresIn: "7d" });
   const newHash = await bcrypt.hash(newToken, 10);
-  
+
   await db.updateSession(sessionId, {
     refreshTokenHash: newHash,
     expiresAt: addDays(new Date(), 7),
   });
-  
-  setCookie('refresh_token', newToken, { httpOnly: true, sameSite: 'strict' });
+
+  setCookie("refresh_token", newToken, { httpOnly: true, sameSite: "strict" });
   return newToken;
 }
 ```

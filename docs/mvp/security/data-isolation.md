@@ -30,7 +30,8 @@ All repository methods filter by user_id:
 ```typescript
 class TransactionRepository {
   async findByUserId(userId: string): Promise<Transaction[]> {
-    return db.select()
+    return db
+      .select()
       .from(transactions)
       .where(eq(transactions.userId, userId));
   }
@@ -59,7 +60,7 @@ Extract user_id from JWT, pass to use cases:
 
 ```typescript
 // NestJS guard sets req.user
-req.user = { userId: '...', email: '...' };
+req.user = { userId: "...", email: "..." };
 ```
 
 ## Testing Data Isolation

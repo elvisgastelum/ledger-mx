@@ -5,6 +5,7 @@ Contract-first API design using `@ts-rest/core` for schema definitions and type 
 ## Contract Structure
 
 Each endpoint contract defines:
+
 - HTTP method (GET, POST, PATCH, DELETE, etc.)
 - Absolute path (no global path prefix; routes use their actual deployed paths, e.g., `/auth/register`, `/api/v1/onboarding/layout`)
 - Path parameters (using `pathParams` with Zod schemas)
@@ -17,6 +18,7 @@ Each endpoint contract defines:
 ## Schema Rules
 
 All request/response schemas enforce MVP conventions:
+
 - Money values: integer in cents (use `MoneySchema` from `libs/contracts`)
 - IDs: UUID v4 strings (use `UuidSchema` from `libs/contracts`)
 - Dates: ISO 8601 datetime strings (offset inclusive)
@@ -34,11 +36,11 @@ Contracts define standardized `ErrorResponseSchema` ( `{ error: string, message:
 
 ## Endpoint Status
 
-| Router          | Endpoint               | Status       |
-|-----------------|------------------------|--------------|
-| `auth`          | `register`, `login`, `refresh`, `logout` | Implemented |
-| `categoryGroups`| `list`, `create`, `update`, `delete` | Implemented |
-| `onboarding`    | `applyLayout`          | Implemented  |
-| `reports`       | All endpoints          | Planned      |
-| `export`        | `downloadCsv`          | Planned      |
-| `health`        | `liveness`, `readiness`| Planned      |
+| Router           | Endpoint                                 | Status      |
+| ---------------- | ---------------------------------------- | ----------- |
+| `auth`           | `register`, `login`, `refresh`, `logout` | Implemented |
+| `categoryGroups` | `list`, `create`, `update`, `delete`     | Implemented |
+| `onboarding`     | `applyLayout`                            | Implemented |
+| `reports`        | All endpoints                            | Planned     |
+| `export`         | `downloadCsv`                            | Planned     |
+| `health`         | `liveness`, `readiness`                  | Planned     |

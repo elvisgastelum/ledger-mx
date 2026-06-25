@@ -34,6 +34,8 @@ export const categories = pgTable(
   (table) => ({
     categoriesUserIdIdx: index("categories_user_id_idx").on(table.userId),
     categoriesParentIdIdx: index("categories_parent_id_idx").on(table.parentId),
-    categoriesGroupIdIdx: index("categories_group_id_idx").on(table.categoryGroupId),
+    categoriesGroupIdIdx: index("categories_group_id_idx").on(
+      table.categoryGroupId,
+    ),
   }),
 );

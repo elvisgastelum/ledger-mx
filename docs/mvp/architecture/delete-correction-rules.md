@@ -5,11 +5,13 @@ Never hard-delete financial records. Use soft delete and reversals.
 ## Deletion Rules
 
 ### Pending/Draft (Local Only, Not Synced)
+
 - May be edited or discarded before sync
 - Status: `draft` or `pending`
 - No audit log required (local-only)
 
 ### Cleared/Synced (Server Persistent)
+
 - **Never hard-delete**
 - Reversal required for corrections
 - Audit trail preserved
@@ -24,6 +26,7 @@ Once synced, corrections use reversal + corrected transaction:
 3. Original transaction marked as `reversed_by`
 
 Example: Correct $100 expense to $150:
+
 1. Reversal: +$100 (type: reversal, note "Reversal for abc-123")
 2. Corrected: -$150 (type: expense, links to reversal)
 
@@ -38,6 +41,7 @@ Example: Correct $100 expense to $150:
 ## Audit Log
 
 Every mutation logs to `audit_log`:
+
 - `action`: create | update | reversal | soft_delete
 - `entity`: transaction | account | etc.
 - `before`: JSON (state before)

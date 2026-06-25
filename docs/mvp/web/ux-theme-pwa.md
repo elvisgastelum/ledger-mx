@@ -19,11 +19,11 @@ type Theme = 'light' | 'dark' | 'system';
 
 function ThemeToggle() {
   const [theme, setTheme] = useLocalStorage<Theme>('theme-preference', 'system');
-  
+
   useEffect(() => {
     applyTheme(theme);
   }, [theme]);
-  
+
   return (
     <Select value={theme} onValueChange={setTheme}>
       <option value="light">Light</option>
@@ -35,7 +35,7 @@ function ThemeToggle() {
 
 function applyTheme(theme: Theme) {
   const root = document.documentElement;
-  
+
   if (theme === 'system') {
     const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
     root.classList.toggle('dark', systemDark);

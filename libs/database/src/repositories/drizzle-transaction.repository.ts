@@ -1,6 +1,12 @@
 import { eq, and, isNull } from "drizzle-orm";
 import { Transaction, TransactionLine } from "@ledger-mx/domain";
-import type { TransactionRepository, UserId, TransactionId, TransactionLineId, TransactionLineTargetId } from "@ledger-mx/domain";
+import type {
+  TransactionRepository,
+  UserId,
+  TransactionId,
+  TransactionLineId,
+  TransactionLineTargetId,
+} from "@ledger-mx/domain";
 import type { Database } from "../connection";
 import { transactions, transactionLines } from "../schema";
 
@@ -62,25 +68,26 @@ export class DrizzleTransactionRepository implements TransactionRepository {
         categoryId = line.targetId as string;
       }
 
-      await this.db
-        .insert(transactionLines)
-        .values({
-          id: line.id,
-          userId: transaction.userId,
-          transactionId: line.transactionId,
-          targetType: line.targetType,
-          accountId: accountId,
-          envelopeId: envelopeId,
-          categoryId: categoryId,
-          amountCents: line.amountCents,
-          createdAt: transaction.createdAt,
-          updatedAt: transaction.updatedAt,
-          deletedAt: null,
-        });
+      await this.db.insert(transactionLines).values({
+        id: line.id,
+        userId: transaction.userId,
+        transactionId: line.transactionId,
+        targetType: line.targetType,
+        accountId: accountId,
+        envelopeId: envelopeId,
+        categoryId: categoryId,
+        amountCents: line.amountCents,
+        createdAt: transaction.createdAt,
+        updatedAt: transaction.updatedAt,
+        deletedAt: null,
+      });
     }
   }
 
-  async findById(userId: UserId, transactionId: TransactionId): Promise<Transaction | null> {
+  async findById(
+    userId: UserId,
+    transactionId: TransactionId,
+  ): Promise<Transaction | null> {
     const txRows = await this.db
       .select()
       .from(transactions)
@@ -142,10 +149,7 @@ export class DrizzleTransactionRepository implements TransactionRepository {
       .select()
       .from(transactions)
       .where(
-        and(
-          eq(transactions.userId, userId),
-          isNull(transactions.deletedAt),
-        ),
+        and(eq(transactions.userId, userId), isNull(transactions.deletedAt)),
       )
       .orderBy(transactions.occurredAt);
 
@@ -203,7 +207,12 @@ export class DrizzleTransactionRepository implements TransactionRepository {
     return result;
   }
 
-  private getTargetId(row: { targetType: string; accountId: string | null; envelopeId: string | null; categoryId: string | null }): string {
+  private getTargetId(row: {
+    targetType: string;
+    accountId: string | null;
+    envelopeId: string | null;
+    categoryId: string | null;
+  }): string {
     if (row.targetType === "account") {
       return row.accountId!;
     } else if (row.targetType === "envelope") {

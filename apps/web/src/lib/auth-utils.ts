@@ -22,7 +22,7 @@ export function getSafeRedirect(redirect: unknown): string {
 
   // Check for dangerous protocols in the path
   const lowerRedirect = redirect.toLowerCase();
-  
+
   // Reject javascript: protocol (could be in various cases)
   if (lowerRedirect.includes("javascript:")) {
     return "/onboarding";

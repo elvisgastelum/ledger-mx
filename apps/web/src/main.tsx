@@ -29,9 +29,9 @@ function Home() {
       <div>
         <h1>Welcome to LedgerMx</h1>
         <a href="/onboarding">Start Onboarding</a>
-        
+
         <hr />
-        
+
         <ExportForm />
       </div>
     </AppShell>
@@ -147,5 +147,5 @@ createRoot(rootElement).render(
         </AuthProvider>
       </QueryClientProvider>
     </ThemeProvider>
-  </StrictMode>
+  </StrictMode>,
 );

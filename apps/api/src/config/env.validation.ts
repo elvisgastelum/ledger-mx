@@ -14,7 +14,9 @@ export const envSchema = z.object({
 
   JWT_SECRET: z
     .string()
-    .min(32, { message: "JWT_SECRET must be at least 32 characters long for security" }),
+    .min(32, {
+      message: "JWT_SECRET must be at least 32 characters long for security",
+    }),
 
   JWT_ACCESS_TOKEN_TTL: z.string().default("15m"),
 

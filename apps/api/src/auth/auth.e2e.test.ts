@@ -54,7 +54,7 @@ describe("Auth E2E (real database)", () => {
     // Create pool and database connection (same as working integration test)
     pool = new Pool({ connectionString });
     // Swallow expected connection termination errors during teardown
-    pool.on('error', () => {});
+    pool.on("error", () => {});
     db = drizzle(pool, { schema });
 
     // Run migrations with correct path from apps/api/src/auth/ to libs/database/drizzle

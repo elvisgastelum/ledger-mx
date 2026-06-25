@@ -39,9 +39,7 @@ describe("LoginPage", () => {
     // Use getByLabelText with more specific regex
     const passwordInputs = screen.getAllByLabelText(/password/i);
     expect(passwordInputs.length).toBeGreaterThan(0);
-    expect(
-      screen.getByRole("button", { name: /login/i })
-    ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /login/i })).toBeInTheDocument();
   });
 
   it("renders the remember me checkbox", () => {
@@ -75,14 +73,16 @@ describe("RegisterPage", () => {
     // Confirm Password field
     expect(screen.getByLabelText(/confirm password/i)).toBeInTheDocument();
     expect(
-      screen.getByRole("button", { name: /create account/i })
+      screen.getByRole("button", { name: /create account/i }),
     ).toBeInTheDocument();
   });
 
   it("renders the display name field as optional", () => {
     render(<RegisterPage />);
 
-    expect(screen.getByLabelText(/display name.*optional/i)).toBeInTheDocument();
+    expect(
+      screen.getByLabelText(/display name.*optional/i),
+    ).toBeInTheDocument();
   });
 
   it("renders the remember me checkbox", () => {

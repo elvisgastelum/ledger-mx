@@ -35,7 +35,7 @@ export function MobileNav({ isOpen, onClose }: MobileNavProps) {
       <nav
         className={cn(
           "fixed top-0 left-0 z-50 h-full w-64 transform bg-background shadow-lg transition-transform duration-200 ease-in-out lg:hidden",
-          isOpen ? "translate-x-0" : "-translate-x-full"
+          isOpen ? "translate-x-0" : "-translate-x-full",
         )}
         aria-label="Mobile navigation"
       >

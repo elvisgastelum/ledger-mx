@@ -20,13 +20,13 @@ Real account balance
 ## Account Schema
 
 ```typescript
-export const accounts = pgTable('accounts', {
-  id: uuid('id').primaryKey(),
-  userId: uuid('user_id').notNull(),
-  name: text('name').notNull(),
-  type: accountTypeEnum('type').notNull(),
-  balanceCents: integer('balance_cents').notNull().default(0),
-  creditLimitCents: integer('credit_limit_cents'), // for credit
+export const accounts = pgTable("accounts", {
+  id: uuid("id").primaryKey(),
+  userId: uuid("user_id").notNull(),
+  name: text("name").notNull(),
+  type: accountTypeEnum("type").notNull(),
+  balanceCents: integer("balance_cents").notNull().default(0),
+  creditLimitCents: integer("credit_limit_cents"), // for credit
 });
 ```
 
@@ -35,18 +35,19 @@ export const accounts = pgTable('accounts', {
 Protected allocations within accounts.
 
 ```typescript
-export const envelopes = pgTable('envelopes', {
-  id: uuid('id').primaryKey(),
-  userId: uuid('user_id').notNull(),
-  name: text('name').notNull(),
-  allocatedCents: integer('allocated_cents').notNull().default(0),
-  targetCents: integer('target_cents'), // optional goal
+export const envelopes = pgTable("envelopes", {
+  id: uuid("id").primaryKey(),
+  userId: uuid("user_id").notNull(),
+  name: text("name").notNull(),
+  allocatedCents: integer("allocated_cents").notNull().default(0),
+  targetCents: integer("target_cents"), // optional goal
 });
 ```
 
 ## Envelope Allocation
 
 Transaction type: envelope_allocation
+
 - Line 1: debit account (-amount)
 - Line 2: credit envelope (+amount)
 

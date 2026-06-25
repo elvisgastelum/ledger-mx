@@ -5,6 +5,7 @@ New user setup wizard for LedgerMx, including category group layout selection.
 ## Purpose
 
 Guide new users through initial setup with a streamlined wizard that:
+
 - Creates default category groups based on selected layout
 - Explains the 50/30/20 budgeting method (if selected)
 - Minimizes setup friction while providing sensible defaults
@@ -22,12 +23,14 @@ Guide new users through initial setup with a streamlined wizard that:
 User chooses one of two layouts:
 
 #### Option A: Blank Layout
+
 - Description: "Start fresh with a clean slate"
 - Creates single "General" category group
 - User adds categories and groups manually later
 - Ideal for: Users who want full customization
 
 #### Option B: 50/30/20 Layout
+
 - Description: "Popular budgeting method: 50% Needs, 30% Wants, 20% Savings"
 - Creates three category groups:
   - **Need** (50%): Essentials like rent, groceries, utilities
@@ -51,6 +54,7 @@ User chooses one of two layouts:
 ## Data Created
 
 ### Blank Layout
+
 ```json
 {
   "categoryGroups": [
@@ -69,6 +73,7 @@ User chooses one of two layouts:
 ```
 
 ### 50/30/20 Layout
+
 ```json
 {
   "categoryGroups": [
@@ -129,6 +134,7 @@ User chooses one of two layouts:
 `POST /api/v1/onboarding/layout` - Apply default category group layout
 
 ### Request
+
 ```json
 {
   "layout": "blank | 50-30-20"
@@ -136,6 +142,7 @@ User chooses one of two layouts:
 ```
 
 ### Response
+
 ```json
 {
   "categoryGroups": [
@@ -155,6 +162,7 @@ User chooses one of two layouts:
 ```
 
 ### Behavior
+
 - Returns `created: true` when new groups are created
 - Returns `created: false` when matching system groups already exist (idempotent)
 - Returns 409 Conflict if existing groups don't match requested layout

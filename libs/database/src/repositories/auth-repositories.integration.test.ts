@@ -7,7 +7,15 @@ import * as schema from "../schema/index";
 import { DrizzleUserRepository } from "./drizzle-user.repository";
 import { DrizzleSessionRepository } from "./drizzle-session.repository";
 import { DrizzleAuthAuditLogRepository } from "./drizzle-auth-audit-log.repository";
-import { AuthUser, AuthSession, AuthAuditLog, SessionId, sessionIdFromString, UserId, userIdFromString } from "@ledger-mx/domain";
+import {
+  AuthUser,
+  AuthSession,
+  AuthAuditLog,
+  SessionId,
+  sessionIdFromString,
+  UserId,
+  userIdFromString,
+} from "@ledger-mx/domain";
 import { NodeCryptoIdGenerator } from "@ledger-mx/infrastructure";
 
 const idGenerator = new NodeCryptoIdGenerator();
@@ -38,10 +46,7 @@ describe("Auth Repositories Integration Tests", () => {
     db = drizzle(pool, { schema });
 
     // Run migrations
-    const migrationsFolder = new URL(
-      "../../drizzle",
-      import.meta.url,
-    ).pathname;
+    const migrationsFolder = new URL("../../drizzle", import.meta.url).pathname;
     await migrate(db, { migrationsFolder });
 
     // Create repositories
@@ -110,7 +115,9 @@ describe("Auth Repositories Integration Tests", () => {
     });
 
     it("should return null for non-existent id", async () => {
-      const found = await userRepository.findById(userIdFromString(idGenerator.uuid()));
+      const found = await userRepository.findById(
+        userIdFromString(idGenerator.uuid()),
+      );
       expect(found).toBeNull();
     });
 
@@ -207,9 +214,8 @@ describe("Auth Repositories Integration Tests", () => {
     });
 
     it("should return null for non-existent refresh token hash", async () => {
-      const found = await sessionRepository.findByRefreshTokenHash(
-        "nonexistent_hash",
-      );
+      const found =
+        await sessionRepository.findByRefreshTokenHash("nonexistent_hash");
       expect(found).toBeNull();
     });
 

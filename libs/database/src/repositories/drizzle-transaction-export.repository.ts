@@ -1,7 +1,15 @@
 import { eq, and, isNull, gte, lte } from "drizzle-orm";
 import type { Database } from "../connection";
-import { transactions, transactionLines, accounts, categories } from "../schema";
-import type { TransactionExportRepository, TransactionExportRow } from "@ledger-mx/application";
+import {
+  transactions,
+  transactionLines,
+  accounts,
+  categories,
+} from "../schema";
+import type {
+  TransactionExportRepository,
+  TransactionExportRow,
+} from "@ledger-mx/application";
 import type { UserId } from "@ledger-mx/domain";
 
 /**
@@ -49,7 +57,10 @@ export class DrizzleTransactionExportRepository implements TransactionExportRepo
         account: accounts.name,
       })
       .from(transactions)
-      .innerJoin(transactionLines, eq(transactionLines.transactionId, transactions.id))
+      .innerJoin(
+        transactionLines,
+        eq(transactionLines.transactionId, transactions.id),
+      )
       .innerJoin(accounts, eq(accounts.id, transactionLines.accountId))
       .leftJoin(categories, eq(categories.id, transactionLines.categoryId))
       .where(and(...conditions))

@@ -28,7 +28,10 @@ export class ExportController {
   ) {}
 
   @TsRestHandler(contract.export.downloadCsv)
-  async downloadCsv(@Req() req: RequestWithUser, @Res({ passthrough: true }) res: Response): Promise<unknown> {
+  async downloadCsv(
+    @Req() req: RequestWithUser,
+    @Res({ passthrough: true }) res: Response,
+  ): Promise<unknown> {
     return tsRestHandler(contract.export.downloadCsv, async ({ query }) => {
       const user = req.user;
       const userId = userIdFromString(user.sub);
@@ -53,7 +56,9 @@ export class ExportController {
 
       // Validate date range
       if (startDate && endDate && startDate > endDate) {
-        throw new BadRequestException("startDate must be before or equal to endDate");
+        throw new BadRequestException(
+          "startDate must be before or equal to endDate",
+        );
       }
 
       // Generate CSV
@@ -65,7 +70,10 @@ export class ExportController {
 
       // Set headers for CSV download
       res.setHeader("Content-Type", "text/csv");
-      res.setHeader("Content-Disposition", 'attachment; filename="transactions.csv"');
+      res.setHeader(
+        "Content-Disposition",
+        'attachment; filename="transactions.csv"',
+      );
 
       return {
         status: 200 as const,

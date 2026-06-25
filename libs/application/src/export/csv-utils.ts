@@ -1,9 +1,9 @@
 /**
  * Escapes a value for safe CSV output.
- * 
+ *
  * @param value - The value to escape (string, null, or undefined)
  * @returns The escaped CSV string
- * 
+ *
  * @example
  * escapeCsvValue("hello") // "hello"
  * escapeCsvValue("hello, world") // "\"hello, world\""

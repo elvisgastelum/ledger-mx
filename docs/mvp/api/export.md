@@ -10,15 +10,18 @@ Download filtered financial data as a CSV file.
 
 **Auth Required**: Yes (JWT)
 **Query Parameters**:
+
 - `startDate` (optional): ISO 8601 datetime (inclusive start of range)
 - `endDate` (optional): ISO 8601 datetime (inclusive end of range)
 - `type` (required): Enum of `transactions`, `category-groups`, `reports` (type of data to export)
 
 **Success Response (200)**:
+
 - Content-Type: `text/csv`
 - Body: CSV file content (string)
 
 **Error Responses**:
+
 - 400: Invalid query parameters
 - 401: Unauthorized (invalid/missing JWT)
 - 501: Not Implemented
@@ -28,12 +31,14 @@ Download filtered financial data as a CSV file.
 ## CSV Format (Transactions)
 
 Planned default format for `type=transactions` exports:
+
 ```csv
 Date,Amount_Cents,Debit_Credit,Account,Envelope,Category,Note,Type
 2024-01-15,10050,debit,BBVA Debit,Food,Groceries,Weekly shopping,expense
 ```
 
 ### Rules
+
 - Amounts are in cents (integer, always positive)
 - `Debit_Credit` column indicates transaction direction
 - Column order is fixed as above

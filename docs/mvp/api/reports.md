@@ -10,10 +10,12 @@ Get spendable balance for an optional date range.
 
 **Auth Required**: Yes (JWT)
 **Query Parameters**:
+
 - `startDate` (optional): ISO 8601 datetime (inclusive start of range)
 - `endDate` (optional): ISO 8601 datetime (inclusive end of range)
 
 **Success Response (200)**:
+
 ```json
 {
   "totalIncome": 500000,
@@ -21,9 +23,11 @@ Get spendable balance for an optional date range.
   "spendableBalance": 150000
 }
 ```
+
 All values are in cents (integer).
 
 **Error Responses**:
+
 - 401: Unauthorized (invalid/missing JWT)
 - 501: Not Implemented
 
@@ -35,10 +39,12 @@ Get expenses grouped by category for a required date range.
 
 **Auth Required**: Yes (JWT)
 **Query Parameters**:
+
 - `startDate` (required): ISO 8601 datetime (inclusive start of range)
 - `endDate` (required): ISO 8601 datetime (inclusive end of range)
 
 **Success Response (200)**:
+
 ```json
 [
   {
@@ -51,6 +57,7 @@ Get expenses grouped by category for a required date range.
 ```
 
 **Error Responses**:
+
 - 400: Invalid query parameters
 - 401: Unauthorized
 - 501: Not Implemented
@@ -63,10 +70,12 @@ Get debt payoff progress for an optional date range.
 
 **Auth Required**: Yes (JWT)
 **Query Parameters**:
+
 - `startDate` (optional): ISO 8601 datetime (inclusive start of range)
 - `endDate` (optional): ISO 8601 datetime (inclusive end of range)
 
 **Success Response (200)**:
+
 ```json
 {
   "totalDebt": 2500000,
@@ -77,6 +86,7 @@ Get debt payoff progress for an optional date range.
 ```
 
 **Error Responses**:
+
 - 401: Unauthorized
 - 501: Not Implemented
 

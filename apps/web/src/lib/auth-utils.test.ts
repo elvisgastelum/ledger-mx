@@ -32,11 +32,15 @@ describe("getSafeRedirect", () => {
 
   it("should return /onboarding for strings containing javascript: protocol", () => {
     expect(getSafeRedirect("/path/javascript:alert(1)")).toBe("/onboarding");
-    expect(getSafeRedirect("/path?redirect=javascript:alert(1)")).toBe("/onboarding");
+    expect(getSafeRedirect("/path?redirect=javascript:alert(1)")).toBe(
+      "/onboarding",
+    );
   });
 
   it("should return /onboarding for strings containing http: or https: protocols", () => {
-    expect(getSafeRedirect("/path?redirect=http://evil.com")).toBe("/onboarding");
+    expect(getSafeRedirect("/path?redirect=http://evil.com")).toBe(
+      "/onboarding",
+    );
     expect(getSafeRedirect("/path?url=https://evil.com")).toBe("/onboarding");
   });
 
@@ -60,7 +64,9 @@ describe("getSafeRedirect", () => {
   it("should handle paths with special characters safely", () => {
     // These should be safe as they start with / and don't contain protocols
     expect(getSafeRedirect("/path-with-dashes")).toBe("/path-with-dashes");
-    expect(getSafeRedirect("/path_with_underscores")).toBe("/path_with_underscores");
+    expect(getSafeRedirect("/path_with_underscores")).toBe(
+      "/path_with_underscores",
+    );
     expect(getSafeRedirect("/path/with/slashes")).toBe("/path/with/slashes");
   });
 });

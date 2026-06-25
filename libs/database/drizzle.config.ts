@@ -12,13 +12,13 @@ const databaseUrl = process.env.DATABASE_URL;
 if (!databaseUrl) {
   throw new Error(
     "DATABASE_URL environment variable is required.\n" +
-    "Copy .env.example to .env and ensure the following are set:\n" +
-    "  - POSTGRES_DB (database name)\n" +
-    "  - POSTGRES_USER (database user)\n" +
-    "  - POSTGRES_PASSWORD (database password)\n" +
-    "  - POSTGRES_PORT (database port, default 5432)\n" +
-    "  - DATABASE_URL (full connection string, must match POSTGRES_* values)\n" +
-    "See .env.example for the required format.",
+      "Copy .env.example to .env and ensure the following are set:\n" +
+      "  - POSTGRES_DB (database name)\n" +
+      "  - POSTGRES_USER (database user)\n" +
+      "  - POSTGRES_PASSWORD (database password)\n" +
+      "  - POSTGRES_PORT (database port, default 5432)\n" +
+      "  - DATABASE_URL (full connection string, must match POSTGRES_* values)\n" +
+      "See .env.example for the required format.",
   );
 }
 

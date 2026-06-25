@@ -74,12 +74,15 @@ ts-rest's Nest integration ignores Nest global prefixes, versioning, and control
 For local development and testing with a real PostgreSQL database:
 
 1. Copy the example environment file to create your local `.env`:
+
    ```bash
    cp .env.example .env
    ```
+
    Edit `.env` to adjust ports, credentials, or other settings if needed. **Do not commit `.env` to version control** (it is ignored by `.gitignore`).
 
 2. Manage the database container:
+
    ```bash
    # Start PostgreSQL container
    pnpm db:up
@@ -98,6 +101,7 @@ For local development and testing with a real PostgreSQL database:
 The Docker Compose service uses a named volume (`ledger_mx_postgres_data`) for data persistence. Running `pnpm db:reset` removes the volume entirely. The service includes a healthcheck using `pg_isready` to ensure the database is ready before use.
 
 **Important:** Docker Compose will fail with a clear error message if required environment variables (`POSTGRES_DB`, `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_PORT`) are missing from `.env`. Copy `.env.example` to `.env` before running `pnpm db:up`:
+
 ```bash
 cp .env.example .env
 ```

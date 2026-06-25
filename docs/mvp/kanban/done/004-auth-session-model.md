@@ -56,12 +56,14 @@ Use NestJS @nestjs/jwt and @nestjs/passport. Store refresh tokens in database wi
 **Status**: Done
 
 All acceptance criteria and remaining blockers have been implemented and verified:
+
 1. ✅ Cookie-based refresh token storage (httpOnly, secure, sameSite)
 2. ✅ Request validation using Zod-only validation (via nestjs-zod and explicit ZodValidationPipe)
 3. ✅ ConfigModule with env validation (Zod-based) for JWT_SECRET, DATABASE_URL, and other vars
 4. ✅ Full E2E tests with real database and HTTP cookies
 
 **Verification notes:**
+
 - Controller tests pass (`auth.controller.test.ts`)
 - E2E tests with Testcontainers pass (`auth.e2e.test.ts`)
 - Repository integration tests pass (`auth-repositories.integration.test.ts`)
@@ -108,27 +110,28 @@ All acceptance criteria and remaining blockers have been implemented and verifie
 - `createDatabase()` utility in `libs/database` supports connection string injection
 
   **Remaining:**
-  
+
   - [x] Wire real Drizzle repositories to `AuthModule` when database is available
   - [x] Add cookie-based refresh token storage (httpOnly, secure, sameSite)
-   - [x] Add request validation using Zod (via nestjs-zod)
+  - [x] Add request validation using Zod (via nestjs-zod)
   - [x] End-to-end tests with real database (Testcontainers) - **Repository integration tests added**
   - [x] Move `JWT_SECRET` and `DATABASE_URL` to proper config module (env fail-fast and `.env` loading added, ConfigModule pending)
- 
- ### Repository Integration Tests (Completed)
- 
- - [x] Add testcontainers dependencies to `libs/database/package.json`
- - [x] Create `auth-repositories.integration.test.ts` with Testcontainers PostgreSQL
- - [x] Test `DrizzleUserRepository` (save, findByEmail, findById)
- - [x] Test `DrizzleSessionRepository` (save, findByRefreshTokenHash, revoke scoped by userId, revokeAllForUser)
- - [x] Test `DrizzleAuthAuditLogRepository` (record/insert verification)
- 
+
+### Repository Integration Tests (Completed)
+
+- [x] Add testcontainers dependencies to `libs/database/package.json`
+- [x] Create `auth-repositories.integration.test.ts` with Testcontainers PostgreSQL
+- [x] Test `DrizzleUserRepository` (save, findByEmail, findById)
+- [x] Test `DrizzleSessionRepository` (save, findByRefreshTokenHash, revoke scoped by userId, revokeAllForUser)
+- [x] Test `DrizzleAuthAuditLogRepository` (record/insert verification)
+
   **Test Details:**
-  - Uses `@testcontainers/postgresql` to spin up isolated PostgreSQL 16 container
-  - Applies existing drizzle migrations before tests run
-  - Cleans up tables between tests (auth_audit_logs → sessions → users) to handle FK constraints
-  - Tests user scoping: verifies session revocation with wrong userId does NOT revoke
-  - Uses deterministic UUID literals and Date values for reproducibility
+
+- Uses `@testcontainers/postgresql` to spin up isolated PostgreSQL 16 container
+- Applies existing drizzle migrations before tests run
+- Cleans up tables between tests (auth_audit_logs → sessions → users) to handle FK constraints
+- Tests user scoping: verifies session revocation with wrong userId does NOT revoke
+- Uses deterministic UUID literals and Date values for reproducibility
 
 ### Local Development Database (Added)
 

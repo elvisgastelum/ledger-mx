@@ -30,7 +30,7 @@ const balance = accountBalanceCents - envelopesCents;
 
 ```typescript
 function parseMoneyInput(input: string): number {
-  const amount = parseFloat(input.replace(/[^\d.-]/g, ''));
+  const amount = parseFloat(input.replace(/[^\d.-]/g, ""));
   return Math.round(amount * 100);
 }
 ```
@@ -39,9 +39,9 @@ function parseMoneyInput(input: string): number {
 
 ```typescript
 function formatMoney(cents: number): string {
-  return new Intl.NumberFormat('es-MX', {
-    style: 'currency',
-    currency: 'MXN',
+  return new Intl.NumberFormat("es-MX", {
+    style: "currency",
+    currency: "MXN",
   }).format(cents / 100);
 }
 ```

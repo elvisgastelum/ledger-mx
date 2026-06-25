@@ -41,7 +41,8 @@ function createDefaultTransactionExportRepoProvider(): FactoryProvider {
 export class ExportModule {
   static forRoot(options?: ExportModuleOptions): DynamicModule {
     const transactionExportRepoProvider =
-      options?.transactionExportRepository ?? createDefaultTransactionExportRepoProvider();
+      options?.transactionExportRepository ??
+      createDefaultTransactionExportRepoProvider();
 
     // Only provide shared database if using default repo provider
     const needsDatabase = !options?.transactionExportRepository;
@@ -49,10 +50,7 @@ export class ExportModule {
     return {
       module: ExportModule,
       controllers: [ExportController],
-      imports: [
-        ConfigModule,
-        JwtAccessModule,
-      ],
+      imports: [ConfigModule, JwtAccessModule],
       providers: [
         transactionExportRepoProvider,
         ...(needsDatabase ? [createDefaultDatabaseProvider()] : []),
@@ -62,7 +60,9 @@ export class ExportModule {
           useFactory: (
             transactionExportRepository: TransactionExportRepository,
           ) => {
-            return new ExportTransactionsCsvUseCase(transactionExportRepository);
+            return new ExportTransactionsCsvUseCase(
+              transactionExportRepository,
+            );
           },
           inject: [EXPORT_TOKENS.TRANSACTION_EXPORT_REPOSITORY],
         },

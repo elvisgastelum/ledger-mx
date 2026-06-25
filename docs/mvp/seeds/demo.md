@@ -43,11 +43,16 @@ Food, Transport, Utilities, Rent, Entertainment, Health, Education, Gifts, Debt,
 ```typescript
 // libs/testing/seeds/demo.ts
 export async function seedDemo(db: DrizzleDb) {
-  const user = await createUser(db, { email: 'demo@ledger-mx.com' });
+  const user = await createUser(db, { email: "demo@ledger-mx.com" });
   const accounts = await createAccounts(db, user.id);
   const envelopes = await createEnvelopes(db, user.id);
   const categories = await createCategories(db, user.id);
-  const transactions = await createTransactions(db, user.id, accounts, categories);
+  const transactions = await createTransactions(
+    db,
+    user.id,
+    accounts,
+    categories,
+  );
 }
 ```
 

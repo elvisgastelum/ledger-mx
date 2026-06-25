@@ -35,17 +35,20 @@ Clean Architecture / Onion Architecture implementation for LedgerMx.
 ## Layer Responsibilities
 
 ### Domain Layer (libs/domain)
+
 - Entities: Account, Transaction, Envelope, Debt, etc.
 - Value Objects: Money, DateRange, etc.
 - Domain Events: TransactionCreated, etc.
 - Repository Interfaces: Define data access contracts
 
 ### Application Layer (libs/application)
+
 - Use Cases: CreateTransaction, CalculateSpendableBalance, etc.
 - Application Services: Orchestrate domain objects
 - DTOs: Data transfer between layers
 
 ### Infrastructure Layer (Frameworks)
+
 - Repositories: Drizzle ORM, PGlite implementations
 - Controllers: NestJS REST endpoints
 - UI Components: React + TanStack

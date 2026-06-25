@@ -29,16 +29,19 @@ All entities use client-generated UUID v4 identifiers.
 ## Implementation Notes
 
 ### Client-Side Generation
+
 - Use `uuid` library (v4)
 - Generate in entity constructor if not provided
 - Store as string in TypeScript and database
 
 ### Database Schema
+
 - PostgreSQL: `uuid` column type, primary key
 - PGlite: same schema, `uuid` type supported
 - No auto-generation in database
 
 ### Value Object Validation
+
 - UUID v4 format regex validation
 - Non-empty string check
 - Invalid UUID throws error

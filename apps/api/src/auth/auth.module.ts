@@ -99,10 +99,7 @@ export class AuthModule {
     return {
       module: AuthModule,
       controllers: [AuthController],
-      imports: [
-        ConfigModule,
-        JwtAccessModule,
-      ],
+      imports: [ConfigModule, JwtAccessModule],
       providers: [
         userRepoProvider,
         sessionRepoProvider,

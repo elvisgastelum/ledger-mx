@@ -5,7 +5,7 @@ import type { IdGenerator } from "@ledger-mx/application";
  * Uses globalThis.crypto.randomUUID() for UUID v4 generation.
  */
 export class WebCryptoIdGenerator implements IdGenerator {
-	uuid(): string {
-		return globalThis.crypto.randomUUID();
-	}
+  uuid(): string {
+    return globalThis.crypto.randomUUID();
+  }
 }

@@ -23,7 +23,8 @@ import type {
 const originalEnv = { ...process.env };
 
 beforeEach(() => {
-  process.env.JWT_SECRET = "test-jwt-secret-for-unit-tests-only-minimum-32-chars";
+  process.env.JWT_SECRET =
+    "test-jwt-secret-for-unit-tests-only-minimum-32-chars";
   process.env.DATABASE_URL = "postgresql://test:test@localhost:5432/test";
   process.env.NODE_ENV = "test";
   process.env.JWT_ACCESS_TOKEN_TTL = "15m";
@@ -199,7 +200,9 @@ describe("AuthController (integration)", () => {
       // refreshToken should be in cookie
       const cookies = response.headers["set-cookie"];
       expect(cookies).toBeDefined();
-      expect(cookies.some((c: string) => c.includes("ledger_mx_refresh_token"))).toBe(true);
+      expect(
+        cookies.some((c: string) => c.includes("ledger_mx_refresh_token")),
+      ).toBe(true);
     });
 
     it("should return 409 for duplicate email", async () => {
@@ -287,7 +290,9 @@ describe("AuthController (integration)", () => {
       // refreshToken should be in cookie
       const cookies = response.headers["set-cookie"];
       expect(cookies).toBeDefined();
-      expect(cookies.some((c: string) => c.includes("ledger_mx_refresh_token"))).toBe(true);
+      expect(
+        cookies.some((c: string) => c.includes("ledger_mx_refresh_token")),
+      ).toBe(true);
     });
 
     it("should return 401 for invalid credentials", async () => {
@@ -315,7 +320,9 @@ describe("AuthController (integration)", () => {
       // Extract refresh token from cookie
       const cookies = response.headers["set-cookie"];
       expect(cookies).toBeDefined();
-      const refreshCookie = cookies.find((c: string) => c.includes("ledger_mx_refresh_token"));
+      const refreshCookie = cookies.find((c: string) =>
+        c.includes("ledger_mx_refresh_token"),
+      );
       expect(refreshCookie).toBeDefined();
       refreshToken = refreshCookie!.split("=")[1].split(";")[0];
     });
@@ -363,7 +370,9 @@ describe("AuthController (integration)", () => {
       // Extract refresh token from cookie
       const cookies = response.headers["set-cookie"];
       expect(cookies).toBeDefined();
-      const refreshCookie = cookies.find((c: string) => c.includes("ledger_mx_refresh_token"));
+      const refreshCookie = cookies.find((c: string) =>
+        c.includes("ledger_mx_refresh_token"),
+      );
       expect(refreshCookie).toBeDefined();
       refreshToken = refreshCookie!.split("=")[1].split(";")[0];
     });
@@ -379,7 +388,12 @@ describe("AuthController (integration)", () => {
       // Cookie should be cleared
       const cookies = response.headers["set-cookie"];
       expect(cookies).toBeDefined();
-      expect(cookies.some((c: string) => c.includes("ledger_mx_refresh_token") && c.includes("Max-Age=0"))).toBe(true);
+      expect(
+        cookies.some(
+          (c: string) =>
+            c.includes("ledger_mx_refresh_token") && c.includes("Max-Age=0"),
+        ),
+      ).toBe(true);
     });
 
     it("should invalidate refresh token after logout", async () => {

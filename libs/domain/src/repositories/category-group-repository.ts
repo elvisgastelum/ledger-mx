@@ -33,7 +33,10 @@ export interface CategoryGroupRepository {
    * @param groupId - The category group ID
    * @returns True if the group has active categories
    */
-  hasActiveCategories(userId: UserId, groupId: CategoryGroupId): Promise<boolean>;
+  hasActiveCategories(
+    userId: UserId,
+    groupId: CategoryGroupId,
+  ): Promise<boolean>;
 
   /**
    * Soft deletes a category group by setting deletedAt.
@@ -41,5 +44,9 @@ export interface CategoryGroupRepository {
    * @param groupId - The category group ID
    * @param deletedAt - The deletion timestamp
    */
-  softDelete(userId: UserId, groupId: CategoryGroupId, deletedAt: Date): Promise<void>;
+  softDelete(
+    userId: UserId,
+    groupId: CategoryGroupId,
+    deletedAt: Date,
+  ): Promise<void>;
 }

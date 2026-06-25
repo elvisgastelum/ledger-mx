@@ -65,9 +65,7 @@ describe("ThemeProvider", () => {
     localStorage.setItem("ledger-mx-web-theme", "dark");
 
     const { result } = renderHook(() => useTheme(), {
-      wrapper: ({ children }) => (
-        <ThemeProvider>{children}</ThemeProvider>
-      ),
+      wrapper: ({ children }) => <ThemeProvider>{children}</ThemeProvider>,
     });
 
     expect(result.current.theme).toBe("dark");

@@ -29,10 +29,10 @@ import userEvent from '@testing-library/user-event';
 test('submits form', async () => {
   const onSubmit = vi.fn();
   render(<TransactionForm onSubmit={onSubmit} />);
-  
+
   await userEvent.type(screen.getByLabelText('Amount'), '100');
   await userEvent.click(screen.getByText('Save'));
-  
+
   expect(onSubmit).toHaveBeenCalledWith({ amountCents: 10000 });
 });
 ```
@@ -42,7 +42,7 @@ test('submits form', async () => {
 Test custom hooks with `@testing-library/react-hooks`:
 
 ```typescript
-test('useTransactions hook', () => {
+test("useTransactions hook", () => {
   const { result } = renderHook(() => useTransactions());
   expect(result.current.transactions).toEqual([]);
 });
@@ -53,7 +53,7 @@ test('useTransactions hook', () => {
 Mock TanStack Query:
 
 ```typescript
-vi.mock('@tanstack/react-query', () => ({
+vi.mock("@tanstack/react-query", () => ({
   useQuery: () => ({ data: mockData, isLoading: false }),
 }));
 ```

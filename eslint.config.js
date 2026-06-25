@@ -25,30 +25,38 @@ export default [
       "libs/application/src/**/*.tsx",
     ],
     rules: {
-      "no-restricted-imports": ["error", {
-        paths: [
-          {
-            name: "@ledger-mx/contracts",
-            message: "Domain and application layers must not import contracts. Contracts are an API boundary (outer layer).",
-          },
-          {
-            name: "@ts-rest/core",
-            message: "Domain and application layers must not import @ts-rest/core. Use domain models instead.",
-          },
-          {
-            name: "@ts-rest/nest",
-            message: "Domain and application layers must not import @ts-rest/nest. This is an infrastructure concern.",
-          },
-          {
-            name: "@ts-rest/open-api",
-            message: "Domain and application layers must not import @ts-rest/open-api. OpenAPI generation is an infrastructure concern.",
-          },
-          {
-            name: "@ts-rest/react-query",
-            message: "Domain and application layers must not import @ts-rest/react-query. This is a web/infrastructure concern.",
-          },
-        ],
-      }],
+      "no-restricted-imports": [
+        "error",
+        {
+          paths: [
+            {
+              name: "@ledger-mx/contracts",
+              message:
+                "Domain and application layers must not import contracts. Contracts are an API boundary (outer layer).",
+            },
+            {
+              name: "@ts-rest/core",
+              message:
+                "Domain and application layers must not import @ts-rest/core. Use domain models instead.",
+            },
+            {
+              name: "@ts-rest/nest",
+              message:
+                "Domain and application layers must not import @ts-rest/nest. This is an infrastructure concern.",
+            },
+            {
+              name: "@ts-rest/open-api",
+              message:
+                "Domain and application layers must not import @ts-rest/open-api. OpenAPI generation is an infrastructure concern.",
+            },
+            {
+              name: "@ts-rest/react-query",
+              message:
+                "Domain and application layers must not import @ts-rest/react-query. This is a web/infrastructure concern.",
+            },
+          ],
+        },
+      ],
     },
   },
 ];

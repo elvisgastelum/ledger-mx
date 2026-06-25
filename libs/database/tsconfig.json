@@ -14,5 +14,9 @@
     "**/*.spec.ts",
     "**/*.spec.tsx"
   ],
-  "references": [{ "path": "../domain" }, { "path": "../application" }, { "path": "../infrastructure" }]
+  "references": [
+    { "path": "../domain" },
+    { "path": "../application" },
+    { "path": "../infrastructure" }
+  ]
 }

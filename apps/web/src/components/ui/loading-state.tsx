@@ -26,15 +26,13 @@ function LoadingState({
     <div
       className={cn(
         "flex min-h-[400px] flex-col items-center justify-center",
-        className
+        className,
       )}
     >
       <Loader2
         className={cn("animate-spin text-muted-foreground", sizeClasses[size])}
       />
-      {text && (
-        <p className="mt-4 text-sm text-muted-foreground">{text}</p>
-      )}
+      {text && <p className="mt-4 text-sm text-muted-foreground">{text}</p>}
     </div>
   );
 }

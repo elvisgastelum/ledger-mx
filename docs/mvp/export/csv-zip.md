@@ -20,6 +20,7 @@ Date,Amount_Cents,Debit_Credit,Account,Envelope,Category,Note,Type
 ```
 
 Columns:
+
 - `Date`: YYYY-MM-DD
 - `Amount_Cents`: positive integer (cents, minor units)
 - `Debit_Credit`: "debit" (money out) or "credit" (money in)
@@ -39,6 +40,7 @@ Date,Amount_Cents,Debit_Credit,Transaction_ID,Line_ID,Account,Envelope,Category,
 ```
 
 Additional columns:
+
 - `Transaction_ID`: unique transaction identifier
 - `Line_ID`: double-entry line identifier (empty for MVP single-line export)
 - `Person`: person associated with transaction (for debt tracking)

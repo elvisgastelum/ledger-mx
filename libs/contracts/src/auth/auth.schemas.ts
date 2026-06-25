@@ -13,25 +13,55 @@ const passwordSchema = z
 /**
  * Request body for user registration
  */
-export const RegisterRequestSchema = z.object({
-  email: z.string().email({ message: "email must be a valid email address" }).describe("User's email address (used for login)"),
-  password: passwordSchema.describe("User's password (min 8 chars, uppercase, lowercase, number, special char)"),
-  displayName: z.string().max(100).optional().describe("Optional display name for the user"),
-  deviceName: z.string().max(200).optional().describe("Optional device name for session tracking"),
-  rememberMe: z.boolean().optional().describe("If true, extends refresh token expiry to 30 days"),
-}).strict();
+export const RegisterRequestSchema = z
+  .object({
+    email: z
+      .string()
+      .email({ message: "email must be a valid email address" })
+      .describe("User's email address (used for login)"),
+    password: passwordSchema.describe(
+      "User's password (min 8 chars, uppercase, lowercase, number, special char)",
+    ),
+    displayName: z
+      .string()
+      .max(100)
+      .optional()
+      .describe("Optional display name for the user"),
+    deviceName: z
+      .string()
+      .max(200)
+      .optional()
+      .describe("Optional device name for session tracking"),
+    rememberMe: z
+      .boolean()
+      .optional()
+      .describe("If true, extends refresh token expiry to 30 days"),
+  })
+  .strict();
 
 export type RegisterRequest = z.infer<typeof RegisterRequestSchema>;
 
 /**
  * Request body for user login
  */
-export const LoginRequestSchema = z.object({
-  email: z.string().email({ message: "email must be a valid email address" }).describe("User's email address"),
-  password: passwordSchema.describe("User's password"),
-  deviceName: z.string().max(200).optional().describe("Optional device name for session tracking"),
-  rememberMe: z.boolean().optional().describe("If true, extends refresh token expiry to 30 days"),
-}).strict();
+export const LoginRequestSchema = z
+  .object({
+    email: z
+      .string()
+      .email({ message: "email must be a valid email address" })
+      .describe("User's email address"),
+    password: passwordSchema.describe("User's password"),
+    deviceName: z
+      .string()
+      .max(200)
+      .optional()
+      .describe("Optional device name for session tracking"),
+    rememberMe: z
+      .boolean()
+      .optional()
+      .describe("If true, extends refresh token expiry to 30 days"),
+  })
+  .strict();
 
 export type LoginRequest = z.infer<typeof LoginRequestSchema>;
 
@@ -42,11 +72,16 @@ export type LoginRequest = z.infer<typeof LoginRequestSchema>;
 export const AuthSuccessResponseSchema = z.object({
   accessToken: z.string().min(1).describe("JWT access token (short-lived)"),
   sessionId: z.string().min(1).describe("Session ID for the active session"),
-  user: z.object({
-    id: UuidSchema,
-    email: z.string().email(),
-    displayName: z.string().optional().describe("User's display name, if set"),
-  }).describe("Authenticated user summary"),
+  user: z
+    .object({
+      id: UuidSchema,
+      email: z.string().email(),
+      displayName: z
+        .string()
+        .optional()
+        .describe("User's display name, if set"),
+    })
+    .describe("Authenticated user summary"),
 });
 
 export type AuthSuccessResponse = z.infer<typeof AuthSuccessResponseSchema>;

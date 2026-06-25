@@ -34,22 +34,26 @@ Open App → Tap (+) → Choose template or manual → Save
 ## Key Features
 
 ### Offline-First
+
 - Transactions saved to local PGlite immediately
 - Sync when online
 - No loading spinners for local reads
 
 ### Transaction Creation
+
 - Quick templates (Groceries, Gas, etc.)
 - Manual entry with full fields
 - Default date/time to now (editable)
 - Optimistic UI updates
 
 ### Spendable Balance
+
 - Real-time calculation
 - Visual breakdown (accounts - envelopes - upcoming)
 - Prominent display on dashboard
 
 ### Financial Calendar
+
 - Income occurrences (biweekly paychecks)
 - Recurring charges due dates
 - Debt payments scheduled

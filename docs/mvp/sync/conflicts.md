@@ -36,7 +36,7 @@ Show comparison before confirming:
 ```typescript
 function KeepBothPreview({ versionA, versionB }) {
   const impact = calculateBalanceImpact(versionA, versionB);
-  
+
   return (
     <Alert variant="warning">
       <h4>Duplicate Transaction Impact</h4>
@@ -81,7 +81,7 @@ function MergeOption({ versionA, versionB }) {
 ```
 
 Merge logic:
+
 - For each field, prefer the newer timestamp
 - If same timestamp, prefer versionB (server wins tiebreak)
 - Show merged preview before confirming
-

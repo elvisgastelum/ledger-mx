@@ -16,12 +16,12 @@ const Label = forwardRef<HTMLLabelElement, LabelProps>(
         className={cn(
           "text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70",
           error && "text-destructive",
-          className
+          className,
         )}
         {...props}
       />
     );
-  }
+  },
 );
 
 Label.displayName = "Label";

@@ -13,9 +13,7 @@ export interface ExportTransactionsCsvResult {
  * Use case for exporting transactions as CSV.
  */
 export class ExportTransactionsCsvUseCase {
-  constructor(
-    private readonly exportRepository: TransactionExportRepository,
-  ) {}
+  constructor(private readonly exportRepository: TransactionExportRepository) {}
 
   async execute(params: {
     userId: UserId;
@@ -42,7 +40,15 @@ export class ExportTransactionsCsvUseCase {
     return { csv };
   }
 
-  private generateCsv(rows: { date: Date; amount: number; category: string | null; note: string | null; account: string }[]): string {
+  private generateCsv(
+    rows: {
+      date: Date;
+      amount: number;
+      category: string | null;
+      note: string | null;
+      account: string;
+    }[],
+  ): string {
     // CSV header
     const header = ["date", "amount", "category", "note", "account"];
     const lines: string[] = [];

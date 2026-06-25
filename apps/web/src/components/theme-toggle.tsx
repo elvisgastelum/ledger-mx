@@ -4,12 +4,7 @@
  */
 import { Button } from "./ui/button";
 import { useTheme } from "./theme-provider";
-import {
-  Sun,
-  Moon,
-  Monitor,
-  type LucideIcon,
-} from "lucide-react";
+import { Sun, Moon, Monitor, type LucideIcon } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,

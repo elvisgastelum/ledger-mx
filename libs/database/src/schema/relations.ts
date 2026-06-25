@@ -44,10 +44,16 @@ export const categoriesRelations = relations(categories, ({ one, many }) => ({
   transactionLines: many(transactionLines),
 }));
 
-export const categoryGroupsRelations = relations(categoryGroups, ({ one, many }) => ({
-  user: one(users, { fields: [categoryGroups.userId], references: [users.id] }),
-  categories: many(categories),
-}));
+export const categoryGroupsRelations = relations(
+  categoryGroups,
+  ({ one, many }) => ({
+    user: one(users, {
+      fields: [categoryGroups.userId],
+      references: [users.id],
+    }),
+    categories: many(categories),
+  }),
+);
 
 export const transactionsRelations = relations(
   transactions,

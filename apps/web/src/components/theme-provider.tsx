@@ -20,9 +20,9 @@ interface ThemeProviderContextValue {
   resolvedTheme: "light" | "dark";
 }
 
-const ThemeProviderContext = createContext<ThemeProviderContextValue | undefined>(
-  undefined
-);
+const ThemeProviderContext = createContext<
+  ThemeProviderContextValue | undefined
+>(undefined);
 
 interface ThemeProviderProps {
   children: ReactNode;
@@ -48,27 +48,24 @@ export function ThemeProvider({
   const [resolvedTheme, setResolvedTheme] = useState<"light" | "dark">("light");
 
   // Apply theme to document
-  const applyTheme = useCallback(
-    (newTheme: Theme) => {
-      if (typeof window === "undefined") return;
+  const applyTheme = useCallback((newTheme: Theme) => {
+    if (typeof window === "undefined") return;
 
-      const root = document.documentElement;
-      root.classList.remove("light", "dark");
+    const root = document.documentElement;
+    root.classList.remove("light", "dark");
 
-      let resolved: "light" | "dark";
-      if (newTheme === "system") {
-        resolved = window.matchMedia("(prefers-color-scheme: dark)").matches
-          ? "dark"
-          : "light";
-      } else {
-        resolved = newTheme;
-      }
+    let resolved: "light" | "dark";
+    if (newTheme === "system") {
+      resolved = window.matchMedia("(prefers-color-scheme: dark)").matches
+        ? "dark"
+        : "light";
+    } else {
+      resolved = newTheme;
+    }
 
-      root.classList.add(resolved);
-      setResolvedTheme(resolved);
-    },
-    []
-  );
+    root.classList.add(resolved);
+    setResolvedTheme(resolved);
+  }, []);
 
   // Set theme and persist to localStorage
   const setTheme = useCallback(
@@ -83,7 +80,7 @@ export function ThemeProvider({
       }
       applyTheme(newTheme);
     },
-    [storageKey, applyTheme]
+    [storageKey, applyTheme],
   );
 
   // Listen for system theme changes

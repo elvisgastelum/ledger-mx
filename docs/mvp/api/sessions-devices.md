@@ -5,20 +5,25 @@ Track active sessions for security and multi-device support.
 ## Endpoints
 
 ### GET /api/sessions
+
 List active sessions for current user. Returns array with: `id`, `deviceName`, `os`, `browser`, `ip` (anonymized), `lastSeen`, `createdAt`, `isCurrent`.
 
 ### DELETE /api/sessions/:id
+
 Revoke specific session. Immediate logout on target device.
 
 ### DELETE /api/sessions
+
 Revoke all sessions except current. "Logout everywhere."
 
 ### POST /api/sessions/revoke-offline
+
 Mark offline sessions expired after 15+ days inactivity.
 
 ## Session Entity
 
 Fields:
+
 - `id`: UUID
 - `user_id`: UUID
 - `refresh_token_hash`: hashed token (never store plain)
@@ -56,12 +61,14 @@ Fields:
 ## Server Revocation on Reconnect
 
 When offline device reconnects:
+
 1. Server checks if session revoked
 2. If revoked, return 401 Unauthorized
 3. Client deletes local data (security)
 4. Redirect to login
 
 Revocation reasons:
+
 - User clicked "logout everywhere"
 - Password changed
 - Security flag (suspicious activity)
@@ -69,6 +76,7 @@ Revocation reasons:
 ## Audit Events
 
 Log to `audit_log`:
+
 - Actions: `session_created`, `session_revoked`, `session_revoked_security`, `session_extended`
 - Fields: `user_id`, `session_id`, `ip_address`, `user_agent`, `timestamp`
 
@@ -78,4 +86,3 @@ Log to `audit_log`:
 - Notify user of new device login (email)
 - Max 5 active sessions per user
 - Daily cron deletes expired/revoked sessions (>30 days)
-

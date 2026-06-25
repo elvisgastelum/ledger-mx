@@ -8,11 +8,19 @@ import * as schema from "../schema/index.js";
 import { seedDemo, resetUser, verifySeed } from "./run.js";
 import { demoUser, getDemoSeedData } from "./demo.js";
 import { validateTransactionLines } from "./run.js";
-import type { SeedData, SeedAccount, SeedEnvelope, SeedTransactionLine } from "./types.js";
+import type {
+  SeedData,
+  SeedAccount,
+  SeedEnvelope,
+  SeedTransactionLine,
+} from "./types.js";
 
 describe("Seed Integration Tests", () => {
   // Container type - match testcontainers API
-  let container: { getConnectionUri(): string; stop(): Promise<unknown> } | null = null;
+  let container: {
+    getConnectionUri(): string;
+    stop(): Promise<unknown>;
+  } | null = null;
   let pool: Pool;
   let db: NodePgDatabase<typeof schema>;
 
@@ -31,10 +39,7 @@ describe("Seed Integration Tests", () => {
     db = drizzle(pool, { schema });
 
     // Run migrations
-    const migrationsFolder = new URL(
-      "../../drizzle",
-      import.meta.url,
-    ).pathname;
+    const migrationsFolder = new URL("../../drizzle", import.meta.url).pathname;
     await migrate(db, { migrationsFolder });
   }, 60000);
 
@@ -172,8 +177,17 @@ describe("Seed Integration Tests", () => {
         users: [],
         categoryGroups: [],
         categories: [],
-        accounts: [{ id: "acc-1", userId: demoUser.id, name: "Test", type: "debit" } as SeedAccount],
-        envelopes: [{ id: "env-1", userId: demoUser.id, name: "Test" } as SeedEnvelope],
+        accounts: [
+          {
+            id: "acc-1",
+            userId: demoUser.id,
+            name: "Test",
+            type: "debit",
+          } as SeedAccount,
+        ],
+        envelopes: [
+          { id: "env-1", userId: demoUser.id, name: "Test" } as SeedEnvelope,
+        ],
         transactions: [],
         transactionLines: [
           {
@@ -196,7 +210,14 @@ describe("Seed Integration Tests", () => {
         users: [],
         categoryGroups: [],
         categories: [],
-        accounts: [{ id: "acc-1", userId: demoUser.id, name: "Test", type: "debit" } as SeedAccount],
+        accounts: [
+          {
+            id: "acc-1",
+            userId: demoUser.id,
+            name: "Test",
+            type: "debit",
+          } as SeedAccount,
+        ],
         envelopes: [],
         transactions: [],
         transactionLines: [

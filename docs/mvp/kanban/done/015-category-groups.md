@@ -13,6 +13,7 @@ Add `category_groups` entity to organize categories by budget type (Need/Want/Sa
 Category groups classify categories for budget planning and analysis. This is separate from `responsibility_groups` (which track spending by person/group). Examples: "Groceries:Need", "Salary:Income", "Dining Out:Want".
 
 The 50/30/20 budgeting method allocates after-tax income as:
+
 - 50% Needs (essentials)
 - 30% Wants (lifestyle)
 - 20% Savings (goals)
@@ -45,6 +46,7 @@ Groups support future snapshots, summaries, and projections via denormalization 
 ## Implementation Notes
 
 ### Completed:
+
 - Domain layer: Added `CATEGORY_GROUP_KINDS`, `CategoryGroupKind`, `CategoryGroup` type, `CategoryGroupRepository` interface
 - Database schema: Created `category-groups.ts`, updated `enums.ts`, `categories.ts`, `relations.ts`, `index.ts`
 - Migration: Created `0002_gentle_category_groups.sql` with backfill for existing users
@@ -54,6 +56,7 @@ Groups support future snapshots, summaries, and projections via denormalization 
 - **API layer: Created category-groups controller, module, JWT auth guard, CurrentUser decorator, and controller tests**
 
 ### Files Created:
+
 - `apps/api/src/auth/guards/jwt-auth.guard.ts` - JWT authentication guard
 - `apps/api/src/auth/decorators/current-user.decorator.ts` - CurrentUser param decorator
 - `apps/api/src/category-groups/category-groups.tokens.ts` - DI tokens
@@ -64,6 +67,7 @@ Groups support future snapshots, summaries, and projections via denormalization 
 - Updated `apps/api/src/auth/infrastructure/jwt-token.service.test.ts` with ConfigService mock
 
 ### Pending Verification:
+
 - Frontend integration (story 016 - default layout wizard)
 
 ## Tests Required

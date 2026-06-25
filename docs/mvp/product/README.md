@@ -12,6 +12,7 @@ Product vision, MVP scope, and example data for LedgerMx.
 ## Product Summary
 
 LedgerMx helps people with irregular income manage finances through:
+
 - Paycheck-based budgeting
 - Protected envelopes for earmarked funds
 - Debt payoff planning

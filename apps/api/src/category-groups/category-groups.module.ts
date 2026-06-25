@@ -17,7 +17,10 @@ import {
 } from "@ledger-mx/application";
 import { UuidIdGenerator } from "../auth/infrastructure/uuid-id-generator";
 import { SystemClock } from "@ledger-mx/application";
-import { createDatabase, DrizzleCategoryGroupRepository } from "@ledger-mx/database";
+import {
+  createDatabase,
+  DrizzleCategoryGroupRepository,
+} from "@ledger-mx/database";
 
 // Internal token for shared database connection
 const CATEGORY_GROUPS_DATABASE = Symbol("CATEGORY_GROUPS_DATABASE");
@@ -47,7 +50,8 @@ function createDefaultCategoryGroupRepoProvider(): FactoryProvider {
 export class CategoryGroupsModule {
   static forRoot(options?: CategoryGroupsModuleOptions): DynamicModule {
     const categoryGroupRepoProvider =
-      options?.categoryGroupRepository ?? createDefaultCategoryGroupRepoProvider();
+      options?.categoryGroupRepository ??
+      createDefaultCategoryGroupRepoProvider();
 
     // Only provide shared database if using default repo provider
     const needsDatabase = !options?.categoryGroupRepository;
@@ -55,10 +59,7 @@ export class CategoryGroupsModule {
     return {
       module: CategoryGroupsModule,
       controllers: [CategoryGroupsController],
-      imports: [
-        ConfigModule,
-        JwtAccessModule,
-      ],
+      imports: [ConfigModule, JwtAccessModule],
       providers: [
         categoryGroupRepoProvider,
         ...(needsDatabase ? [createDefaultDatabaseProvider()] : []),
