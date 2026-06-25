@@ -2,24 +2,32 @@ import { defineConfig } from "drizzle-kit";
 import * as dotenv from "dotenv";
 import path from "node:path";
 
-// Load root .env file for DATABASE_URL
-// Use process.cwd() as fallback since drizzle-kit may run from different contexts
-const rootDir = path.resolve(process.cwd(), "..", "..");
+// drizzle-kit loads this config as CJS, so __dirname is available at runtime.
+// Using @ts-ignore because TypeScript doesn't recognize CJS globals in ESM context.
+// @ts-ignore
+const rootDir = path.resolve(__dirname, "..", "..");
 dotenv.config({ path: path.join(rootDir, ".env") });
 
 const databaseUrl = process.env.DATABASE_URL;
 if (!databaseUrl) {
   throw new Error(
-    "DATABASE_URL environment variable is required. Copy .env.example to .env and set a valid DATABASE_URL.",
+    "DATABASE_URL environment variable is required.\n" +
+    "Copy .env.example to .env and ensure the following are set:\n" +
+    "  - POSTGRES_DB (database name)\n" +
+    "  - POSTGRES_USER (database user)\n" +
+    "  - POSTGRES_PASSWORD (database password)\n" +
+    "  - POSTGRES_PORT (database port, default 5432)\n" +
+    "  - DATABASE_URL (full connection string, must match POSTGRES_* values)\n" +
+    "See .env.example for the required format.",
   );
 }
 
 export default defineConfig({
-  dialect: "postgresql",
+  driver: "pg",
   schema: "./src/schema/index.ts",
   out: "./drizzle",
   dbCredentials: {
-    url: databaseUrl,
+    connectionString: databaseUrl,
   },
   strict: true,
   verbose: true,
