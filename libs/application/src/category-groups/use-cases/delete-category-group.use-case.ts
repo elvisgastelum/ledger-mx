@@ -26,7 +26,7 @@ export class DeleteCategoryGroupUseCase {
     }
 
     // Cannot delete system groups
-    if (existing.isSystem) {
+    if (existing.ownership === "system") {
       throw new SystemCategoryGroupModificationError("delete");
     }
 
@@ -43,10 +43,6 @@ export class DeleteCategoryGroupUseCase {
 
     // Soft delete
     const now = this.clock.now();
-    await this.categoryGroupRepository.softDelete(
-      input.userId,
-      input.id,
-      now,
-    );
+    await this.categoryGroupRepository.softDelete(input.userId, input.id, now);
   }
 }

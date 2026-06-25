@@ -38,6 +38,7 @@ Electric + TanStack DB Shape API is the official MVP sync path. Every shape is s
 - Automatic updates via Electric WebSocket
 
 Example shape config:
+
 - Table: `transactions`
 - Where: `user_id = currentUser.id`
 - Include: related `transaction_lines`
@@ -47,6 +48,7 @@ Example shape config:
 Sync status must be visible in the UI for MVP. See [Sync Status UI](./sync-status-ui.md) for full documentation.
 
 Required user-visible states:
+
 - **Offline**: No network connection
 - **Queued**: Writes pending in IndexedDB queue
 - **Syncing**: Actively syncing with server

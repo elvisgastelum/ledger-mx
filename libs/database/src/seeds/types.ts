@@ -16,7 +16,7 @@ export interface SeedCategoryGroup {
   kind: "income" | "expense" | "savings" | "general";
   idealPercentageBasisPoints?: number;
   sortOrder?: number;
-  isSystem?: boolean;
+  ownership?: "user" | "system";
 }
 
 export interface SeedCategory {
@@ -25,7 +25,7 @@ export interface SeedCategory {
   name: string;
   categoryGroupId: string;
   parentId?: string;
-  isSystem?: boolean;
+  ownership?: "user" | "system";
 }
 
 export interface SeedAccount {
@@ -34,7 +34,8 @@ export interface SeedAccount {
   name: string;
   type: "debit" | "credit" | "loan" | "savings" | "cash";
   currencyCode?: string;
-  isArchived?: boolean;
+  status?: "active" | "archived";
+  ownership?: "user" | "system";
 }
 
 export interface SeedEnvelope {
@@ -49,7 +50,13 @@ export interface SeedEnvelope {
 export interface SeedTransaction {
   id: string;
   userId: string;
-  type: "income" | "expense" | "transfer" | "adjustment" | "reversal" | "debt_payment";
+  type:
+    | "income"
+    | "expense"
+    | "transfer"
+    | "adjustment"
+    | "reversal"
+    | "debt_payment";
   occurredAt: Date;
   description?: string;
   externalId?: string;

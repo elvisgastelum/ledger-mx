@@ -1,4 +1,4 @@
-import type { CategoryGroupId } from "@ledger-mx/domain";
+import type { CategoryGroupId, OwnershipType } from "@ledger-mx/domain";
 import type { CategoryGroupRepository } from "@ledger-mx/domain";
 import type { CategoryGroupKind } from "@ledger-mx/domain";
 import type { IdGenerator } from "../../auth/ports/id-generator.port";
@@ -19,7 +19,7 @@ export class CreateCategoryGroupUseCase {
     kind: CategoryGroupKind;
     idealPercentageBasisPoints: number | null;
     sortOrder: number;
-    isSystem: boolean;
+    ownership: OwnershipType;
     createdAt: Date;
     updatedAt: Date;
   }> {
@@ -31,10 +31,9 @@ export class CreateCategoryGroupUseCase {
       userId: input.userId,
       name: input.name.trim(),
       kind: input.kind,
-      idealPercentageBasisPoints:
-        input.idealPercentageBasisPoints ?? null,
+      idealPercentageBasisPoints: input.idealPercentageBasisPoints ?? null,
       sortOrder: input.sortOrder ?? 0,
-      isSystem: false,
+      ownership: "user" as OwnershipType,
       createdAt: now,
       updatedAt: now,
     };
@@ -47,7 +46,7 @@ export class CreateCategoryGroupUseCase {
       kind: group.kind,
       idealPercentageBasisPoints: group.idealPercentageBasisPoints,
       sortOrder: group.sortOrder,
-      isSystem: group.isSystem,
+      ownership: group.ownership,
       createdAt: group.createdAt,
       updatedAt: group.updatedAt,
     };

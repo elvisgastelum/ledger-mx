@@ -6,7 +6,7 @@ import type { Database } from "../connection";
 
 describe("DrizzleAccountRepository", () => {
   describe("archive behavior", () => {
-    it("should set isArchived=true and deletedAt timestamp", async () => {
+    it("should set status to archived and set deletedAt timestamp", async () => {
       // Create a mock that tracks calls
       const mockSet = vi.fn().mockReturnThis();
       const mockWhere = vi.fn().mockReturnThis();
@@ -21,15 +21,19 @@ describe("DrizzleAccountRepository", () => {
       };
 
       const repo = new DrizzleAccountRepository(mockDb as unknown as Database);
-      const userId = userIdFromString("550e8400-e29b-41d4-a716-446655440000") as UserId;
-      const accountId = accountIdFromString("660e8400-e29b-41d4-a716-446655440000") as AccountId;
+      const userId = userIdFromString(
+        "550e8400-e29b-41d4-a716-446655440000",
+      ) as UserId;
+      const accountId = accountIdFromString(
+        "660e8400-e29b-41d4-a716-446655440000",
+      ) as AccountId;
       const deletedAt = new Date("2024-01-15T10:30:00Z");
 
       await repo.archive(userId, accountId, deletedAt);
 
       // Verify the set method was called with correct parameters
       expect(mockSet).toHaveBeenCalledWith({
-        isArchived: true,
+        status: "archived",
         updatedAt: expect.any(Date),
         deletedAt: deletedAt,
       });
@@ -57,8 +61,12 @@ describe("DrizzleAccountRepository", () => {
       };
 
       const repo = new DrizzleAccountRepository(mockDb as unknown as Database);
-      const userId = userIdFromString("550e8400-e29b-41d4-a716-446655440000") as UserId;
-      const accountId = accountIdFromString("660e8400-e29b-41d4-a716-446655440000") as AccountId;
+      const userId = userIdFromString(
+        "550e8400-e29b-41d4-a716-446655440000",
+      ) as UserId;
+      const accountId = accountIdFromString(
+        "660e8400-e29b-41d4-a716-446655440000",
+      ) as AccountId;
 
       await repo.save({
         id: accountId,
@@ -66,9 +74,11 @@ describe("DrizzleAccountRepository", () => {
         name: "Test Account",
         type: "debit",
         currencyCode: "MXN",
-        isArchived: false,
+        status: "active",
         createdAt: new Date(),
         updatedAt: new Date(),
+        ownership: "user",
+        systemRole: null,
       });
 
       // Verify onConflictDoUpdate was called with where option
@@ -98,8 +108,12 @@ describe("DrizzleAccountRepository", () => {
       };
 
       const repo = new DrizzleAccountRepository(mockDb as unknown as Database);
-      const userId = userIdFromString("550e8400-e29b-41d4-a716-446655440000") as UserId;
-      const accountId = accountIdFromString("660e8400-e29b-41d4-a716-446655440000") as AccountId;
+      const userId = userIdFromString(
+        "550e8400-e29b-41d4-a716-446655440000",
+      ) as UserId;
+      const accountId = accountIdFromString(
+        "660e8400-e29b-41d4-a716-446655440000",
+      ) as AccountId;
 
       await repo.findById(userId, accountId);
 
@@ -123,7 +137,9 @@ describe("DrizzleAccountRepository", () => {
       };
 
       const repo = new DrizzleAccountRepository(mockDb as unknown as Database);
-      const userId = userIdFromString("550e8400-e29b-41d4-a716-446655440000") as UserId;
+      const userId = userIdFromString(
+        "550e8400-e29b-41d4-a716-446655440000",
+      ) as UserId;
 
       await repo.listByUserId(userId);
 

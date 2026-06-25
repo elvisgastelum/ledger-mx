@@ -4,9 +4,7 @@
     "/auth/register": {
       "post": {
         "summary": "Register a new user and return auth tokens",
-        "tags": [
-          "auth"
-        ],
+        "tags": ["auth"],
         "parameters": [],
         "requestBody": {
           "description": "Body",
@@ -41,10 +39,7 @@
                     "description": "If true, extends refresh token expiry to 30 days"
                   }
                 },
-                "required": [
-                  "email",
-                  "password"
-                ],
+                "required": ["email", "password"],
                 "additionalProperties": false
               }
             }
@@ -85,18 +80,11 @@
                           "description": "User's display name, if set"
                         }
                       },
-                      "required": [
-                        "id",
-                        "email"
-                      ],
+                      "required": ["id", "email"],
                       "description": "Authenticated user summary"
                     }
                   },
-                  "required": [
-                    "accessToken",
-                    "sessionId",
-                    "user"
-                  ]
+                  "required": ["accessToken", "sessionId", "user"]
                 }
               }
             }
@@ -125,11 +113,7 @@
                       "description": "HTTP status code matching the response"
                     }
                   },
-                  "required": [
-                    "error",
-                    "message",
-                    "statusCode"
-                  ]
+                  "required": ["error", "message", "statusCode"]
                 }
               }
             }
@@ -158,11 +142,7 @@
                       "description": "HTTP status code matching the response"
                     }
                   },
-                  "required": [
-                    "error",
-                    "message",
-                    "statusCode"
-                  ],
+                  "required": ["error", "message", "statusCode"],
                   "description": "Email already registered"
                 }
               }
@@ -174,9 +154,7 @@
     "/auth/login": {
       "post": {
         "summary": "Login with email and password, return auth tokens",
-        "tags": [
-          "auth"
-        ],
+        "tags": ["auth"],
         "parameters": [],
         "requestBody": {
           "description": "Body",
@@ -206,10 +184,7 @@
                     "description": "If true, extends refresh token expiry to 30 days"
                   }
                 },
-                "required": [
-                  "email",
-                  "password"
-                ],
+                "required": ["email", "password"],
                 "additionalProperties": false
               }
             }
@@ -250,18 +225,11 @@
                           "description": "User's display name, if set"
                         }
                       },
-                      "required": [
-                        "id",
-                        "email"
-                      ],
+                      "required": ["id", "email"],
                       "description": "Authenticated user summary"
                     }
                   },
-                  "required": [
-                    "accessToken",
-                    "sessionId",
-                    "user"
-                  ]
+                  "required": ["accessToken", "sessionId", "user"]
                 }
               }
             }
@@ -290,11 +258,7 @@
                       "description": "HTTP status code matching the response"
                     }
                   },
-                  "required": [
-                    "error",
-                    "message",
-                    "statusCode"
-                  ]
+                  "required": ["error", "message", "statusCode"]
                 }
               }
             }
@@ -323,11 +287,7 @@
                       "description": "HTTP status code matching the response"
                     }
                   },
-                  "required": [
-                    "error",
-                    "message",
-                    "statusCode"
-                  ],
+                  "required": ["error", "message", "statusCode"],
                   "description": "Invalid email or password"
                 }
               }
@@ -339,9 +299,7 @@
     "/auth/refresh": {
       "post": {
         "summary": "Refresh access token using a valid refresh token",
-        "tags": [
-          "auth"
-        ],
+        "tags": ["auth"],
         "parameters": [],
         "requestBody": {
           "description": "Body",
@@ -395,18 +353,11 @@
                           "description": "User's display name, if set"
                         }
                       },
-                      "required": [
-                        "id",
-                        "email"
-                      ],
+                      "required": ["id", "email"],
                       "description": "Authenticated user summary"
                     }
                   },
-                  "required": [
-                    "accessToken",
-                    "sessionId",
-                    "user"
-                  ]
+                  "required": ["accessToken", "sessionId", "user"]
                 }
               }
             }
@@ -435,11 +386,7 @@
                       "description": "HTTP status code matching the response"
                     }
                   },
-                  "required": [
-                    "error",
-                    "message",
-                    "statusCode"
-                  ],
+                  "required": ["error", "message", "statusCode"],
                   "description": "Invalid or expired refresh token"
                 }
               }
@@ -451,9 +398,7 @@
     "/auth/logout": {
       "post": {
         "summary": "Invalidate a refresh token (logout)",
-        "tags": [
-          "auth"
-        ],
+        "tags": ["auth"],
         "parameters": [],
         "requestBody": {
           "description": "Body",
@@ -482,15 +427,11 @@
                   "properties": {
                     "success": {
                       "type": "boolean",
-                      "enum": [
-                        true
-                      ],
+                      "enum": [true],
                       "description": "Indicates logout was successful"
                     }
                   },
-                  "required": [
-                    "success"
-                  ],
+                  "required": ["success"],
                   "description": "Logout successful"
                 }
               }
@@ -520,11 +461,7 @@
                       "description": "HTTP status code matching the response"
                     }
                   },
-                  "required": [
-                    "error",
-                    "message",
-                    "statusCode"
-                  ],
+                  "required": ["error", "message", "statusCode"],
                   "description": "Invalid refresh token"
                 }
               }
@@ -536,9 +473,7 @@
     "/category-groups": {
       "get": {
         "summary": "List all category groups for the authenticated user",
-        "tags": [
-          "categoryGroups"
-        ],
+        "tags": ["categoryGroups"],
         "parameters": [],
         "responses": {
           "200": {
@@ -564,12 +499,7 @@
                           },
                           "kind": {
                             "type": "string",
-                            "enum": [
-                              "income",
-                              "expense",
-                              "savings",
-                              "general"
-                            ]
+                            "enum": ["income", "expense", "savings", "general"]
                           },
                           "idealPercentageBasisPoints": {
                             "type": "integer",
@@ -606,9 +536,7 @@
                       }
                     }
                   },
-                  "required": [
-                    "categoryGroups"
-                  ]
+                  "required": ["categoryGroups"]
                 }
               }
             }
@@ -637,11 +565,7 @@
                       "description": "HTTP status code matching the response"
                     }
                   },
-                  "required": [
-                    "error",
-                    "message",
-                    "statusCode"
-                  ]
+                  "required": ["error", "message", "statusCode"]
                 }
               }
             }
@@ -650,9 +574,7 @@
       },
       "post": {
         "summary": "Create a new category group for the authenticated user",
-        "tags": [
-          "categoryGroups"
-        ],
+        "tags": ["categoryGroups"],
         "parameters": [],
         "requestBody": {
           "description": "Body",
@@ -668,12 +590,7 @@
                   },
                   "kind": {
                     "type": "string",
-                    "enum": [
-                      "income",
-                      "expense",
-                      "savings",
-                      "general"
-                    ]
+                    "enum": ["income", "expense", "savings", "general"]
                   },
                   "idealPercentageBasisPoints": {
                     "type": "integer",
@@ -686,10 +603,7 @@
                     "minimum": 0
                   }
                 },
-                "required": [
-                  "name",
-                  "kind"
-                ]
+                "required": ["name", "kind"]
               }
             }
           }
@@ -711,12 +625,7 @@
                     },
                     "kind": {
                       "type": "string",
-                      "enum": [
-                        "income",
-                        "expense",
-                        "savings",
-                        "general"
-                      ]
+                      "enum": ["income", "expense", "savings", "general"]
                     },
                     "idealPercentageBasisPoints": {
                       "type": "integer",
@@ -775,11 +684,7 @@
                       "description": "HTTP status code matching the response"
                     }
                   },
-                  "required": [
-                    "error",
-                    "message",
-                    "statusCode"
-                  ]
+                  "required": ["error", "message", "statusCode"]
                 }
               }
             }
@@ -808,11 +713,7 @@
                       "description": "HTTP status code matching the response"
                     }
                   },
-                  "required": [
-                    "error",
-                    "message",
-                    "statusCode"
-                  ]
+                  "required": ["error", "message", "statusCode"]
                 }
               }
             }
@@ -823,9 +724,7 @@
     "/category-groups/{id}": {
       "patch": {
         "summary": "Update an existing category group by ID",
-        "tags": [
-          "categoryGroups"
-        ],
+        "tags": ["categoryGroups"],
         "parameters": [
           {
             "name": "id",
@@ -852,12 +751,7 @@
                   },
                   "kind": {
                     "type": "string",
-                    "enum": [
-                      "income",
-                      "expense",
-                      "savings",
-                      "general"
-                    ]
+                    "enum": ["income", "expense", "savings", "general"]
                   },
                   "idealPercentageBasisPoints": {
                     "type": "integer",
@@ -891,12 +785,7 @@
                     },
                     "kind": {
                       "type": "string",
-                      "enum": [
-                        "income",
-                        "expense",
-                        "savings",
-                        "general"
-                      ]
+                      "enum": ["income", "expense", "savings", "general"]
                     },
                     "idealPercentageBasisPoints": {
                       "type": "integer",
@@ -955,11 +844,7 @@
                       "description": "HTTP status code matching the response"
                     }
                   },
-                  "required": [
-                    "error",
-                    "message",
-                    "statusCode"
-                  ]
+                  "required": ["error", "message", "statusCode"]
                 }
               }
             }
@@ -988,11 +873,7 @@
                       "description": "HTTP status code matching the response"
                     }
                   },
-                  "required": [
-                    "error",
-                    "message",
-                    "statusCode"
-                  ]
+                  "required": ["error", "message", "statusCode"]
                 }
               }
             }
@@ -1021,11 +902,7 @@
                       "description": "HTTP status code matching the response"
                     }
                   },
-                  "required": [
-                    "error",
-                    "message",
-                    "statusCode"
-                  ],
+                  "required": ["error", "message", "statusCode"],
                   "description": "Category group not found or not owned by user"
                 }
               }
@@ -1035,9 +912,7 @@
       },
       "delete": {
         "summary": "Delete a category group by ID",
-        "tags": [
-          "categoryGroups"
-        ],
+        "tags": ["categoryGroups"],
         "parameters": [
           {
             "name": "id",
@@ -1078,11 +953,7 @@
                       "description": "HTTP status code matching the response"
                     }
                   },
-                  "required": [
-                    "error",
-                    "message",
-                    "statusCode"
-                  ]
+                  "required": ["error", "message", "statusCode"]
                 }
               }
             }
@@ -1111,11 +982,7 @@
                       "description": "HTTP status code matching the response"
                     }
                   },
-                  "required": [
-                    "error",
-                    "message",
-                    "statusCode"
-                  ],
+                  "required": ["error", "message", "statusCode"],
                   "description": "Category group not found or not owned by user"
                 }
               }
@@ -1127,9 +994,7 @@
     "/onboarding/layout": {
       "post": {
         "summary": "Apply a default category group layout during user onboarding",
-        "tags": [
-          "onboarding"
-        ],
+        "tags": ["onboarding"],
         "parameters": [],
         "requestBody": {
           "description": "Body",
@@ -1140,15 +1005,10 @@
                 "properties": {
                   "layout": {
                     "type": "string",
-                    "enum": [
-                      "blank",
-                      "50-30-20"
-                    ]
+                    "enum": ["blank", "50-30-20"]
                   }
                 },
-                "required": [
-                  "layout"
-                ]
+                "required": ["layout"]
               }
             }
           }
@@ -1177,12 +1037,7 @@
                           },
                           "kind": {
                             "type": "string",
-                            "enum": [
-                              "income",
-                              "expense",
-                              "savings",
-                              "general"
-                            ]
+                            "enum": ["income", "expense", "savings", "general"]
                           },
                           "idealPercentageBasisPoints": {
                             "type": "integer",
@@ -1222,10 +1077,7 @@
                       "type": "boolean"
                     }
                   },
-                  "required": [
-                    "categoryGroups",
-                    "created"
-                  ]
+                  "required": ["categoryGroups", "created"]
                 }
               }
             }
@@ -1254,11 +1106,7 @@
                       "description": "HTTP status code matching the response"
                     }
                   },
-                  "required": [
-                    "error",
-                    "message",
-                    "statusCode"
-                  ]
+                  "required": ["error", "message", "statusCode"]
                 }
               }
             }
@@ -1287,11 +1135,7 @@
                       "description": "HTTP status code matching the response"
                     }
                   },
-                  "required": [
-                    "error",
-                    "message",
-                    "statusCode"
-                  ]
+                  "required": ["error", "message", "statusCode"]
                 }
               }
             }
@@ -1302,9 +1146,7 @@
     "/accounts": {
       "get": {
         "summary": "List all accounts for the authenticated user",
-        "tags": [
-          "accounts"
-        ],
+        "tags": ["accounts"],
         "parameters": [],
         "responses": {
           "200": {
@@ -1375,9 +1217,7 @@
                       }
                     }
                   },
-                  "required": [
-                    "accounts"
-                  ]
+                  "required": ["accounts"]
                 }
               }
             }
@@ -1406,11 +1246,7 @@
                       "description": "HTTP status code matching the response"
                     }
                   },
-                  "required": [
-                    "error",
-                    "message",
-                    "statusCode"
-                  ]
+                  "required": ["error", "message", "statusCode"]
                 }
               }
             }
@@ -1439,11 +1275,7 @@
                       "description": "HTTP status code matching the response"
                     }
                   },
-                  "required": [
-                    "error",
-                    "message",
-                    "statusCode"
-                  ],
+                  "required": ["error", "message", "statusCode"],
                   "description": "Endpoint not yet implemented"
                 }
               }
@@ -1453,9 +1285,7 @@
       },
       "post": {
         "summary": "Create a new account for the authenticated user",
-        "tags": [
-          "accounts"
-        ],
+        "tags": ["accounts"],
         "parameters": [],
         "requestBody": {
           "description": "Body",
@@ -1487,10 +1317,7 @@
                     "description": "ISO 4217 currency code"
                   }
                 },
-                "required": [
-                  "name",
-                  "type"
-                ],
+                "required": ["name", "type"],
                 "additionalProperties": false
               }
             }
@@ -1585,11 +1412,7 @@
                       "description": "HTTP status code matching the response"
                     }
                   },
-                  "required": [
-                    "error",
-                    "message",
-                    "statusCode"
-                  ]
+                  "required": ["error", "message", "statusCode"]
                 }
               }
             }
@@ -1618,11 +1441,7 @@
                       "description": "HTTP status code matching the response"
                     }
                   },
-                  "required": [
-                    "error",
-                    "message",
-                    "statusCode"
-                  ]
+                  "required": ["error", "message", "statusCode"]
                 }
               }
             }
@@ -1651,11 +1470,7 @@
                       "description": "HTTP status code matching the response"
                     }
                   },
-                  "required": [
-                    "error",
-                    "message",
-                    "statusCode"
-                  ],
+                  "required": ["error", "message", "statusCode"],
                   "description": "Endpoint not yet implemented"
                 }
               }
@@ -1667,9 +1482,7 @@
     "/accounts/{id}": {
       "get": {
         "summary": "Get an account by ID",
-        "tags": [
-          "accounts"
-        ],
+        "tags": ["accounts"],
         "parameters": [
           {
             "name": "id",
@@ -1771,11 +1584,7 @@
                       "description": "HTTP status code matching the response"
                     }
                   },
-                  "required": [
-                    "error",
-                    "message",
-                    "statusCode"
-                  ]
+                  "required": ["error", "message", "statusCode"]
                 }
               }
             }
@@ -1804,11 +1613,7 @@
                       "description": "HTTP status code matching the response"
                     }
                   },
-                  "required": [
-                    "error",
-                    "message",
-                    "statusCode"
-                  ],
+                  "required": ["error", "message", "statusCode"],
                   "description": "Account not found or not owned by user"
                 }
               }
@@ -1838,11 +1643,7 @@
                       "description": "HTTP status code matching the response"
                     }
                   },
-                  "required": [
-                    "error",
-                    "message",
-                    "statusCode"
-                  ],
+                  "required": ["error", "message", "statusCode"],
                   "description": "Endpoint not yet implemented"
                 }
               }
@@ -1852,9 +1653,7 @@
       },
       "patch": {
         "summary": "Update an existing account by ID",
-        "tags": [
-          "accounts"
-        ],
+        "tags": ["accounts"],
         "parameters": [
           {
             "name": "id",
@@ -1992,11 +1791,7 @@
                       "description": "HTTP status code matching the response"
                     }
                   },
-                  "required": [
-                    "error",
-                    "message",
-                    "statusCode"
-                  ]
+                  "required": ["error", "message", "statusCode"]
                 }
               }
             }
@@ -2025,11 +1820,7 @@
                       "description": "HTTP status code matching the response"
                     }
                   },
-                  "required": [
-                    "error",
-                    "message",
-                    "statusCode"
-                  ]
+                  "required": ["error", "message", "statusCode"]
                 }
               }
             }
@@ -2058,11 +1849,7 @@
                       "description": "HTTP status code matching the response"
                     }
                   },
-                  "required": [
-                    "error",
-                    "message",
-                    "statusCode"
-                  ],
+                  "required": ["error", "message", "statusCode"],
                   "description": "Account not found or not owned by user"
                 }
               }
@@ -2092,11 +1879,7 @@
                       "description": "HTTP status code matching the response"
                     }
                   },
-                  "required": [
-                    "error",
-                    "message",
-                    "statusCode"
-                  ],
+                  "required": ["error", "message", "statusCode"],
                   "description": "Endpoint not yet implemented"
                 }
               }
@@ -2106,9 +1889,7 @@
       },
       "delete": {
         "summary": "Delete an account by ID",
-        "tags": [
-          "accounts"
-        ],
+        "tags": ["accounts"],
         "parameters": [
           {
             "name": "id",
@@ -2149,11 +1930,7 @@
                       "description": "HTTP status code matching the response"
                     }
                   },
-                  "required": [
-                    "error",
-                    "message",
-                    "statusCode"
-                  ]
+                  "required": ["error", "message", "statusCode"]
                 }
               }
             }
@@ -2182,11 +1959,7 @@
                       "description": "HTTP status code matching the response"
                     }
                   },
-                  "required": [
-                    "error",
-                    "message",
-                    "statusCode"
-                  ],
+                  "required": ["error", "message", "statusCode"],
                   "description": "Account not found or not owned by user"
                 }
               }
@@ -2216,11 +1989,7 @@
                       "description": "HTTP status code matching the response"
                     }
                   },
-                  "required": [
-                    "error",
-                    "message",
-                    "statusCode"
-                  ],
+                  "required": ["error", "message", "statusCode"],
                   "description": "Endpoint not yet implemented"
                 }
               }
@@ -2232,9 +2001,7 @@
     "/envelopes": {
       "get": {
         "summary": "List all envelopes for the authenticated user",
-        "tags": [
-          "envelopes"
-        ],
+        "tags": ["envelopes"],
         "parameters": [],
         "responses": {
           "200": {
@@ -2271,11 +2038,7 @@
                           },
                           "status": {
                             "type": "string",
-                            "enum": [
-                              "active",
-                              "funded",
-                              "depleted"
-                            ]
+                            "enum": ["active", "funded", "depleted"]
                           },
                           "month": {
                             "type": "string",
@@ -2311,9 +2074,7 @@
                       }
                     }
                   },
-                  "required": [
-                    "envelopes"
-                  ]
+                  "required": ["envelopes"]
                 }
               }
             }
@@ -2342,11 +2103,7 @@
                       "description": "HTTP status code matching the response"
                     }
                   },
-                  "required": [
-                    "error",
-                    "message",
-                    "statusCode"
-                  ]
+                  "required": ["error", "message", "statusCode"]
                 }
               }
             }
@@ -2375,11 +2132,7 @@
                       "description": "HTTP status code matching the response"
                     }
                   },
-                  "required": [
-                    "error",
-                    "message",
-                    "statusCode"
-                  ],
+                  "required": ["error", "message", "statusCode"],
                   "description": "Endpoint not yet implemented"
                 }
               }
@@ -2389,9 +2142,7 @@
       },
       "post": {
         "summary": "Create a new envelope for the authenticated user",
-        "tags": [
-          "envelopes"
-        ],
+        "tags": ["envelopes"],
         "parameters": [],
         "requestBody": {
           "description": "Body",
@@ -2422,11 +2173,7 @@
                     "nullable": true
                   }
                 },
-                "required": [
-                  "name",
-                  "targetAmountCents",
-                  "month"
-                ],
+                "required": ["name", "targetAmountCents", "month"],
                 "additionalProperties": false
               }
             }
@@ -2462,11 +2209,7 @@
                     },
                     "status": {
                       "type": "string",
-                      "enum": [
-                        "active",
-                        "funded",
-                        "depleted"
-                      ]
+                      "enum": ["active", "funded", "depleted"]
                     },
                     "month": {
                       "type": "string",
@@ -2527,11 +2270,7 @@
                       "description": "HTTP status code matching the response"
                     }
                   },
-                  "required": [
-                    "error",
-                    "message",
-                    "statusCode"
-                  ]
+                  "required": ["error", "message", "statusCode"]
                 }
               }
             }
@@ -2560,11 +2299,7 @@
                       "description": "HTTP status code matching the response"
                     }
                   },
-                  "required": [
-                    "error",
-                    "message",
-                    "statusCode"
-                  ]
+                  "required": ["error", "message", "statusCode"]
                 }
               }
             }
@@ -2593,11 +2328,7 @@
                       "description": "HTTP status code matching the response"
                     }
                   },
-                  "required": [
-                    "error",
-                    "message",
-                    "statusCode"
-                  ],
+                  "required": ["error", "message", "statusCode"],
                   "description": "Endpoint not yet implemented"
                 }
               }
@@ -2609,9 +2340,7 @@
     "/envelopes/{id}": {
       "get": {
         "summary": "Get an envelope by ID",
-        "tags": [
-          "envelopes"
-        ],
+        "tags": ["envelopes"],
         "parameters": [
           {
             "name": "id",
@@ -2654,11 +2383,7 @@
                     },
                     "status": {
                       "type": "string",
-                      "enum": [
-                        "active",
-                        "funded",
-                        "depleted"
-                      ]
+                      "enum": ["active", "funded", "depleted"]
                     },
                     "month": {
                       "type": "string",
@@ -2719,11 +2444,7 @@
                       "description": "HTTP status code matching the response"
                     }
                   },
-                  "required": [
-                    "error",
-                    "message",
-                    "statusCode"
-                  ]
+                  "required": ["error", "message", "statusCode"]
                 }
               }
             }
@@ -2752,11 +2473,7 @@
                       "description": "HTTP status code matching the response"
                     }
                   },
-                  "required": [
-                    "error",
-                    "message",
-                    "statusCode"
-                  ],
+                  "required": ["error", "message", "statusCode"],
                   "description": "Envelope not found or not owned by user"
                 }
               }
@@ -2786,11 +2503,7 @@
                       "description": "HTTP status code matching the response"
                     }
                   },
-                  "required": [
-                    "error",
-                    "message",
-                    "statusCode"
-                  ],
+                  "required": ["error", "message", "statusCode"],
                   "description": "Endpoint not yet implemented"
                 }
               }
@@ -2800,9 +2513,7 @@
       },
       "patch": {
         "summary": "Update an existing envelope by ID",
-        "tags": [
-          "envelopes"
-        ],
+        "tags": ["envelopes"],
         "parameters": [
           {
             "name": "id",
@@ -2878,11 +2589,7 @@
                     },
                     "status": {
                       "type": "string",
-                      "enum": [
-                        "active",
-                        "funded",
-                        "depleted"
-                      ]
+                      "enum": ["active", "funded", "depleted"]
                     },
                     "month": {
                       "type": "string",
@@ -2943,11 +2650,7 @@
                       "description": "HTTP status code matching the response"
                     }
                   },
-                  "required": [
-                    "error",
-                    "message",
-                    "statusCode"
-                  ]
+                  "required": ["error", "message", "statusCode"]
                 }
               }
             }
@@ -2976,11 +2679,7 @@
                       "description": "HTTP status code matching the response"
                     }
                   },
-                  "required": [
-                    "error",
-                    "message",
-                    "statusCode"
-                  ]
+                  "required": ["error", "message", "statusCode"]
                 }
               }
             }
@@ -3009,11 +2708,7 @@
                       "description": "HTTP status code matching the response"
                     }
                   },
-                  "required": [
-                    "error",
-                    "message",
-                    "statusCode"
-                  ],
+                  "required": ["error", "message", "statusCode"],
                   "description": "Envelope not found or not owned by user"
                 }
               }
@@ -3043,11 +2738,7 @@
                       "description": "HTTP status code matching the response"
                     }
                   },
-                  "required": [
-                    "error",
-                    "message",
-                    "statusCode"
-                  ],
+                  "required": ["error", "message", "statusCode"],
                   "description": "Endpoint not yet implemented"
                 }
               }
@@ -3057,9 +2748,7 @@
       },
       "delete": {
         "summary": "Delete an envelope by ID",
-        "tags": [
-          "envelopes"
-        ],
+        "tags": ["envelopes"],
         "parameters": [
           {
             "name": "id",
@@ -3100,11 +2789,7 @@
                       "description": "HTTP status code matching the response"
                     }
                   },
-                  "required": [
-                    "error",
-                    "message",
-                    "statusCode"
-                  ]
+                  "required": ["error", "message", "statusCode"]
                 }
               }
             }
@@ -3133,11 +2818,7 @@
                       "description": "HTTP status code matching the response"
                     }
                   },
-                  "required": [
-                    "error",
-                    "message",
-                    "statusCode"
-                  ],
+                  "required": ["error", "message", "statusCode"],
                   "description": "Envelope not found or not owned by user"
                 }
               }
@@ -3167,11 +2848,7 @@
                       "description": "HTTP status code matching the response"
                     }
                   },
-                  "required": [
-                    "error",
-                    "message",
-                    "statusCode"
-                  ],
+                  "required": ["error", "message", "statusCode"],
                   "description": "Endpoint not yet implemented"
                 }
               }
@@ -3183,9 +2860,7 @@
     "/transactions": {
       "get": {
         "summary": "List transactions for the authenticated user with optional filters",
-        "tags": [
-          "transactions"
-        ],
+        "tags": ["transactions"],
         "parameters": [],
         "responses": {
           "200": {
@@ -3308,9 +2983,7 @@
                       }
                     }
                   },
-                  "required": [
-                    "transactions"
-                  ]
+                  "required": ["transactions"]
                 }
               }
             }
@@ -3339,11 +3012,7 @@
                       "description": "HTTP status code matching the response"
                     }
                   },
-                  "required": [
-                    "error",
-                    "message",
-                    "statusCode"
-                  ]
+                  "required": ["error", "message", "statusCode"]
                 }
               }
             }
@@ -3372,11 +3041,7 @@
                       "description": "HTTP status code matching the response"
                     }
                   },
-                  "required": [
-                    "error",
-                    "message",
-                    "statusCode"
-                  ],
+                  "required": ["error", "message", "statusCode"],
                   "description": "Endpoint not yet implemented"
                 }
               }
@@ -3386,9 +3051,7 @@
       },
       "post": {
         "summary": "Create a new transaction (double-entry, lines must sum to zero)",
-        "tags": [
-          "transactions"
-        ],
+        "tags": ["transactions"],
         "parameters": [],
         "requestBody": {
           "description": "Body",
@@ -3478,12 +3141,7 @@
                     "minItems": 2
                   }
                 },
-                "required": [
-                  "id",
-                  "transactionDate",
-                  "type",
-                  "lines"
-                ],
+                "required": ["id", "transactionDate", "type", "lines"],
                 "additionalProperties": false
               }
             }
@@ -3630,11 +3288,7 @@
                       "description": "HTTP status code matching the response"
                     }
                   },
-                  "required": [
-                    "error",
-                    "message",
-                    "statusCode"
-                  ]
+                  "required": ["error", "message", "statusCode"]
                 }
               }
             }
@@ -3663,11 +3317,7 @@
                       "description": "HTTP status code matching the response"
                     }
                   },
-                  "required": [
-                    "error",
-                    "message",
-                    "statusCode"
-                  ]
+                  "required": ["error", "message", "statusCode"]
                 }
               }
             }
@@ -3696,11 +3346,7 @@
                       "description": "HTTP status code matching the response"
                     }
                   },
-                  "required": [
-                    "error",
-                    "message",
-                    "statusCode"
-                  ],
+                  "required": ["error", "message", "statusCode"],
                   "description": "Endpoint not yet implemented"
                 }
               }
@@ -3712,9 +3358,7 @@
     "/transactions/{id}": {
       "get": {
         "summary": "Get a transaction by ID with all lines",
-        "tags": [
-          "transactions"
-        ],
+        "tags": ["transactions"],
         "parameters": [
           {
             "name": "id",
@@ -3868,11 +3512,7 @@
                       "description": "HTTP status code matching the response"
                     }
                   },
-                  "required": [
-                    "error",
-                    "message",
-                    "statusCode"
-                  ]
+                  "required": ["error", "message", "statusCode"]
                 }
               }
             }
@@ -3901,11 +3541,7 @@
                       "description": "HTTP status code matching the response"
                     }
                   },
-                  "required": [
-                    "error",
-                    "message",
-                    "statusCode"
-                  ],
+                  "required": ["error", "message", "statusCode"],
                   "description": "Transaction not found or not owned by user"
                 }
               }
@@ -3935,11 +3571,7 @@
                       "description": "HTTP status code matching the response"
                     }
                   },
-                  "required": [
-                    "error",
-                    "message",
-                    "statusCode"
-                  ],
+                  "required": ["error", "message", "statusCode"],
                   "description": "Endpoint not yet implemented"
                 }
               }
@@ -3949,9 +3581,7 @@
       },
       "patch": {
         "summary": "Update an existing transaction by ID",
-        "tags": [
-          "transactions"
-        ],
+        "tags": ["transactions"],
         "parameters": [
           {
             "name": "id",
@@ -4192,11 +3822,7 @@
                       "description": "HTTP status code matching the response"
                     }
                   },
-                  "required": [
-                    "error",
-                    "message",
-                    "statusCode"
-                  ]
+                  "required": ["error", "message", "statusCode"]
                 }
               }
             }
@@ -4225,11 +3851,7 @@
                       "description": "HTTP status code matching the response"
                     }
                   },
-                  "required": [
-                    "error",
-                    "message",
-                    "statusCode"
-                  ]
+                  "required": ["error", "message", "statusCode"]
                 }
               }
             }
@@ -4258,11 +3880,7 @@
                       "description": "HTTP status code matching the response"
                     }
                   },
-                  "required": [
-                    "error",
-                    "message",
-                    "statusCode"
-                  ],
+                  "required": ["error", "message", "statusCode"],
                   "description": "Transaction not found or not owned by user"
                 }
               }
@@ -4292,11 +3910,7 @@
                       "description": "HTTP status code matching the response"
                     }
                   },
-                  "required": [
-                    "error",
-                    "message",
-                    "statusCode"
-                  ],
+                  "required": ["error", "message", "statusCode"],
                   "description": "Endpoint not yet implemented"
                 }
               }
@@ -4306,9 +3920,7 @@
       },
       "delete": {
         "summary": "Delete a transaction by ID (creates reversal transaction)",
-        "tags": [
-          "transactions"
-        ],
+        "tags": ["transactions"],
         "parameters": [
           {
             "name": "id",
@@ -4349,11 +3961,7 @@
                       "description": "HTTP status code matching the response"
                     }
                   },
-                  "required": [
-                    "error",
-                    "message",
-                    "statusCode"
-                  ]
+                  "required": ["error", "message", "statusCode"]
                 }
               }
             }
@@ -4382,11 +3990,7 @@
                       "description": "HTTP status code matching the response"
                     }
                   },
-                  "required": [
-                    "error",
-                    "message",
-                    "statusCode"
-                  ],
+                  "required": ["error", "message", "statusCode"],
                   "description": "Transaction not found or not owned by user"
                 }
               }
@@ -4416,11 +4020,7 @@
                       "description": "HTTP status code matching the response"
                     }
                   },
-                  "required": [
-                    "error",
-                    "message",
-                    "statusCode"
-                  ],
+                  "required": ["error", "message", "statusCode"],
                   "description": "Endpoint not yet implemented"
                 }
               }
@@ -4432,9 +4032,7 @@
     "/reports/spendable-balance": {
       "get": {
         "summary": "Get spendable balance for a date range",
-        "tags": [
-          "reports"
-        ],
+        "tags": ["reports"],
         "parameters": [],
         "responses": {
           "200": {
@@ -4494,11 +4092,7 @@
                       "description": "HTTP status code matching the response"
                     }
                   },
-                  "required": [
-                    "error",
-                    "message",
-                    "statusCode"
-                  ]
+                  "required": ["error", "message", "statusCode"]
                 }
               }
             }
@@ -4527,11 +4121,7 @@
                       "description": "HTTP status code matching the response"
                     }
                   },
-                  "required": [
-                    "error",
-                    "message",
-                    "statusCode"
-                  ],
+                  "required": ["error", "message", "statusCode"],
                   "description": "Endpoint not yet implemented"
                 }
               }
@@ -4543,9 +4133,7 @@
     "/reports/expenses-by-category": {
       "get": {
         "summary": "Get expenses grouped by category for a date range",
-        "tags": [
-          "reports"
-        ],
+        "tags": ["reports"],
         "parameters": [
           {
             "name": "startDate",
@@ -4631,11 +4219,7 @@
                       "description": "HTTP status code matching the response"
                     }
                   },
-                  "required": [
-                    "error",
-                    "message",
-                    "statusCode"
-                  ]
+                  "required": ["error", "message", "statusCode"]
                 }
               }
             }
@@ -4664,11 +4248,7 @@
                       "description": "HTTP status code matching the response"
                     }
                   },
-                  "required": [
-                    "error",
-                    "message",
-                    "statusCode"
-                  ],
+                  "required": ["error", "message", "statusCode"],
                   "description": "Endpoint not yet implemented"
                 }
               }
@@ -4680,9 +4260,7 @@
     "/reports/debt-progress": {
       "get": {
         "summary": "Get debt payoff progress for a date range",
-        "tags": [
-          "reports"
-        ],
+        "tags": ["reports"],
         "parameters": [],
         "responses": {
           "200": {
@@ -4748,11 +4326,7 @@
                       "description": "HTTP status code matching the response"
                     }
                   },
-                  "required": [
-                    "error",
-                    "message",
-                    "statusCode"
-                  ]
+                  "required": ["error", "message", "statusCode"]
                 }
               }
             }
@@ -4781,11 +4355,7 @@
                       "description": "HTTP status code matching the response"
                     }
                   },
-                  "required": [
-                    "error",
-                    "message",
-                    "statusCode"
-                  ],
+                  "required": ["error", "message", "statusCode"],
                   "description": "Endpoint not yet implemented"
                 }
               }
@@ -4797,9 +4367,7 @@
     "/export/csv": {
       "get": {
         "summary": "Download transactions as a CSV file with optional date range filter",
-        "tags": [
-          "export"
-        ],
+        "tags": ["export"],
         "parameters": [],
         "responses": {
           "200": {
@@ -4829,11 +4397,7 @@
                       "description": "HTTP status code matching the response"
                     }
                   },
-                  "required": [
-                    "error",
-                    "message",
-                    "statusCode"
-                  ]
+                  "required": ["error", "message", "statusCode"]
                 }
               }
             }
@@ -4862,11 +4426,7 @@
                       "description": "HTTP status code matching the response"
                     }
                   },
-                  "required": [
-                    "error",
-                    "message",
-                    "statusCode"
-                  ]
+                  "required": ["error", "message", "statusCode"]
                 }
               }
             }
@@ -4877,9 +4437,7 @@
     "/health/liveness": {
       "get": {
         "summary": "Kubernetes liveness probe endpoint",
-        "tags": [
-          "health"
-        ],
+        "tags": ["health"],
         "parameters": [],
         "responses": {
           "200": {
@@ -4891,14 +4449,10 @@
                   "properties": {
                     "status": {
                       "type": "string",
-                      "enum": [
-                        "ok"
-                      ]
+                      "enum": ["ok"]
                     }
                   },
-                  "required": [
-                    "status"
-                  ],
+                  "required": ["status"],
                   "description": "Liveness check passed"
                 }
               }
@@ -4928,11 +4482,7 @@
                       "description": "HTTP status code matching the response"
                     }
                   },
-                  "required": [
-                    "error",
-                    "message",
-                    "statusCode"
-                  ],
+                  "required": ["error", "message", "statusCode"],
                   "description": "Service unavailable"
                 }
               }
@@ -4944,9 +4494,7 @@
     "/health/readiness": {
       "get": {
         "summary": "Kubernetes readiness probe endpoint",
-        "tags": [
-          "health"
-        ],
+        "tags": ["health"],
         "parameters": [],
         "responses": {
           "200": {
@@ -4958,9 +4506,7 @@
                   "properties": {
                     "status": {
                       "type": "string",
-                      "enum": [
-                        "ok"
-                      ]
+                      "enum": ["ok"]
                     },
                     "checks": {
                       "type": "object",
@@ -4972,15 +4518,10 @@
                           "type": "boolean"
                         }
                       },
-                      "required": [
-                        "database"
-                      ]
+                      "required": ["database"]
                     }
                   },
-                  "required": [
-                    "status",
-                    "checks"
-                  ],
+                  "required": ["status", "checks"],
                   "description": "Readiness check passed"
                 }
               }
@@ -5010,11 +4551,7 @@
                       "description": "HTTP status code matching the response"
                     }
                   },
-                  "required": [
-                    "error",
-                    "message",
-                    "statusCode"
-                  ],
+                  "required": ["error", "message", "statusCode"],
                   "description": "Service not ready (dependent systems down)"
                 }
               }

@@ -33,7 +33,7 @@ export class OnboardingController {
   ) {}
 
   @TsRestHandler(contract.onboarding.applyLayout)
-  async applyLayout(@Req() req: RequestWithUser) {
+  async applyLayout(@Req() req: RequestWithUser): Promise<unknown> {
     return tsRestHandler(contract.onboarding.applyLayout, async ({ body }) => {
       const userId = userIdFromString(req.user.sub);
 
@@ -52,7 +52,7 @@ export class OnboardingController {
               kind: group.kind as CategoryGroupKind,
               idealPercentageBasisPoints: group.idealPercentageBasisPoints,
               sortOrder: group.sortOrder,
-              isSystem: group.isSystem,
+              ownership: group.ownership,
               createdAt: group.createdAt.toISOString(),
               updatedAt: group.updatedAt.toISOString(),
             })),
@@ -67,7 +67,9 @@ export class OnboardingController {
 
   private handleError(error: unknown): never {
     if (error instanceof CategoryGroupLayoutConflictError) {
-      throw new ConflictException((error as CategoryGroupLayoutConflictError).message);
+      throw new ConflictException(
+        (error as CategoryGroupLayoutConflictError).message,
+      );
     }
 
     if (error instanceof ConflictException) {
@@ -78,7 +80,8 @@ export class OnboardingController {
       throw error;
     }
 
-    const message = error instanceof Error ? error.message : "An error occurred";
+    const message =
+      error instanceof Error ? error.message : "An error occurred";
     throw new BadRequestException(message);
   }
 }

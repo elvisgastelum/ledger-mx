@@ -1,6 +1,11 @@
 import { useState } from "react";
 import { useForm, Controller } from "react-hook-form";
-import type { AccountType } from "@ledger-mx/contracts";
+import type {
+  AccountType,
+  SystemRole,
+  AccountStatus,
+  OwnershipType,
+} from "@ledger-mx/contracts";
 import { tsr } from "../lib/ts-rest-client";
 import { cn } from "../lib/utils";
 import { Button } from "../components/ui/button";
@@ -36,7 +41,9 @@ interface Account {
   type: AccountType;
   balanceCents: number;
   currency: string;
-  isActive: boolean;
+  status: AccountStatus;
+  ownership: OwnershipType;
+  systemRole: SystemRole;
   createdAt: string;
   updatedAt: string;
 }
@@ -144,6 +151,8 @@ export function AccountsPage() {
   };
 
   const startEdit = (account: Account) => {
+    // Don't allow editing system accounts
+    if (account.ownership === "system") return;
     setEditingAccount(account);
     setValue("name", account.name);
     setValue("type", account.type);
@@ -344,7 +353,14 @@ export function AccountsPage() {
                 <tbody>
                   {accounts.map((account: Account) => (
                     <tr key={account.id} className="border-b">
-                      <td className="px-4 py-3">{account.name}</td>
+                      <td className="px-4 py-3">
+                        {account.name}
+                        {account.ownership === "system" && (
+                          <span className="ml-2 text-xs text-muted-foreground">
+                            (System - {account.systemRole})
+                          </span>
+                        )}
+                      </td>
                       <td className="px-4 py-3 capitalize">{account.type}</td>
                       <td className="px-4 py-3">{account.currency}</td>
                       <td className="px-4 py-3">
@@ -354,12 +370,12 @@ export function AccountsPage() {
                         <span
                           className={cn(
                             "inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold",
-                            account.isActive
+                            account.status === "active"
                               ? "bg-success/20 text-success"
                               : "bg-muted text-muted-foreground",
                           )}
                         >
-                          {account.isActive ? "Active" : "Archived"}
+                          {account.status === "active" ? "Active" : "Archived"}
                         </span>
                       </td>
                       <td className="px-4 py-3">
@@ -369,19 +385,21 @@ export function AccountsPage() {
                             variant="ghost"
                             size="sm"
                             onClick={() => startEdit(account)}
+                            disabled={account.ownership === "system"}
                           >
-                            Edit
+                            {account.ownership === "system" ? "System" : "Edit"}
                           </Button>
-                          {account.isActive && (
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => onArchive(account.id)}
-                            >
-                              Archive
-                            </Button>
-                          )}
+                          {account.status === "active" &&
+                            account.ownership !== "system" && (
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => onArchive(account.id)}
+                              >
+                                Archive
+                              </Button>
+                            )}
                         </div>
                       </td>
                     </tr>

@@ -1,3 +1,5 @@
+import type { AccountStatus } from "@ledger-mx/domain";
+
 export interface CreateAccountInput {
   userId: string;
   name: string;
@@ -11,7 +13,7 @@ export interface UpdateAccountInput {
   name?: string;
   type?: string;
   currencyCode?: string;
-  isArchived?: boolean;
+  status?: AccountStatus;
 }
 
 export interface ListAccountsInput {

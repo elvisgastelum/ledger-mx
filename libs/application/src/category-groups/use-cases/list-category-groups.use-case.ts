@@ -1,4 +1,4 @@
-import type { CategoryGroupRepository } from "@ledger-mx/domain";
+import type { CategoryGroupRepository, OwnershipType } from "@ledger-mx/domain";
 import type { ListCategoryGroupsInput } from "../category-group.types";
 
 export class ListCategoryGroupsUseCase {
@@ -13,12 +13,14 @@ export class ListCategoryGroupsUseCase {
       kind: string;
       idealPercentageBasisPoints: number | null;
       sortOrder: number;
-      isSystem: boolean;
+      ownership: OwnershipType;
       createdAt: Date;
       updatedAt: Date;
     }>;
   }> {
-    const groups = await this.categoryGroupRepository.listByUserId(input.userId);
+    const groups = await this.categoryGroupRepository.listByUserId(
+      input.userId,
+    );
 
     return {
       categoryGroups: groups.map((group) => ({
@@ -27,7 +29,7 @@ export class ListCategoryGroupsUseCase {
         kind: group.kind,
         idealPercentageBasisPoints: group.idealPercentageBasisPoints,
         sortOrder: group.sortOrder,
-        isSystem: group.isSystem,
+        ownership: group.ownership,
         createdAt: group.createdAt,
         updatedAt: group.updatedAt,
       })),

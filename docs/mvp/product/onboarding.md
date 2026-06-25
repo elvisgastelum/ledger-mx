@@ -60,7 +60,7 @@ User chooses one of two layouts:
       "kind": "general",
       "idealPercentageBasisPoints": null,
       "sortOrder": 0,
-      "isSystem": true,
+      "ownership": "system",
       "createdAt": "2024-01-01T00:00:00Z",
       "updatedAt": "2024-01-01T00:00:00Z"
     }
@@ -78,7 +78,7 @@ User chooses one of two layouts:
       "kind": "expense",
       "idealPercentageBasisPoints": 5000,
       "sortOrder": 0,
-      "isSystem": true,
+      "ownership": "system",
       "createdAt": "2024-01-01T00:00:00Z",
       "updatedAt": "2024-01-01T00:00:00Z"
     },
@@ -88,7 +88,7 @@ User chooses one of two layouts:
       "kind": "expense",
       "idealPercentageBasisPoints": 3000,
       "sortOrder": 1,
-      "isSystem": true,
+      "ownership": "system",
       "createdAt": "2024-01-01T00:00:00Z",
       "updatedAt": "2024-01-01T00:00:00Z"
     },
@@ -98,7 +98,7 @@ User chooses one of two layouts:
       "kind": "savings",
       "idealPercentageBasisPoints": 2000,
       "sortOrder": 2,
-      "isSystem": true,
+      "ownership": "system",
       "createdAt": "2024-01-01T00:00:00Z",
       "updatedAt": "2024-01-01T00:00:00Z"
     }
@@ -144,7 +144,7 @@ User chooses one of two layouts:
       "name": "General",
       "kind": "general",
       "idealPercentageBasisPoints": null,
-      "isSystem": true,
+      "ownership": "system",
       "sortOrder": 0,
       "createdAt": "2024-01-01T00:00:00Z",
       "updatedAt": "2024-01-01T00:00:00Z"

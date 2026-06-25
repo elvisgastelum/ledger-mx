@@ -1,5 +1,9 @@
 import { eq, and, isNull, count } from "drizzle-orm";
-import type { CategoryGroup, CategoryGroupRepository } from "@ledger-mx/domain";
+import type {
+  CategoryGroup,
+  CategoryGroupRepository,
+  OwnershipType,
+} from "@ledger-mx/domain";
 import type { UserId, CategoryGroupId } from "@ledger-mx/domain";
 import type { Database } from "../connection";
 import { categoryGroups, categories } from "../schema";
@@ -23,7 +27,7 @@ export class DrizzleCategoryGroupRepository implements CategoryGroupRepository {
           kind: data.kind,
           idealPercentageBasisPoints: data.idealPercentageBasisPoints,
           sortOrder: data.sortOrder,
-          isSystem: data.isSystem,
+          ownership: data.ownership,
           updatedAt: new Date(),
           deletedAt: data.deletedAt,
         },
@@ -31,7 +35,10 @@ export class DrizzleCategoryGroupRepository implements CategoryGroupRepository {
       });
   }
 
-  async findById(userId: UserId, id: CategoryGroupId): Promise<CategoryGroup | null> {
+  async findById(
+    userId: UserId,
+    id: CategoryGroupId,
+  ): Promise<CategoryGroup | null> {
     const result = await this.db
       .select()
       .from(categoryGroups)
@@ -66,7 +73,10 @@ export class DrizzleCategoryGroupRepository implements CategoryGroupRepository {
     return result.map((row) => this.mapToDomain(row));
   }
 
-  async hasActiveCategories(userId: UserId, groupId: CategoryGroupId): Promise<boolean> {
+  async hasActiveCategories(
+    userId: UserId,
+    groupId: CategoryGroupId,
+  ): Promise<boolean> {
     const result = await this.db
       .select({ count: count() })
       .from(categories)
@@ -81,15 +91,16 @@ export class DrizzleCategoryGroupRepository implements CategoryGroupRepository {
     return (result[0]?.count ?? 0) > 0;
   }
 
-  async softDelete(userId: UserId, groupId: CategoryGroupId, deletedAt: Date): Promise<void> {
+  async softDelete(
+    userId: UserId,
+    groupId: CategoryGroupId,
+    deletedAt: Date,
+  ): Promise<void> {
     await this.db
       .update(categoryGroups)
       .set({ deletedAt, updatedAt: new Date() })
       .where(
-        and(
-          eq(categoryGroups.id, groupId),
-          eq(categoryGroups.userId, userId),
-        ),
+        and(eq(categoryGroups.id, groupId), eq(categoryGroups.userId, userId)),
       );
   }
 
@@ -101,7 +112,7 @@ export class DrizzleCategoryGroupRepository implements CategoryGroupRepository {
       kind: row.kind,
       idealPercentageBasisPoints: row.idealPercentageBasisPoints,
       sortOrder: row.sortOrder,
-      isSystem: row.isSystem,
+      ownership: row.ownership as OwnershipType,
       createdAt: row.createdAt,
       updatedAt: row.updatedAt,
       deletedAt: row.deletedAt ?? undefined,
@@ -116,7 +127,7 @@ export class DrizzleCategoryGroupRepository implements CategoryGroupRepository {
       kind: group.kind,
       idealPercentageBasisPoints: group.idealPercentageBasisPoints,
       sortOrder: group.sortOrder,
-      isSystem: group.isSystem,
+      ownership: group.ownership,
       createdAt: group.createdAt,
       updatedAt: group.updatedAt,
       deletedAt: group.deletedAt ?? null,

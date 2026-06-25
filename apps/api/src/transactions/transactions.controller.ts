@@ -40,7 +40,7 @@ export class TransactionsController {
   ) {}
 
   @TsRestHandler(contract.transactions.list)
-  async listTransactions(@Req() req: RequestWithUser) {
+  async listTransactions(@Req() req: RequestWithUser): Promise<unknown> {
     return tsRestHandler(contract.transactions.list, async () => {
       const user = req.user as { sub: string };
       const userId = userIdFromString(user.sub);
@@ -76,7 +76,7 @@ export class TransactionsController {
   }
 
   @TsRestHandler(contract.transactions.create)
-  async createTransaction(@Req() req: RequestWithUser) {
+  async createTransaction(@Req() req: RequestWithUser): Promise<unknown> {
     return tsRestHandler(contract.transactions.create, async ({ body }) => {
       const user = req.user as { sub: string };
       const userId = userIdFromString(user.sub);

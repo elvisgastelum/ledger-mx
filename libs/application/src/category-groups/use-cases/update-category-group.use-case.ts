@@ -1,4 +1,4 @@
-import type { CategoryGroupId } from "@ledger-mx/domain";
+import type { CategoryGroupId, OwnershipType } from "@ledger-mx/domain";
 import type { CategoryGroupRepository } from "@ledger-mx/domain";
 import type { CategoryGroupKind } from "@ledger-mx/domain";
 import type { Clock } from "../../auth/ports/clock.port";
@@ -20,7 +20,7 @@ export class UpdateCategoryGroupUseCase {
     kind: CategoryGroupKind;
     idealPercentageBasisPoints: number | null;
     sortOrder: number;
-    isSystem: boolean;
+    ownership: OwnershipType;
     createdAt: Date;
     updatedAt: Date;
   }> {
@@ -34,7 +34,7 @@ export class UpdateCategoryGroupUseCase {
       throw new CategoryGroupNotFoundError(input.id);
     }
 
-    if (existing.isSystem) {
+    if (existing.ownership === "system") {
       throw new SystemCategoryGroupModificationError("update");
     }
 
@@ -59,7 +59,7 @@ export class UpdateCategoryGroupUseCase {
       kind: updated.kind,
       idealPercentageBasisPoints: updated.idealPercentageBasisPoints,
       sortOrder: updated.sortOrder,
-      isSystem: updated.isSystem,
+      ownership: updated.ownership,
       createdAt: updated.createdAt,
       updatedAt: updated.updatedAt,
     };

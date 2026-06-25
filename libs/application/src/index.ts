@@ -86,11 +86,13 @@ export { CreateAccountUseCase } from "./accounts/use-cases/create-account.use-ca
 export { ListAccountsUseCase } from "./accounts/use-cases/list-accounts.use-case";
 export { UpdateAccountUseCase } from "./accounts/use-cases/update-account.use-case";
 export { ArchiveAccountUseCase } from "./accounts/use-cases/archive-account.use-case";
+export { EnsureSystemAccountsUseCase } from "./accounts/use-cases/ensure-system-accounts.use-case";
 
 // Account Errors
 export {
   AccountApplicationError,
   AccountNotFoundError,
+  SystemAccountModificationError,
 } from "./accounts/account.errors";
 
 // Transaction Types

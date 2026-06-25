@@ -1,6 +1,11 @@
 import { describe, it, expect, beforeEach } from "vitest";
 import { DeleteCategoryGroupUseCase } from "./delete-category-group.use-case";
-import type { CategoryGroupRepository, CategoryGroup, UserId, CategoryGroupId } from "@ledger-mx/domain";
+import type {
+  CategoryGroupRepository,
+  CategoryGroup,
+  UserId,
+  CategoryGroupId,
+} from "@ledger-mx/domain";
 import type { Clock } from "../../auth/ports/clock.port";
 import { categoryGroupIdFromString } from "@ledger-mx/domain";
 import {
@@ -18,7 +23,10 @@ class FakeCategoryGroupRepository implements CategoryGroupRepository {
     this.groups.set(`${group.userId}:${group.id}`, group);
   }
 
-  async findById(userId: UserId, id: CategoryGroupId): Promise<CategoryGroup | null> {
+  async findById(
+    userId: UserId,
+    id: CategoryGroupId,
+  ): Promise<CategoryGroup | null> {
     return this.groups.get(`${userId}:${id}`) ?? null;
   }
 
@@ -28,18 +36,29 @@ class FakeCategoryGroupRepository implements CategoryGroupRepository {
       .sort((a, b) => a.sortOrder - b.sortOrder);
   }
 
-  async hasActiveCategories(userId: UserId, groupId: CategoryGroupId): Promise<boolean> {
+  async hasActiveCategories(
+    userId: UserId,
+    groupId: CategoryGroupId,
+  ): Promise<boolean> {
     return this.activeCategories.get(`${userId}:${groupId}`) ?? false;
   }
 
-  async softDelete(userId: UserId, groupId: CategoryGroupId, deletedAt: Date): Promise<void> {
+  async softDelete(
+    userId: UserId,
+    groupId: CategoryGroupId,
+    deletedAt: Date,
+  ): Promise<void> {
     const group = this.groups.get(`${userId}:${groupId}`);
     if (group) {
       group.deletedAt = deletedAt;
     }
   }
 
-  setHasActiveCategories(userId: UserId, groupId: CategoryGroupId, has: boolean) {
+  setHasActiveCategories(
+    userId: UserId,
+    groupId: CategoryGroupId,
+    has: boolean,
+  ) {
     this.activeCategories.set(`${userId}:${groupId}`, has);
   }
 
@@ -60,7 +79,9 @@ describe("DeleteCategoryGroupUseCase", () => {
   let repo: FakeCategoryGroupRepository;
   let clock: FakeClock;
   const userId = "00000000-0000-4000-8000-000000000101" as UserId;
-  const groupId = categoryGroupIdFromString("00000000-0000-4000-8000-000000000001");
+  const groupId = categoryGroupIdFromString(
+    "00000000-0000-4000-8000-000000000001",
+  );
 
   beforeEach(() => {
     repo = new FakeCategoryGroupRepository();
@@ -85,7 +106,7 @@ describe("DeleteCategoryGroupUseCase", () => {
       kind: "expense",
       idealPercentageBasisPoints: 5000,
       sortOrder: 0,
-      isSystem: true,
+      ownership: "system",
       createdAt: new Date("2024-01-01"),
       updatedAt: new Date("2024-01-01"),
     });
@@ -106,7 +127,7 @@ describe("DeleteCategoryGroupUseCase", () => {
       kind: "expense",
       idealPercentageBasisPoints: 5000,
       sortOrder: 0,
-      isSystem: false,
+      ownership: "user",
       createdAt: new Date("2024-01-01"),
       updatedAt: new Date("2024-01-01"),
     });
@@ -129,7 +150,7 @@ describe("DeleteCategoryGroupUseCase", () => {
       kind: "expense",
       idealPercentageBasisPoints: 5000,
       sortOrder: 0,
-      isSystem: false,
+      ownership: "user",
       createdAt: new Date("2024-01-01"),
       updatedAt: new Date("2024-01-01"),
     });

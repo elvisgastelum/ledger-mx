@@ -12,25 +12,25 @@ Users need clear feedback about sync state: offline/online status, pending write
 
 ## User-Visible States
 
-| State | Description | UI Indicator |
-|-------|-------------|--------------|
-| `offline` | No network connection | Status badge: "Offline" |
-| `queued` | Writes pending in IndexedDB queue | Status badge: "Pending changes" + count |
-| `syncing` | Actively syncing with server | Status badge: "Syncing..." (animated) |
-| `synced` | All changes synced | Status badge: "Synced" or hidden when idle |
-| `conflict` | Conflict requires user resolution | Prominent notification + conflict icon |
-| `error` | Sync error (non-conflict) | Error badge with retry action |
+| State      | Description                       | UI Indicator                               |
+| ---------- | --------------------------------- | ------------------------------------------ |
+| `offline`  | No network connection             | Status badge: "Offline"                    |
+| `queued`   | Writes pending in IndexedDB queue | Status badge: "Pending changes" + count    |
+| `syncing`  | Actively syncing with server      | Status badge: "Syncing..." (animated)      |
+| `synced`   | All changes synced                | Status badge: "Synced" or hidden when idle |
+| `conflict` | Conflict requires user resolution | Prominent notification + conflict icon     |
+| `error`    | Sync error (non-conflict)         | Error badge with retry action              |
 
 ## TypeScript Interface Sketch
 
 ```typescript
 type SyncState =
-  | { status: 'offline' }
-  | { status: 'queued'; pendingCount: number }
-  | { status: 'syncing' }
-  | { status: 'synced' }
-  | { status: 'conflict'; conflictIds: string[] }
-  | { status: 'error'; message: string; retryable: boolean };
+  | { status: "offline" }
+  | { status: "queued"; pendingCount: number }
+  | { status: "syncing" }
+  | { status: "synced" }
+  | { status: "conflict"; conflictIds: string[] }
+  | { status: "error"; message: string; retryable: boolean };
 
 interface SyncStatus {
   state: SyncState;

@@ -1,5 +1,11 @@
 import { Account } from "@ledger-mx/domain";
-import type { AccountRepository, AccountId, UserId } from "@ledger-mx/domain";
+import type {
+  AccountRepository,
+  AccountId,
+  UserId,
+  AccountStatus,
+  OwnershipType,
+} from "@ledger-mx/domain";
 import type { IdGenerator } from "@ledger-mx/application";
 import type { CreateAccountInput } from "../account.types";
 
@@ -17,10 +23,12 @@ export class CreateAccountUseCase {
       name: input.name,
       type: input.type as Account["type"],
       currencyCode: input.currencyCode ?? "MXN",
-      isArchived: false,
+      status: "active" as AccountStatus,
       createdAt: this.clock.now(),
       updatedAt: this.clock.now(),
       deletedAt: null,
+      ownership: "user" as OwnershipType,
+      systemRole: null,
     };
 
     await this.accountRepository.save(account);

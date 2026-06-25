@@ -16,3 +16,12 @@ export class AccountNotFoundError extends AccountApplicationError {
     super(`Account not found: ${id}`);
   }
 }
+
+/**
+ * Thrown when attempting to modify a system account.
+ */
+export class SystemAccountModificationError extends AccountApplicationError {
+  constructor(id: string) {
+    super(`Cannot modify system account: ${id}`);
+  }
+}

@@ -11,10 +11,10 @@ Overview: [Offline Writes](./offline-writes.md)
 ```typescript
 interface QueuedWrite {
   id: string;
-  type: 'INSERT' | 'UPDATE' | 'DELETE';
+  type: "INSERT" | "UPDATE" | "DELETE";
   table: string;
   data: any;
-  status: 'pending' | 'synced' | 'error';
+  status: "pending" | "synced" | "error";
   attempts: number;
   maxAttempts: 7;
   nextRetryAt?: Date;
@@ -22,27 +22,27 @@ interface QueuedWrite {
 }
 
 async function processRetryQueue() {
-  const pending = await db.queue.findMany({ 
-    where: { status: 'pending' } 
+  const pending = await db.queue.findMany({
+    where: { status: "pending" },
   });
-  
+
   for (const write of pending) {
     if (write.attempts >= write.maxAttempts) {
-      await db.queue.update(write.id, { status: 'error' });
+      await db.queue.update(write.id, { status: "error" });
       continue;
     }
-    
+
     if (write.nextRetryAt && write.nextRetryAt > new Date()) {
       continue; // Not time yet
     }
-    
+
     try {
       await syncWrite(write);
-      await db.queue.update(write.id, { status: 'synced' });
+      await db.queue.update(write.id, { status: "synced" });
     } catch (error) {
       const nextAttempt = write.attempts + 1;
       const delayMs = Math.pow(2, nextAttempt) * 1000; // Exponential backoff
-      
+
       await db.queue.update(write.id, {
         attempts: nextAttempt,
         nextRetryAt: addSeconds(new Date(), delayMs / 1000),
@@ -73,15 +73,15 @@ function SyncErrorNotification({ write }) {
 
 ```typescript
 function SyncStatus() {
-  const pending = useQuery(['syncQueue']);
-  return pending.data > 0 ? '⏳ Pending' : '✅ Synced';
+  const pending = useQuery(["syncQueue"]);
+  return pending.data > 0 ? "⏳ Pending" : "✅ Synced";
 }
 ```
 
 ## Online Detection
 
 ```typescript
-window.addEventListener('online', () => processSyncQueue());
+window.addEventListener("online", () => processSyncQueue());
 ```
 
 ## Testing

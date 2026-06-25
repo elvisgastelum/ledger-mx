@@ -10,12 +10,19 @@ Kubernetes liveness probe: confirms the application process is running.
 
 **Auth Required**: No
 **Success Response (200)**:
+
 ```json
 { "status": "ok" }
 ```
+
 **Error Response (503)**:
+
 ```json
-{ "error": "SERVICE_UNAVAILABLE", "message": "Application process is unresponsive", "statusCode": 503 }
+{
+  "error": "SERVICE_UNAVAILABLE",
+  "message": "Application process is unresponsive",
+  "statusCode": 503
+}
 ```
 
 ---
@@ -26,6 +33,7 @@ Kubernetes readiness probe: confirms the application can handle traffic (depende
 
 **Auth Required**: No
 **Success Response (200)**:
+
 ```json
 {
   "status": "ok",
@@ -34,7 +42,9 @@ Kubernetes readiness probe: confirms the application can handle traffic (depende
   }
 }
 ```
+
 **Error Response (503)**:
+
 ```json
 {
   "error": "SERVICE_UNAVAILABLE",
@@ -48,10 +58,10 @@ Kubernetes readiness probe: confirms the application can handle traffic (depende
 
 ## Checks (Planned)
 
-| Check       | Description                                  | Required for Readiness |
-|-------------|----------------------------------------------|------------------------|
-| Database    | Execute simple query (e.g., `SELECT 1`)      | Yes                    |
-| Redis       | Ping Redis cache (if enabled)                 | No (optional)          |
+| Check    | Description                             | Required for Readiness |
+| -------- | --------------------------------------- | ---------------------- |
+| Database | Execute simple query (e.g., `SELECT 1`) | Yes                    |
+| Redis    | Ping Redis cache (if enabled)           | No (optional)          |
 
 ## Implementation Notes
 
@@ -62,6 +72,7 @@ Kubernetes readiness probe: confirms the application can handle traffic (depende
 ## Docker/Kubernetes Configuration
 
 Once implemented, update Dockerfile and Kubernetes manifests to use the correct probe endpoints:
+
 ```dockerfile
 HEALTHCHECK --interval=30s --timeout=3s \
   CMD curl -f http://localhost:3000/health/liveness || exit 1

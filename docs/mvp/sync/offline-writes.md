@@ -18,10 +18,10 @@ Implementation details: [Offline Retry](./offline-retry.md)
 ```typescript
 interface QueuedWrite {
   id: string;
-  type: 'INSERT' | 'UPDATE' | 'DELETE';
+  type: "INSERT" | "UPDATE" | "DELETE";
   table: string;
   data: any;
-  status: 'pending' | 'synced' | 'error';
+  status: "pending" | "synced" | "error";
 }
 ```
 
@@ -41,4 +41,3 @@ interface QueuedWrite {
 - **Export fallback**: If sync continuously fails, allow export of pending writes
 
 See [Offline Retry](./offline-retry.md) for implementation details.
-

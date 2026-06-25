@@ -2,13 +2,13 @@ import {
   pgTable,
   uuid,
   text,
-  boolean,
   timestamp,
   index,
   type AnyPgColumn,
 } from "drizzle-orm/pg-core";
 import { users } from "./users";
 import { categoryGroups } from "./category-groups";
+import { ownershipTypeEnum } from "./enums";
 
 export const categories = pgTable(
   "categories",
@@ -22,7 +22,7 @@ export const categories = pgTable(
     categoryGroupId: uuid("category_group_id")
       .references(() => categoryGroups.id)
       .notNull(),
-    isSystem: boolean("is_system").default(false).notNull(),
+    ownership: ownershipTypeEnum("ownership").default("user").notNull(),
     createdAt: timestamp("created_at", { withTimezone: true })
       .defaultNow()
       .notNull(),

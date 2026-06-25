@@ -1,4 +1,4 @@
-import type { UserId } from "@ledger-mx/domain";
+import type { UserId, OwnershipType } from "@ledger-mx/domain";
 import type { CategoryGroupRepository } from "@ledger-mx/domain";
 import type { CategoryGroupKind } from "@ledger-mx/domain";
 import type { IdGenerator } from "../../auth/ports/id-generator.port";
@@ -30,12 +30,12 @@ const BLANK_LAYOUT_GROUPS: DefaultCategoryGroupDef[] = [
 
 const FIFTY_THIRTY_TWENTY_LAYOUT_GROUPS: DefaultCategoryGroupDef[] = [
   {
-    name: "Need",
+    name: "Needs",
     kind: "expense",
     idealPercentageBasisPoints: 5000,
   },
   {
-    name: "Want",
+    name: "Wants",
     kind: "expense",
     idealPercentageBasisPoints: 3000,
   },
@@ -64,7 +64,7 @@ export interface ApplyDefaultCategoryGroupLayoutResult {
     kind: string;
     idealPercentageBasisPoints: number | null;
     sortOrder: number;
-    isSystem: boolean;
+    ownership: OwnershipType;
     createdAt: Date;
     updatedAt: Date;
   }>;
@@ -87,17 +87,24 @@ export class ApplyDefaultCategoryGroupLayoutUseCase {
     private readonly clock: Clock,
   ) {}
 
-  async execute(input: ApplyDefaultCategoryGroupLayoutInput): Promise<ApplyDefaultCategoryGroupLayoutResult> {
+  async execute(
+    input: ApplyDefaultCategoryGroupLayoutInput,
+  ): Promise<ApplyDefaultCategoryGroupLayoutResult> {
     const { userId, layout } = input;
 
     // Get existing active category groups for the user
-    const existingGroups = await this.categoryGroupRepository.listByUserId(userId);
+    const existingGroups =
+      await this.categoryGroupRepository.listByUserId(userId);
 
     // Get the default group definitions for the requested layout
     const defaultDefs = this.getDefaultGroupDefs(layout);
 
     // Check for conflicts or idempotency
-    const result = await this.checkAndApplyLayout(userId, existingGroups, defaultDefs);
+    const result = await this.checkAndApplyLayout(
+      userId,
+      existingGroups,
+      defaultDefs,
+    );
 
     return result;
   }
@@ -120,7 +127,7 @@ export class ApplyDefaultCategoryGroupLayoutUseCase {
       kind: string;
       idealPercentageBasisPoints: number | null;
       sortOrder: number;
-      isSystem: boolean;
+      ownership: OwnershipType;
       createdAt: Date;
       updatedAt: Date;
       deletedAt?: Date | null;
@@ -148,7 +155,7 @@ export class ApplyDefaultCategoryGroupLayoutUseCase {
           kind: group.kind,
           idealPercentageBasisPoints: group.idealPercentageBasisPoints,
           sortOrder: group.sortOrder,
-          isSystem: group.isSystem,
+          ownership: group.ownership,
           createdAt: group.createdAt,
           updatedAt: group.updatedAt,
         })),
@@ -168,7 +175,7 @@ export class ApplyDefaultCategoryGroupLayoutUseCase {
       kind: string;
       idealPercentageBasisPoints: number | null;
       sortOrder: number;
-      isSystem: boolean;
+      ownership: OwnershipType;
       createdAt: Date;
       updatedAt: Date;
     }>,
@@ -179,7 +186,7 @@ export class ApplyDefaultCategoryGroupLayoutUseCase {
     kind: string;
     idealPercentageBasisPoints: number | null;
     sortOrder: number;
-    isSystem: boolean;
+    ownership: OwnershipType;
     createdAt: Date;
     updatedAt: Date;
   }> {
@@ -189,7 +196,7 @@ export class ApplyDefaultCategoryGroupLayoutUseCase {
       kind: string;
       idealPercentageBasisPoints: number | null;
       sortOrder: number;
-      isSystem: boolean;
+      ownership: OwnershipType;
       createdAt: Date;
       updatedAt: Date;
     }> = [];
@@ -200,7 +207,7 @@ export class ApplyDefaultCategoryGroupLayoutUseCase {
           group.name === def.name &&
           group.kind === def.kind &&
           group.idealPercentageBasisPoints === def.idealPercentageBasisPoints &&
-          group.isSystem === true,
+          group.ownership === "system",
       );
 
       if (match) {
@@ -222,7 +229,7 @@ export class ApplyDefaultCategoryGroupLayoutUseCase {
       kind: string;
       idealPercentageBasisPoints: number | null;
       sortOrder: number;
-      isSystem: boolean;
+      ownership: OwnershipType;
       createdAt: Date;
       updatedAt: Date;
     }> = [];
@@ -238,7 +245,7 @@ export class ApplyDefaultCategoryGroupLayoutUseCase {
         kind: def.kind,
         idealPercentageBasisPoints: def.idealPercentageBasisPoints,
         sortOrder: i,
-        isSystem: true,
+        ownership: "system" as OwnershipType,
         createdAt: now,
         updatedAt: now,
       };
@@ -251,7 +258,7 @@ export class ApplyDefaultCategoryGroupLayoutUseCase {
         kind: group.kind,
         idealPercentageBasisPoints: group.idealPercentageBasisPoints,
         sortOrder: group.sortOrder,
-        isSystem: group.isSystem,
+        ownership: group.ownership,
         createdAt: group.createdAt,
         updatedAt: group.updatedAt,
       });

@@ -9,4 +9,10 @@ export type { SeedData } from "./types.js";
 export { getDemoSeedData } from "./demo.js";
 export { demoSeedData } from "./demo.js";
 export { validateTransactionLines } from "./run.js";
-export { seedDatabase, resetUser, seedDemo, seedPersonal, verifySeed } from "./run.js";
+export {
+  seedDatabase,
+  resetUser,
+  seedDemo,
+  seedPersonal,
+  verifySeed,
+} from "./run.js";

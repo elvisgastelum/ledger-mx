@@ -1,6 +1,18 @@
-import type { AccountRepository, UserId, AccountId, Account, AccountType } from "@ledger-mx/domain";
+import type {
+  AccountRepository,
+  UserId,
+  AccountId,
+  Account,
+  AccountType,
+  AccountStatus,
+  SystemRole,
+  OwnershipType,
+} from "@ledger-mx/domain";
 import type { UpdateAccountInput } from "../account.types";
-import { AccountNotFoundError } from "../account.errors";
+import {
+  AccountNotFoundError,
+  SystemAccountModificationError,
+} from "../account.errors";
 
 export class UpdateAccountUseCase {
   constructor(
@@ -13,7 +25,9 @@ export class UpdateAccountUseCase {
     name: string;
     type: AccountType;
     currencyCode: string;
-    isArchived: boolean;
+    status: AccountStatus;
+    ownership: OwnershipType;
+    systemRole: SystemRole;
     createdAt: Date;
     updatedAt: Date;
   }> {
@@ -26,6 +40,11 @@ export class UpdateAccountUseCase {
       throw new AccountNotFoundError(input.id);
     }
 
+    // Prevent modification of system accounts
+    if (account.ownership === "system") {
+      throw new SystemAccountModificationError(input.id);
+    }
+
     // Update only provided fields
     if (input.name !== undefined) {
       account.name = input.name;
@@ -36,8 +55,8 @@ export class UpdateAccountUseCase {
     if (input.currencyCode !== undefined) {
       account.currencyCode = input.currencyCode;
     }
-    if (input.isArchived !== undefined) {
-      account.isArchived = input.isArchived;
+    if (input.status !== undefined) {
+      account.status = input.status;
     }
     account.updatedAt = this.clock.now();
 
@@ -48,7 +67,9 @@ export class UpdateAccountUseCase {
       name: account.name,
       type: account.type,
       currencyCode: account.currencyCode,
-      isArchived: account.isArchived,
+      status: account.status,
+      ownership: account.ownership,
+      systemRole: account.systemRole ?? null,
       createdAt: account.createdAt,
       updatedAt: account.updatedAt,
     };

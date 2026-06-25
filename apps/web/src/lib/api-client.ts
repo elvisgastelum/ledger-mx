@@ -76,7 +76,7 @@ export async function loginApi(
  * Note: Deduplication is now handled in AuthContext with useRef.
  */
 export async function refreshApi(): Promise<AuthSuccessResponse> {
-	const result = await authClient.auth.refresh();
+	const result = await authClient.auth.refresh({ body: undefined });
 
 	if (result.status === 200) {
 		return result.body;
@@ -97,7 +97,7 @@ export async function refreshApi(): Promise<AuthSuccessResponse> {
  * POST /api/v1/auth/logout
  */
 export async function logoutApi(): Promise<LogoutResponse> {
-	const result = await authClient.auth.logout();
+	const result = await authClient.auth.logout({ body: undefined });
 
 	if (result.status === 200) {
 		return result.body;

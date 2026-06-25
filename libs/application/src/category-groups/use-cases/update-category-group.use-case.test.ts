@@ -1,9 +1,17 @@
 import { describe, it, expect, beforeEach } from "vitest";
 import { UpdateCategoryGroupUseCase } from "./update-category-group.use-case";
-import type { CategoryGroupRepository, CategoryGroup, UserId, CategoryGroupId } from "@ledger-mx/domain";
+import type {
+  CategoryGroupRepository,
+  CategoryGroup,
+  UserId,
+  CategoryGroupId,
+} from "@ledger-mx/domain";
 import type { Clock } from "../../auth/ports/clock.port";
 import { categoryGroupIdFromString } from "@ledger-mx/domain";
-import { CategoryGroupNotFoundError, SystemCategoryGroupModificationError } from "../category-group.errors";
+import {
+  CategoryGroupNotFoundError,
+  SystemCategoryGroupModificationError,
+} from "../category-group.errors";
 
 // In-memory fake repository
 class FakeCategoryGroupRepository implements CategoryGroupRepository {
@@ -13,7 +21,10 @@ class FakeCategoryGroupRepository implements CategoryGroupRepository {
     this.groups.set(`${group.userId}:${group.id}`, group);
   }
 
-  async findById(userId: UserId, id: CategoryGroupId): Promise<CategoryGroup | null> {
+  async findById(
+    userId: UserId,
+    id: CategoryGroupId,
+  ): Promise<CategoryGroup | null> {
     return this.groups.get(`${userId}:${id}`) ?? null;
   }
 
@@ -45,7 +56,9 @@ describe("UpdateCategoryGroupUseCase", () => {
   let repo: FakeCategoryGroupRepository;
   let clock: FakeClock;
   const userId = "00000000-0000-4000-8000-000000000101" as UserId;
-  const groupId = categoryGroupIdFromString("00000000-0000-4000-8000-000000000001");
+  const groupId = categoryGroupIdFromString(
+    "00000000-0000-4000-8000-000000000001",
+  );
 
   beforeEach(() => {
     repo = new FakeCategoryGroupRepository();
@@ -71,7 +84,7 @@ describe("UpdateCategoryGroupUseCase", () => {
       kind: "expense",
       idealPercentageBasisPoints: 5000,
       sortOrder: 0,
-      isSystem: true,
+      ownership: "system",
       createdAt: new Date("2024-01-01"),
       updatedAt: new Date("2024-01-01"),
     });
@@ -93,7 +106,7 @@ describe("UpdateCategoryGroupUseCase", () => {
       kind: "expense",
       idealPercentageBasisPoints: 5000,
       sortOrder: 0,
-      isSystem: false,
+      ownership: "user",
       createdAt: new Date("2024-01-01"),
       updatedAt: new Date("2024-01-01"),
     });
@@ -113,7 +126,7 @@ describe("UpdateCategoryGroupUseCase", () => {
     expect(result.sortOrder).toBe(5);
     expect(result.updatedAt).toEqual(new Date("2024-06-15T00:00:00Z"));
     expect(result.createdAt).toEqual(new Date("2024-01-01")); // unchanged
-    expect(result.isSystem).toBe(false);
+    expect(result.ownership).toBe("user");
   });
 
   it("should trim name when updating", async () => {
@@ -124,7 +137,7 @@ describe("UpdateCategoryGroupUseCase", () => {
       kind: "expense",
       idealPercentageBasisPoints: null,
       sortOrder: 0,
-      isSystem: false,
+      ownership: "user",
       createdAt: new Date("2024-01-01"),
       updatedAt: new Date("2024-01-01"),
     });

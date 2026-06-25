@@ -20,7 +20,10 @@ import {
   SystemCategoryGroupModificationError,
   CategoryGroupHasActiveCategoriesError,
 } from "@ledger-mx/application";
-import type { CreateCategoryGroupInput, UpdateCategoryGroupInput } from "@ledger-mx/application";
+import type {
+  CreateCategoryGroupInput,
+  UpdateCategoryGroupInput,
+} from "@ledger-mx/application";
 import { contract } from "@ledger-mx/contracts";
 import { TsRestHandler, tsRestHandler } from "@ts-rest/nest";
 
@@ -47,7 +50,7 @@ export class CategoryGroupsController {
   ) {}
 
   @TsRestHandler(contract.categoryGroups.list)
-  async listCategoryGroups(@Req() req: RequestWithUser) {
+  async listCategoryGroups(@Req() req: RequestWithUser): Promise<unknown> {
     return tsRestHandler(contract.categoryGroups.list, async () => {
       const user = req.user as { sub: string };
       const userId = userIdFromString(user.sub);
@@ -65,7 +68,7 @@ export class CategoryGroupsController {
             kind: group.kind as CategoryGroupKind,
             idealPercentageBasisPoints: group.idealPercentageBasisPoints,
             sortOrder: group.sortOrder,
-            isSystem: group.isSystem,
+            ownership: group.ownership,
             createdAt: group.createdAt.toISOString(),
             updatedAt: group.updatedAt.toISOString(),
           })),
@@ -75,7 +78,7 @@ export class CategoryGroupsController {
   }
 
   @TsRestHandler(contract.categoryGroups.create)
-  async createCategoryGroup(@Req() req: RequestWithUser) {
+  async createCategoryGroup(@Req() req: RequestWithUser): Promise<unknown> {
     return tsRestHandler(contract.categoryGroups.create, async ({ body }) => {
       const user = req.user as { sub: string };
       const userId = userIdFromString(user.sub);
@@ -97,7 +100,7 @@ export class CategoryGroupsController {
             kind: result.kind,
             idealPercentageBasisPoints: result.idealPercentageBasisPoints,
             sortOrder: result.sortOrder,
-            isSystem: result.isSystem,
+            ownership: result.ownership,
             createdAt: result.createdAt.toISOString(),
             updatedAt: result.updatedAt.toISOString(),
           },
@@ -109,42 +112,45 @@ export class CategoryGroupsController {
   }
 
   @TsRestHandler(contract.categoryGroups.update)
-  async updateCategoryGroup(@Req() req: RequestWithUser) {
-    return tsRestHandler(contract.categoryGroups.update, async ({ body, params }) => {
-      const user = req.user as { sub: string };
-      const userId = userIdFromString(user.sub);
+  async updateCategoryGroup(@Req() req: RequestWithUser): Promise<unknown> {
+    return tsRestHandler(
+      contract.categoryGroups.update,
+      async ({ body, params }) => {
+        const user = req.user as { sub: string };
+        const userId = userIdFromString(user.sub);
 
-      try {
-        const result = await this.updateCategoryGroupUseCase.execute({
-          userId,
-          id: categoryGroupIdFromString(params.id),
-          name: body.name,
-          kind: body.kind as CategoryGroupKind | undefined,
-          idealPercentageBasisPoints: body.idealPercentageBasisPoints,
-          sortOrder: body.sortOrder,
-        } as UpdateCategoryGroupInput);
+        try {
+          const result = await this.updateCategoryGroupUseCase.execute({
+            userId,
+            id: categoryGroupIdFromString(params.id),
+            name: body.name,
+            kind: body.kind as CategoryGroupKind | undefined,
+            idealPercentageBasisPoints: body.idealPercentageBasisPoints,
+            sortOrder: body.sortOrder,
+          } as UpdateCategoryGroupInput);
 
-        return {
-          status: 200 as const,
-          body: {
-            id: result.id,
-            name: result.name,
-            kind: result.kind,
-            idealPercentageBasisPoints: result.idealPercentageBasisPoints,
-            sortOrder: result.sortOrder,
-            isSystem: result.isSystem,
-            createdAt: result.createdAt.toISOString(),
-            updatedAt: result.updatedAt.toISOString(),
-          },
-        };
-      } catch (error) {
-        this.handleError(error);
-      }
-    });
+          return {
+            status: 200 as const,
+            body: {
+              id: result.id,
+              name: result.name,
+              kind: result.kind,
+              idealPercentageBasisPoints: result.idealPercentageBasisPoints,
+              sortOrder: result.sortOrder,
+              ownership: result.ownership,
+              createdAt: result.createdAt.toISOString(),
+              updatedAt: result.updatedAt.toISOString(),
+            },
+          };
+        } catch (error) {
+          this.handleError(error);
+        }
+      },
+    );
   }
 
   @TsRestHandler(contract.categoryGroups.delete)
-  async deleteCategoryGroup(@Req() req: RequestWithUser) {
+  async deleteCategoryGroup(@Req() req: RequestWithUser): Promise<unknown> {
     return tsRestHandler(contract.categoryGroups.delete, async ({ params }) => {
       const user = req.user as { sub: string };
       const userId = userIdFromString(user.sub);
@@ -177,7 +183,10 @@ export class CategoryGroupsController {
       throw new ConflictException(error.message);
     }
 
-    if (error instanceof NotFoundException || error instanceof ConflictException) {
+    if (
+      error instanceof NotFoundException ||
+      error instanceof ConflictException
+    ) {
       throw error;
     }
 

@@ -1,6 +1,11 @@
 import { describe, it, expect, beforeEach } from "vitest";
 import { ApplyDefaultCategoryGroupLayoutUseCase } from "./apply-default-category-group-layout.use-case";
-import type { CategoryGroupRepository, CategoryGroup, UserId, CategoryGroupId } from "@ledger-mx/domain";
+import type {
+  CategoryGroupRepository,
+  CategoryGroup,
+  UserId,
+  CategoryGroupId,
+} from "@ledger-mx/domain";
 import type { IdGenerator } from "../../auth/ports/id-generator.port";
 import type { Clock } from "../../auth/ports/clock.port";
 import { categoryGroupIdFromString } from "@ledger-mx/domain";
@@ -14,7 +19,10 @@ class FakeCategoryGroupRepository implements CategoryGroupRepository {
     this.groups.set(`${group.userId}:${group.id}`, group);
   }
 
-  async findById(userId: UserId, id: CategoryGroupId): Promise<CategoryGroup | null> {
+  async findById(
+    userId: UserId,
+    id: CategoryGroupId,
+  ): Promise<CategoryGroup | null> {
     return this.groups.get(`${userId}:${id}`) ?? null;
   }
 
@@ -65,7 +73,11 @@ describe("ApplyDefaultCategoryGroupLayoutUseCase", () => {
     repo = new FakeCategoryGroupRepository();
     idGenerator = new FakeIdGenerator();
     clock = new FakeClock();
-    useCase = new ApplyDefaultCategoryGroupLayoutUseCase(repo, idGenerator, clock);
+    useCase = new ApplyDefaultCategoryGroupLayoutUseCase(
+      repo,
+      idGenerator,
+      clock,
+    );
   });
 
   describe("blank layout", () => {
@@ -82,7 +94,7 @@ describe("ApplyDefaultCategoryGroupLayoutUseCase", () => {
       expect(group.name).toBe("General");
       expect(group.kind).toBe("general");
       expect(group.idealPercentageBasisPoints).toBeNull();
-      expect(group.isSystem).toBe(true);
+      expect(group.ownership).toBe("system");
       expect(group.sortOrder).toBe(0);
     });
 
@@ -118,24 +130,24 @@ describe("ApplyDefaultCategoryGroupLayoutUseCase", () => {
       expect(result.categoryGroups).toHaveLength(3);
 
       const need = result.categoryGroups[0];
-      expect(need.name).toBe("Need");
+      expect(need.name).toBe("Needs");
       expect(need.kind).toBe("expense");
       expect(need.idealPercentageBasisPoints).toBe(5000);
-      expect(need.isSystem).toBe(true);
+      expect(need.ownership).toBe("system");
       expect(need.sortOrder).toBe(0);
 
       const want = result.categoryGroups[1];
-      expect(want.name).toBe("Want");
+      expect(want.name).toBe("Wants");
       expect(want.kind).toBe("expense");
       expect(want.idealPercentageBasisPoints).toBe(3000);
-      expect(want.isSystem).toBe(true);
+      expect(want.ownership).toBe("system");
       expect(want.sortOrder).toBe(1);
 
       const savings = result.categoryGroups[2];
       expect(savings.name).toBe("Savings");
       expect(savings.kind).toBe("savings");
       expect(savings.idealPercentageBasisPoints).toBe(2000);
-      expect(savings.isSystem).toBe(true);
+      expect(savings.ownership).toBe("system");
       expect(savings.sortOrder).toBe(2);
     });
 
@@ -169,7 +181,7 @@ describe("ApplyDefaultCategoryGroupLayoutUseCase", () => {
         kind: "expense",
         idealPercentageBasisPoints: 10000,
         sortOrder: 0,
-        isSystem: false,
+        ownership: "user",
         createdAt: new Date(),
         updatedAt: new Date(),
       });
@@ -191,7 +203,7 @@ describe("ApplyDefaultCategoryGroupLayoutUseCase", () => {
         kind: "expense",
         idealPercentageBasisPoints: 10000,
         sortOrder: 0,
-        isSystem: true,
+        ownership: "system",
         createdAt: new Date(),
         updatedAt: new Date(),
       });
@@ -219,7 +231,7 @@ describe("ApplyDefaultCategoryGroupLayoutUseCase", () => {
         kind: "expense",
         idealPercentageBasisPoints: 1000,
         sortOrder: 1,
-        isSystem: false,
+        ownership: "user",
         createdAt: new Date(),
         updatedAt: new Date(),
       });
@@ -266,7 +278,7 @@ describe("ApplyDefaultCategoryGroupLayoutUseCase", () => {
         kind: "expense",
         idealPercentageBasisPoints: 10000,
         sortOrder: 0,
-        isSystem: true,
+        ownership: "system",
         createdAt: new Date(),
         updatedAt: new Date(),
       });

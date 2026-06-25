@@ -28,7 +28,7 @@ export class ExportController {
   ) {}
 
   @TsRestHandler(contract.export.downloadCsv)
-  async downloadCsv(@Req() req: RequestWithUser, @Res({ passthrough: true }) res: Response) {
+  async downloadCsv(@Req() req: RequestWithUser, @Res({ passthrough: true }) res: Response): Promise<unknown> {
     return tsRestHandler(contract.export.downloadCsv, async ({ query }) => {
       const user = req.user;
       const userId = userIdFromString(user.sub);

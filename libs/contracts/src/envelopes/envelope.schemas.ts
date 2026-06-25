@@ -16,8 +16,13 @@ export const EnvelopeSchema = z.object({
   targetAmountCents: MoneySchema.describe("Target funding amount in cents"),
   currentAmountCents: MoneySchema.describe("Current funded amount in cents"),
   status: z.enum(ENVELOPE_STATUSES),
-  month: z.string().regex(/^\d{4}-\d{2}$/).describe("YYYY-MM format for envelope month"),
-  categoryGroupId: UuidSchema.nullable().describe("Associated category group ID"),
+  month: z
+    .string()
+    .regex(/^\d{4}-\d{2}$/)
+    .describe("YYYY-MM format for envelope month"),
+  categoryGroupId: UuidSchema.nullable().describe(
+    "Associated category group ID",
+  ),
   createdAt: z.string().datetime(),
   updatedAt: z.string().datetime(),
 });
@@ -28,24 +33,34 @@ export type Envelope = z.infer<typeof EnvelopeSchema>;
  * Schema for creating an envelope
  * Note: User ID is derived from session, not from request body
  */
-export const CreateEnvelopeRequestSchema = z.object({
-  name: z.string().min(1).max(100),
-  targetAmountCents: MoneySchema,
-  month: z.string().regex(/^\d{4}-\d{2}$/).describe("YYYY-MM format for envelope month"),
-  categoryGroupId: UuidSchema.nullable().optional(),
-}).strict();
+export const CreateEnvelopeRequestSchema = z
+  .object({
+    name: z.string().min(1).max(100),
+    targetAmountCents: MoneySchema,
+    month: z
+      .string()
+      .regex(/^\d{4}-\d{2}$/)
+      .describe("YYYY-MM format for envelope month"),
+    categoryGroupId: UuidSchema.nullable().optional(),
+  })
+  .strict();
 
 export type CreateEnvelopeRequest = z.infer<typeof CreateEnvelopeRequestSchema>;
 
 /**
  * Schema for updating an envelope
  */
-export const UpdateEnvelopeRequestSchema = z.object({
-  name: z.string().min(1).max(100).optional(),
-  targetAmountCents: MoneySchema.optional(),
-  month: z.string().regex(/^\d{4}-\d{2}$/).optional(),
-  categoryGroupId: UuidSchema.nullable().optional(),
-}).strict();
+export const UpdateEnvelopeRequestSchema = z
+  .object({
+    name: z.string().min(1).max(100).optional(),
+    targetAmountCents: MoneySchema.optional(),
+    month: z
+      .string()
+      .regex(/^\d{4}-\d{2}$/)
+      .optional(),
+    categoryGroupId: UuidSchema.nullable().optional(),
+  })
+  .strict();
 
 export type UpdateEnvelopeRequest = z.infer<typeof UpdateEnvelopeRequestSchema>;
 

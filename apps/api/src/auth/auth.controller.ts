@@ -112,7 +112,7 @@ export class AuthController {
   }
 
   @TsRestHandler(contract.auth.register)
-  async register(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
+  async register(@Req() req: Request, @Res({ passthrough: true }) res: Response): Promise<unknown> {
     return tsRestHandler(contract.auth.register, async ({ body }) => {
       const context: AuthRequestContext = {
         ipAddress: req.ip,
@@ -144,7 +144,7 @@ export class AuthController {
   }
 
   @TsRestHandler(contract.auth.login)
-  async login(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
+  async login(@Req() req: Request, @Res({ passthrough: true }) res: Response): Promise<unknown> {
     return tsRestHandler(contract.auth.login, async ({ body }) => {
       const context: AuthRequestContext = {
         ipAddress: req.ip,
@@ -175,7 +175,7 @@ export class AuthController {
   }
 
   @TsRestHandler(contract.auth.refresh)
-  async refresh(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
+  async refresh(@Req() req: Request, @Res({ passthrough: true }) res: Response): Promise<unknown> {
     return tsRestHandler(contract.auth.refresh, async () => {
       const refreshToken = this.getRefreshTokenFromRequest(req);
 
@@ -200,7 +200,7 @@ export class AuthController {
   }
 
   @TsRestHandler(contract.auth.logout)
-  async logout(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
+  async logout(@Req() req: Request, @Res({ passthrough: true }) res: Response): Promise<unknown> {
     return tsRestHandler(contract.auth.logout, async () => {
       const refreshToken = this.getRefreshTokenFromRequest(req);
 

@@ -87,7 +87,7 @@ interface RecurringBill {
   dueDay: number; // day of month (1-31) or day of week (0-6)
   categoryId: string;
   accountId: string; // default payment account
-  isActive: boolean;
+  status: "active" | "archived";
   nextDueDate: string; // ISO8601 UTC
   createdAt: string; // UTC
   updatedAt: string; // UTC

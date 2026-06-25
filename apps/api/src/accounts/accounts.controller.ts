@@ -5,6 +5,7 @@ import {
   NotFoundException,
   ConflictException,
   BadRequestException,
+  ForbiddenException,
 } from "@nestjs/common";
 import { Req } from "@nestjs/common";
 import type { Request } from "express";
@@ -15,9 +16,14 @@ import {
   ListAccountsUseCase,
   UpdateAccountUseCase,
   ArchiveAccountUseCase,
+  EnsureSystemAccountsUseCase,
   AccountNotFoundError,
+  SystemAccountModificationError,
 } from "@ledger-mx/application";
-import type { CreateAccountInput, UpdateAccountInput } from "@ledger-mx/application";
+import type {
+  CreateAccountInput,
+  UpdateAccountInput,
+} from "@ledger-mx/application";
 import { contract } from "@ledger-mx/contracts";
 import type { AccountType } from "@ledger-mx/contracts";
 import { TsRestHandler, tsRestHandler } from "@ts-rest/nest";
@@ -41,13 +47,18 @@ export class AccountsController {
     private readonly updateAccountUseCase: UpdateAccountUseCase,
     @Inject(ArchiveAccountUseCase)
     private readonly archiveAccountUseCase: ArchiveAccountUseCase,
+    @Inject(EnsureSystemAccountsUseCase)
+    private readonly ensureSystemAccountsUseCase: EnsureSystemAccountsUseCase,
   ) {}
 
   @TsRestHandler(contract.accounts.list)
-  async listAccounts(@Req() req: RequestWithUser) {
+  async listAccounts(@Req() req: RequestWithUser): Promise<unknown> {
     return tsRestHandler(contract.accounts.list, async () => {
       const user = req.user as { sub: string };
       const userId = userIdFromString(user.sub);
+
+      // Ensure system accounts exist before listing
+      await this.ensureSystemAccountsUseCase.execute(userId);
 
       const result = await this.listAccountsUseCase.execute({
         userId,
@@ -62,7 +73,9 @@ export class AccountsController {
             type: account.type as AccountType,
             balanceCents: 0, // TODO: compute from transaction lines
             currency: account.currencyCode,
-            isActive: !account.isArchived,
+            status: account.status,
+            ownership: account.ownership,
+            systemRole: account.systemRole ?? null,
             createdAt: account.createdAt.toISOString(),
             updatedAt: account.updatedAt.toISOString(),
           })),
@@ -72,7 +85,7 @@ export class AccountsController {
   }
 
   @TsRestHandler(contract.accounts.create)
-  async createAccount(@Req() req: RequestWithUser) {
+  async createAccount(@Req() req: RequestWithUser): Promise<unknown> {
     return tsRestHandler(contract.accounts.create, async ({ body }) => {
       const user = req.user as { sub: string };
       const userId = userIdFromString(user.sub);
@@ -85,19 +98,21 @@ export class AccountsController {
           currencyCode: body.currency,
         } as CreateAccountInput);
 
-          return {
-            status: 201 as const,
-            body: {
-              id: result.id,
-              name: result.name,
-              type: result.type as AccountType,
-              balanceCents: 0, // TODO: compute from transaction lines
-              currency: result.currencyCode,
-              isActive: !result.isArchived,
-              createdAt: result.createdAt.toISOString(),
-              updatedAt: result.updatedAt.toISOString(),
-            },
-          };
+        return {
+          status: 201 as const,
+          body: {
+            id: result.id,
+            name: result.name,
+            type: result.type as AccountType,
+            balanceCents: 0, // TODO: compute from transaction lines
+            currency: result.currencyCode,
+            status: result.status,
+            ownership: result.ownership,
+            systemRole: result.systemRole ?? null,
+            createdAt: result.createdAt.toISOString(),
+            updatedAt: result.updatedAt.toISOString(),
+          },
+        };
       } catch (error) {
         this.handleError(error);
       }
@@ -105,7 +120,7 @@ export class AccountsController {
   }
 
   @TsRestHandler(contract.accounts.update)
-  async updateAccount(@Req() req: RequestWithUser) {
+  async updateAccount(@Req() req: RequestWithUser): Promise<unknown> {
     return tsRestHandler(contract.accounts.update, async ({ body, params }) => {
       const user = req.user as { sub: string };
       const userId = userIdFromString(user.sub);
@@ -117,22 +132,24 @@ export class AccountsController {
           name: body.name,
           type: body.type,
           currencyCode: body.currency,
-          isArchived: body.isActive === false ? true : undefined,
+          status: body.status,
         } as UpdateAccountInput);
 
-          return {
-            status: 200 as const,
-            body: {
-              id: result.id,
-              name: result.name,
-              type: result.type as AccountType,
-              balanceCents: 0, // TODO: compute from transaction lines
-              currency: result.currencyCode,
-              isActive: !result.isArchived,
-              createdAt: result.createdAt.toISOString(),
-              updatedAt: result.updatedAt.toISOString(),
-            },
-          };
+        return {
+          status: 200 as const,
+          body: {
+            id: result.id,
+            name: result.name,
+            type: result.type as AccountType,
+            balanceCents: 0, // TODO: compute from transaction lines
+            currency: result.currencyCode,
+            status: result.status,
+            ownership: result.ownership,
+            systemRole: result.systemRole ?? null,
+            createdAt: result.createdAt.toISOString(),
+            updatedAt: result.updatedAt.toISOString(),
+          },
+        };
       } catch (error) {
         this.handleError(error);
       }
@@ -140,7 +157,7 @@ export class AccountsController {
   }
 
   @TsRestHandler(contract.accounts.archive)
-  async archiveAccount(@Req() req: RequestWithUser) {
+  async archiveAccount(@Req() req: RequestWithUser): Promise<unknown> {
     return tsRestHandler(contract.accounts.archive, async ({ params }) => {
       const user = req.user as { sub: string };
       const userId = userIdFromString(user.sub);
@@ -166,7 +183,14 @@ export class AccountsController {
       throw new NotFoundException(error.message);
     }
 
-    if (error instanceof NotFoundException || error instanceof ConflictException) {
+    if (error instanceof SystemAccountModificationError) {
+      throw new ForbiddenException(error.message);
+    }
+
+    if (
+      error instanceof NotFoundException ||
+      error instanceof ConflictException
+    ) {
       throw error;
     }
 

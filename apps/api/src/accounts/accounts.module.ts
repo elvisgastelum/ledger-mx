@@ -14,6 +14,7 @@ import {
   ListAccountsUseCase,
   UpdateAccountUseCase,
   ArchiveAccountUseCase,
+  EnsureSystemAccountsUseCase,
 } from "@ledger-mx/application";
 import { UuidIdGenerator } from "../auth/infrastructure/uuid-id-generator";
 import { SystemClock } from "@ledger-mx/application";
@@ -80,6 +81,25 @@ export class AccountsModule {
             clock: SystemClock,
           ) => {
             return new CreateAccountUseCase(
+              accountRepository,
+              idGenerator,
+              clock,
+            );
+          },
+          inject: [
+            ACCOUNTS_TOKENS.ACCOUNT_REPOSITORY,
+            UuidIdGenerator,
+            SystemClock,
+          ],
+        },
+        {
+          provide: EnsureSystemAccountsUseCase,
+          useFactory: (
+            accountRepository: AccountRepository,
+            idGenerator: UuidIdGenerator,
+            clock: SystemClock,
+          ) => {
+            return new EnsureSystemAccountsUseCase(
               accountRepository,
               idGenerator,
               clock,

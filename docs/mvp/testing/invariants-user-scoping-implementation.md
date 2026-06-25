@@ -9,30 +9,29 @@ export class DrizzleTransactionRepository {
     const result = await db
       .update(transactions)
       .set(data)
-      .where(and(
-        eq(transactions.id, id),
-        eq(transactions.userId, userId) // Critical: always filter by userId
-      ))
+      .where(
+        and(
+          eq(transactions.id, id),
+          eq(transactions.userId, userId), // Critical: always filter by userId
+        ),
+      )
       .returning();
-    
+
     if (result.length === 0) {
-      throw new NotFoundException('Transaction not found or access denied');
+      throw new NotFoundException("Transaction not found or access denied");
     }
-    
+
     return result[0];
   }
-  
+
   async delete(id: string, userId: string) {
     const result = await db
       .delete(transactions)
-      .where(and(
-        eq(transactions.id, id),
-        eq(transactions.userId, userId)
-      ))
+      .where(and(eq(transactions.id, id), eq(transactions.userId, userId)))
       .returning();
-    
+
     if (result.length === 0) {
-      throw new NotFoundException('Transaction not found or access denied');
+      throw new NotFoundException("Transaction not found or access denied");
     }
   }
 }
@@ -41,33 +40,33 @@ export class DrizzleTransactionRepository {
 ## API-layer Authorization Tests
 
 ```typescript
-test('GET another user\'s transaction returns 404', async () => {
-  const otherUserTx = await createTransactionForUser('user-2');
+test("GET another user's transaction returns 404", async () => {
+  const otherUserTx = await createTransactionForUser("user-2");
 
   const response = await request(app.getHttpServer())
     .get(`/api/transactions/${otherUserTx.id}`)
-    .set('Authorization', `Bearer ${user1Token}`);
+    .set("Authorization", `Bearer ${user1Token}`);
 
   expect(response.status).toBe(404); // Or 403 - must be consistent
 });
 
-test('PUT another user\'s transaction returns 404', async () => {
-  const otherUserTx = await createTransactionForUser('user-2');
+test("PUT another user's transaction returns 404", async () => {
+  const otherUserTx = await createTransactionForUser("user-2");
 
   const response = await request(app.getHttpServer())
     .put(`/api/transactions/${otherUserTx.id}`)
-    .set('Authorization', `Bearer ${user1Token}`)
+    .set("Authorization", `Bearer ${user1Token}`)
     .send({ amountCents: 99900 });
 
   expect(response.status).toBe(404);
 });
 
-test('DELETE another user\'s transaction returns 404', async () => {
-  const otherUserTx = await createTransactionForUser('user-2');
+test("DELETE another user's transaction returns 404", async () => {
+  const otherUserTx = await createTransactionForUser("user-2");
 
   const response = await request(app.getHttpServer())
     .delete(`/api/transactions/${otherUserTx.id}`)
-    .set('Authorization', `Bearer ${user1Token}`);
+    .set("Authorization", `Bearer ${user1Token}`);
 
   expect(response.status).toBe(404);
 });

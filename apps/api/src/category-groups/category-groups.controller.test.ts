@@ -6,16 +6,21 @@ import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
 import { CategoryGroupsModule } from "./category-groups.module";
 import { CATEGORY_GROUPS_TOKENS } from "./category-groups.tokens";
 import type { CategoryGroupRepository } from "@ledger-mx/domain";
-import type { CategoryGroup, CategoryGroupKind, UserId } from "@ledger-mx/domain";
+import type {
+  CategoryGroup,
+  CategoryGroupKind,
+  UserId,
+} from "@ledger-mx/domain";
 import { categoryGroupIdFromString } from "@ledger-mx/domain";
 
 // Environment setup: save original and set test values before module creation
 const originalEnv = { ...process.env };
 
 beforeEach(() => {
-  process.env.NODE_ENV = 'test';
-  process.env.JWT_SECRET = 'test-jwt-secret-for-category-groups-tests-minimum-32-chars';
-  process.env.DATABASE_URL = 'postgresql://test:test@localhost:5432/test';
+  process.env.NODE_ENV = "test";
+  process.env.JWT_SECRET =
+    "test-jwt-secret-for-category-groups-tests-minimum-32-chars";
+  process.env.DATABASE_URL = "postgresql://test:test@localhost:5432/test";
 });
 
 afterEach(() => {
@@ -24,7 +29,9 @@ afterEach(() => {
 
 // Mock user
 const validUserId = "550e8400-e29b-41d4-a716-446655440000" as UserId;
-const validGroupId = categoryGroupIdFromString("660e8400-e29b-41d4-a716-446655440000");
+const validGroupId = categoryGroupIdFromString(
+  "660e8400-e29b-41d4-a716-446655440000",
+);
 
 // Mock category group
 const mockCategoryGroup: CategoryGroup = {
@@ -34,7 +41,7 @@ const mockCategoryGroup: CategoryGroup = {
   kind: "expense" as CategoryGroupKind,
   idealPercentageBasisPoints: 5000,
   sortOrder: 0,
-  isSystem: false,
+  ownership: "user",
   createdAt: new Date("2024-01-01"),
   updatedAt: new Date("2024-01-01"),
 };
@@ -92,7 +99,9 @@ describe("CategoryGroupsController", () => {
 
   describe("GET /api/v1/category-groups", () => {
     it("should return list of category groups for authenticated user", async () => {
-      vi.spyOn(repository, "listByUserId").mockResolvedValue([mockCategoryGroup]);
+      vi.spyOn(repository, "listByUserId").mockResolvedValue([
+        mockCategoryGroup,
+      ]);
 
       const response = await request(app.getHttpServer())
         .get("/api/v1/category-groups")
@@ -104,9 +113,10 @@ describe("CategoryGroupsController", () => {
             id: mockCategoryGroup.id,
             name: mockCategoryGroup.name,
             kind: mockCategoryGroup.kind,
-            idealPercentageBasisPoints: mockCategoryGroup.idealPercentageBasisPoints,
+            idealPercentageBasisPoints:
+              mockCategoryGroup.idealPercentageBasisPoints,
             sortOrder: mockCategoryGroup.sortOrder,
-            isSystem: mockCategoryGroup.isSystem,
+            ownership: mockCategoryGroup.ownership,
             createdAt: mockCategoryGroup.createdAt.toISOString(),
             updatedAt: mockCategoryGroup.updatedAt.toISOString(),
           },
@@ -147,7 +157,7 @@ describe("CategoryGroupsController", () => {
         kind: validCreateDto.kind,
         idealPercentageBasisPoints: validCreateDto.idealPercentageBasisPoints,
         sortOrder: validCreateDto.sortOrder,
-        isSystem: false,
+        ownership: "user",
       });
       expect(response.body.id).toBeDefined();
       expect(response.body.createdAt).toBeDefined();
@@ -246,7 +256,10 @@ describe("CategoryGroupsController", () => {
     });
 
     it("should return 409 for system category group", async () => {
-      const systemGroup = { ...mockCategoryGroup, isSystem: true };
+      const systemGroup = {
+        ...mockCategoryGroup,
+        ownership: "system" as const,
+      };
       vi.spyOn(repository, "findById").mockResolvedValue(systemGroup);
 
       await request(app.getHttpServer())

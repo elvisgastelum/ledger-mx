@@ -12,7 +12,7 @@
 
 ```typescript
 // libs/testing/setup/postgres.ts
-import { PostgreSqlContainer } from 'testcontainers';
+import { PostgreSqlContainer } from "testcontainers";
 
 let container: PostgreSqlContainer;
 
@@ -49,7 +49,7 @@ test('POST /transactions', async () => {
   const res = await request(app.getHttpServer())
     .post('/transactions')
     .send({ amountCents: 10000, ... });
-  
+
   expect(res.status).toBe(201);
 });
 ```

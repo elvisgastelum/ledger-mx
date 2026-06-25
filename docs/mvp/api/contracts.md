@@ -52,18 +52,21 @@ libs/contracts/src/
 ## Onboarding Router (Implemented)
 
 ### Endpoints
+
 ```
 POST   /api/v1/onboarding/layout (create default groups by layout type)
 ```
 
 ### Request Schema
+
 ```typescript
 const ApplyLayoutRequestSchema = z.object({
-  layout: z.enum(['blank', '50-30-20']),
+  layout: z.enum(["blank", "50-30-20"]),
 });
 ```
 
 ### Response Schema
+
 ```typescript
 const ApplyLayoutResponseSchema = z.object({
   categoryGroups: z.array(OnboardingCategoryGroupSchema),
@@ -72,10 +75,12 @@ const ApplyLayoutResponseSchema = z.object({
 ```
 
 ### Layout Types
-- `blank`: Creates single "General" group (kind: general, percentage: null, isSystem: true)
+
+- `blank`: Creates single "General" group (kind: general, percentage: null, ownership: "system")
 - `50-30-20`: Creates Need (5000bp), Want (3000bp), Savings (2000bp) groups
 
 ### Behavior
+
 - If no active category groups exist for user: creates default groups (201/200 with created=true)
 - If system groups matching layout already exist: returns them idempotently (200 with created=false)
 - If existing groups conflict with requested layout: returns 409 Conflict
@@ -86,6 +91,7 @@ const ApplyLayoutResponseSchema = z.object({
 Planned API endpoints for category groups feature:
 
 ### Category Groups Router
+
 ```
 GET    /api/v1/category-groups
 POST   /api/v1/category-groups
@@ -94,19 +100,22 @@ DELETE /api/v1/category-groups/:id (soft delete)
 ```
 
 ### Categories Router Updates
+
 ```
 PUT    /api/v1/categories/:id (add required categoryGroupId field)
 ```
 
 ### Onboarding Router
+
 ```
 POST   /api/v1/onboarding/layout (create default groups by layout type)
 GET    /api/v1/onboarding/layout-options (list available layouts)
 ```
 
 ### Zod Schema Conventions (Future)
-- `categoryGroupSchema`: id, userId, name, kind (enum), idealPercentageBasisPoints (nullable), sortOrder, isSystem, timestamps, deletedAt
-- `createCategoryGroupSchema`: omit system fields (id, timestamps, isSystem)
+
+- `categoryGroupSchema`: id, userId, name, kind (enum), idealPercentageBasisPoints (nullable), sortOrder, ownership, timestamps, deletedAt
+- `createCategoryGroupSchema`: omit system fields (id, timestamps, ownership)
 - `layoutTypeSchema`: enum `blank | 50-30-20`
 - All percentage fields use `z.number().int().nullable()` for basis points
 

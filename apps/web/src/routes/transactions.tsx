@@ -1,7 +1,12 @@
 import { useState, useMemo } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { tsr } from "../lib/ts-rest-client";
-import type { AccountType } from "@ledger-mx/contracts";
+import type {
+  AccountType,
+  SystemRole,
+  AccountStatus,
+  OwnershipType,
+} from "@ledger-mx/contracts";
 import { dateInputToISOString, getTodayString } from "../lib/date-format";
 import { Button } from "../components/ui/button";
 import {
@@ -29,10 +34,10 @@ import { WebCryptoIdGenerator } from "../lib/web-crypto-id-generator";
 interface TransactionFormValues {
   transactionDate: string;
   note: string;
-  type: "expense" | "transfer";
+  type: "expense" | "income" | "transfer";
   amount: string;
   expenseAccountId: string;
-  expenseCategoryId: string;
+  incomeDestinationAccountId: string;
   transferFromAccountId: string;
   transferToAccountId: string;
 }
@@ -62,7 +67,9 @@ interface Account {
   type: AccountType;
   balanceCents: number;
   currency: string;
-  isActive: boolean;
+  status: AccountStatus;
+  ownership: OwnershipType;
+  systemRole: SystemRole;
   createdAt: string;
   updatedAt: string;
 }
@@ -84,9 +91,6 @@ function formatAccountLabel(account: Account): string {
   const balanceDisplay = formatCentsForDisplay(account.balanceCents);
   return `${account.name} (${formatAccountTypeLabel(account.type)}) - ${account.currency} ${balanceDisplay}`;
 }
-
-const UUID_V4_PATTERN =
-  /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 function parseMoneyAmountToCents(value: string): number | null {
   const trimmed = value.trim();
@@ -126,7 +130,7 @@ export function TransactionsPage() {
   const transactions = (transactionsData?.body?.transactions ??
     []) as Transaction[];
 
-  // Fetch accounts for the account select dropdown
+  // Fetch accounts for the account select dropdowns
   const {
     data: accountsData,
     isLoading: isAccountsLoading,
@@ -136,12 +140,33 @@ export function TransactionsPage() {
     queryData: { query: {} },
   });
 
-  const activeAccounts = (
-    (accountsData?.body?.accounts ?? []) as Account[]
-  ).filter((account) => account.isActive === true);
+  const allAccounts = (accountsData?.body?.accounts ?? []) as Account[];
 
-  const isActiveAccountId = (accountId: string) =>
-    activeAccounts.some((account) => account.id === accountId);
+  // Filter accounts: active non-system accounts for normal selects
+  const activeUserAccounts = allAccounts.filter(
+    (account) => account.status === "active" && account.ownership === "user",
+  );
+
+  // Filter system accounts by role
+  const systemIncomeAccounts = allAccounts.filter(
+    (account) =>
+      account.ownership === "system" &&
+      (account.systemRole === "income" || account.systemRole === "salary"),
+  );
+
+  const systemExpenseAccount = allAccounts.find(
+    (account) =>
+      account.ownership === "system" && account.systemRole === "expense",
+  );
+
+  // Get preferred income source (prefer Salary, then Income)
+  const incomeSourceAccount =
+    systemIncomeAccounts.find((a) => a.systemRole === "salary") ??
+    systemIncomeAccounts[0] ??
+    null;
+
+  const hasActiveStatusAccountId = (accountId: string) =>
+    activeUserAccounts.some((account) => account.id === accountId);
 
   // Use ts-rest mutation for creating transactions
   const createMutation = tsr.transactions.create.useMutation();
@@ -161,7 +186,7 @@ export function TransactionsPage() {
       type: "expense",
       amount: "",
       expenseAccountId: "",
-      expenseCategoryId: "",
+      incomeDestinationAccountId: "",
       transferFromAccountId: "",
       transferToAccountId: "",
     },
@@ -183,17 +208,17 @@ export function TransactionsPage() {
     // Build exactly two lines based on type
     const lines: Array<{
       id: string;
-      targetType: "account" | "category";
+      targetType: "account";
       accountId: string | null;
       categoryId: string | null;
       envelopeId: string | null;
       amountCents: number;
-      type: "expense" | "transfer";
+      type: "expense" | "income" | "transfer";
     }> = [];
 
     if (data.type === "expense") {
-      // Validate account ID is an active account
-      if (!isActiveAccountId(data.expenseAccountId)) {
+      // Validate account ID is an active user account
+      if (!hasActiveStatusAccountId(data.expenseAccountId)) {
         setError("expenseAccountId", {
           type: "manual",
           message: "Select an active account",
@@ -201,16 +226,15 @@ export function TransactionsPage() {
         return;
       }
 
-      // Validate category ID is a valid UUID v4
-      if (!UUID_V4_PATTERN.test(data.expenseCategoryId)) {
-        setError("expenseCategoryId", {
-          type: "manual",
-          message: "Enter a valid category UUID",
-        });
+      // Validate system expense account exists
+      if (!systemExpenseAccount) {
+        setSubmitError(
+          "System Expense account not found. Please contact support.",
+        );
         return;
       }
 
-      // Expense: account (negative) + category (positive)
+      // Expense: user account (negative) + system Expense account (positive)
       lines.push({
         id: idGenerator.uuid(),
         targetType: "account",
@@ -222,23 +246,61 @@ export function TransactionsPage() {
       });
       lines.push({
         id: idGenerator.uuid(),
-        targetType: "category",
-        accountId: null,
-        categoryId: data.expenseCategoryId,
+        targetType: "account",
+        accountId: systemExpenseAccount.id,
+        categoryId: null,
         envelopeId: null,
         amountCents: amountCents,
         type: "expense",
       });
+    } else if (data.type === "income") {
+      // Validate destination account ID is an active user account
+        if (!hasActiveStatusAccountId(data.incomeDestinationAccountId)) {
+        setError("incomeDestinationAccountId", {
+          type: "manual",
+          message: "Select an active account",
+        });
+        return;
+      }
+
+      // Validate system income source account exists
+      if (!incomeSourceAccount) {
+        setSubmitError(
+          "System income source account not found. Please contact support.",
+        );
+        return;
+      }
+
+      // Income: system income source (negative) + user account (positive)
+      lines.push({
+        id: idGenerator.uuid(),
+        targetType: "account",
+        accountId: incomeSourceAccount.id,
+        categoryId: null,
+        envelopeId: null,
+        amountCents: -amountCents,
+        type: "income",
+      });
+      lines.push({
+        id: idGenerator.uuid(),
+        targetType: "account",
+        accountId: data.incomeDestinationAccountId,
+        categoryId: null,
+        envelopeId: null,
+        amountCents: amountCents,
+        type: "income",
+      });
     } else {
-      // Validate account IDs are active accounts
-      if (!isActiveAccountId(data.transferFromAccountId)) {
+      // Transfer
+      // Validate account IDs are active user accounts
+      if (!hasActiveStatusAccountId(data.transferFromAccountId)) {
         setError("transferFromAccountId", {
           type: "manual",
           message: "Select an active source account",
         });
         return;
       }
-      if (!isActiveAccountId(data.transferToAccountId)) {
+      if (!hasActiveStatusAccountId(data.transferToAccountId)) {
         setError("transferToAccountId", {
           type: "manual",
           message: "Select an active destination account",
@@ -407,6 +469,7 @@ export function TransactionsPage() {
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="expense">Expense</SelectItem>
+                        <SelectItem value="income">Income</SelectItem>
                         <SelectItem value="transfer">Transfer</SelectItem>
                       </SelectContent>
                     </Select>
@@ -455,7 +518,7 @@ export function TransactionsPage() {
                       <p className="text-sm text-muted-foreground py-2">
                         Loading accounts…
                       </p>
-                    ) : activeAccounts.length === 0 ? (
+                    ) : activeUserAccounts.length === 0 ? (
                       <p className="text-sm text-muted-foreground py-2">
                         No active accounts found. Create or activate an account
                         first.
@@ -483,7 +546,7 @@ export function TransactionsPage() {
                               <SelectValue placeholder="Choose an active account" />
                             </SelectTrigger>
                             <SelectContent>
-                              {activeAccounts.map((account) => (
+                              {activeUserAccounts.map((account) => (
                                 <SelectItem key={account.id} value={account.id}>
                                   {formatAccountLabel(account)}
                                 </SelectItem>
@@ -500,30 +563,78 @@ export function TransactionsPage() {
                       </p>
                     )}
                   </div>
+                </>
+              )}
 
+              {watch("type") === "income" && (
+                <>
                   <div className="space-y-2">
-                    <Label htmlFor="expenseCategoryId">
-                      Expense category ID
+                    <Label htmlFor="incomeDestinationAccountId">
+                      To Account
                     </Label>
-                    <Input
-                      id="expenseCategoryId"
-                      type="text"
-                      disabled={isSubmitting}
-                      {...register("expenseCategoryId", {
-                        required: "Category ID is required",
-                        pattern: {
-                          value: UUID_V4_PATTERN,
-                          message: "Enter a valid category UUID",
-                        },
-                      })}
-                    />
-                    <p className="text-xs text-muted-foreground">
-                      Temporary: categories do not yet have a selectable API in
-                      the web client.
-                    </p>
-                    {errors.expenseCategoryId && (
+                    {accountsError ? (
+                      <p className="text-sm text-destructive py-2">
+                        Failed to load accounts. Please try again.
+                      </p>
+                    ) : isAccountsLoading ? (
+                      <p className="text-sm text-muted-foreground py-2">
+                        Loading accounts…
+                      </p>
+                    ) : activeUserAccounts.length === 0 ? (
+                      <p className="text-sm text-muted-foreground py-2">
+                        No active accounts found. Create or activate an account
+                        first.
+                      </p>
+                    ) : (
+                      <>
+                        {incomeSourceAccount && (
+                          <p className="text-xs text-muted-foreground mb-2">
+                            From: {incomeSourceAccount.name} (System{" "}
+                            {incomeSourceAccount.systemRole})
+                          </p>
+                        )}
+                        <Controller
+                          control={control}
+                          name="incomeDestinationAccountId"
+                          rules={{ required: "Select a destination account" }}
+                          render={({ field }) => (
+                            <Select
+                              value={field.value}
+                              onValueChange={field.onChange}
+                              disabled={isSubmitting || !!accountsError}
+                            >
+                              <SelectTrigger
+                                id="incomeDestinationAccountId"
+                                aria-invalid={
+                                  !!errors.incomeDestinationAccountId
+                                }
+                                className={
+                                  errors.incomeDestinationAccountId
+                                    ? "border-destructive"
+                                    : ""
+                                }
+                              >
+                                <SelectValue placeholder="Choose destination account" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {activeUserAccounts.map((account) => (
+                                  <SelectItem
+                                    key={account.id}
+                                    value={account.id}
+                                  >
+                                    {formatAccountLabel(account)}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          )}
+                        />
+                      </>
+                    )}
+                    {errors.incomeDestinationAccountId && (
                       <p className="text-sm text-destructive">
-                        {errors.expenseCategoryId.message}
+                        {errors.incomeDestinationAccountId.message ||
+                          "Destination account is required"}
                       </p>
                     )}
                   </div>
@@ -542,7 +653,7 @@ export function TransactionsPage() {
                       <p className="text-sm text-muted-foreground py-2">
                         Loading accounts…
                       </p>
-                    ) : activeAccounts.length === 0 ? (
+                    ) : activeUserAccounts.length === 0 ? (
                       <p className="text-sm text-muted-foreground py-2">
                         No active accounts found. Create or activate an account
                         first.
@@ -570,7 +681,7 @@ export function TransactionsPage() {
                               <SelectValue placeholder="Choose source account" />
                             </SelectTrigger>
                             <SelectContent>
-                              {activeAccounts.map((account) => (
+                              {activeUserAccounts.map((account) => (
                                 <SelectItem key={account.id} value={account.id}>
                                   {formatAccountLabel(account)}
                                 </SelectItem>
@@ -598,7 +709,7 @@ export function TransactionsPage() {
                       <p className="text-sm text-muted-foreground py-2">
                         Loading accounts…
                       </p>
-                    ) : activeAccounts.length === 0 ? (
+                    ) : activeUserAccounts.length === 0 ? (
                       <p className="text-sm text-muted-foreground py-2">
                         No active accounts found. Create or activate an account
                         first.
@@ -631,7 +742,7 @@ export function TransactionsPage() {
                               <SelectValue placeholder="Choose destination account" />
                             </SelectTrigger>
                             <SelectContent>
-                              {activeAccounts.map((account) => (
+                              {activeUserAccounts.map((account) => (
                                 <SelectItem key={account.id} value={account.id}>
                                   {formatAccountLabel(account)}
                                 </SelectItem>

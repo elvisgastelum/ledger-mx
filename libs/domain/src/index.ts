@@ -35,6 +35,17 @@ export const CATEGORY_GROUP_KINDS = [
 ] as const;
 export type CategoryGroupKind = (typeof CATEGORY_GROUP_KINDS)[number];
 
+// Account status constants and types
+export const ACCOUNT_STATUSES = ["active", "archived"] as const;
+export type AccountStatus = (typeof ACCOUNT_STATUSES)[number];
+
+// Ownership type constants and types
+export const OWNERSHIP_TYPES = ["user", "system"] as const;
+export type OwnershipType = (typeof OWNERSHIP_TYPES)[number];
+
+// System account types
+export type SystemRole = "expense" | "income" | "salary" | null;
+
 // Value Objects
 export { Money } from "./value-objects/money";
 export {

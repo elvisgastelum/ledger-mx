@@ -13,9 +13,10 @@ import { CategoryGroupLayoutConflictError } from "@ledger-mx/application";
 const originalEnv = { ...process.env };
 
 beforeEach(() => {
-  process.env.NODE_ENV = 'test';
-  process.env.JWT_SECRET = 'test-jwt-secret-for-onboarding-tests-minimum-32-chars';
-  process.env.DATABASE_URL = 'postgresql://test:test@localhost:5432/test';
+  process.env.NODE_ENV = "test";
+  process.env.JWT_SECRET =
+    "test-jwt-secret-for-onboarding-tests-minimum-32-chars";
+  process.env.DATABASE_URL = "postgresql://test:test@localhost:5432/test";
 });
 
 afterEach(() => {
@@ -60,9 +61,11 @@ describe("OnboardingController", () => {
       .overrideGuard(JwtAuthGuard)
       .useValue(mockJwtAuthGuard)
       .overrideProvider(ApplyDefaultCategoryGroupLayoutUseCase)
-      .useClass(class MockUseCase {
-        execute = mockApplyLayoutUseCase.execute;
-      })
+      .useClass(
+        class MockUseCase {
+          execute = mockApplyLayoutUseCase.execute;
+        },
+      )
       .compile();
 
     app = module.createNestApplication();
@@ -81,7 +84,7 @@ describe("OnboardingController", () => {
         kind: "general",
         idealPercentageBasisPoints: null,
         sortOrder: 0,
-        isSystem: true,
+        ownership: "system" as const,
         createdAt: new Date("2024-01-01"),
         updatedAt: new Date("2024-01-01"),
       },
@@ -106,7 +109,7 @@ describe("OnboardingController", () => {
             kind: mockCategoryGroups[0].kind,
             idealPercentageBasisPoints: null,
             sortOrder: mockCategoryGroups[0].sortOrder,
-            isSystem: mockCategoryGroups[0].isSystem,
+            ownership: mockCategoryGroups[0].ownership,
             createdAt: mockCategoryGroups[0].createdAt.toISOString(),
             updatedAt: mockCategoryGroups[0].updatedAt.toISOString(),
           },
@@ -127,7 +130,7 @@ describe("OnboardingController", () => {
           kind: "expense",
           idealPercentageBasisPoints: 5000,
           sortOrder: 0,
-          isSystem: true,
+          ownership: "system" as const,
           createdAt: new Date("2024-01-01"),
           updatedAt: new Date("2024-01-01"),
         },
@@ -137,7 +140,7 @@ describe("OnboardingController", () => {
           kind: "expense",
           idealPercentageBasisPoints: 3000,
           sortOrder: 1,
-          isSystem: true,
+          ownership: "system" as const,
           createdAt: new Date("2024-01-01"),
           updatedAt: new Date("2024-01-01"),
         },
@@ -147,7 +150,7 @@ describe("OnboardingController", () => {
           kind: "savings",
           idealPercentageBasisPoints: 2000,
           sortOrder: 2,
-          isSystem: true,
+          ownership: "system" as const,
           createdAt: new Date("2024-01-01"),
           updatedAt: new Date("2024-01-01"),
         },
@@ -233,9 +236,11 @@ describe("OnboardingController", () => {
         imports: [OnboardingModule.forRoot()],
       })
         .overrideProvider(ApplyDefaultCategoryGroupLayoutUseCase)
-        .useClass(class MockUseCase {
-          execute = mockApplyLayoutUseCase.execute;
-        })
+        .useClass(
+          class MockUseCase {
+            execute = mockApplyLayoutUseCase.execute;
+          },
+        )
         .compile();
 
       const unauthApp = module.createNestApplication();

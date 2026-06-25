@@ -43,6 +43,7 @@ export const personalCategoryGroups: SeedCategoryGroup[] = [
     name: "Income",
     kind: "income",
     sortOrder: 0,
+    ownership: "system",
   },
   {
     id: "10000000-0000-0000-0000-000000000002",
@@ -50,6 +51,7 @@ export const personalCategoryGroups: SeedCategoryGroup[] = [
     name: "Housing",
     kind: "expense",
     sortOrder: 1,
+    ownership: "user",
   },
   {
     id: "10000000-0000-0000-0000-000000000003",
@@ -57,6 +59,7 @@ export const personalCategoryGroups: SeedCategoryGroup[] = [
     name: "Food",
     kind: "expense",
     sortOrder: 2,
+    ownership: "user",
   },
 ];
 

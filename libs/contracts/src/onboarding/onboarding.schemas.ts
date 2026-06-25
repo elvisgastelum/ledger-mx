@@ -1,5 +1,8 @@
 import { z } from "zod";
-import { CATEGORY_GROUP_KINDS } from "../category-groups/category-group.schemas";
+import {
+  CATEGORY_GROUP_KINDS,
+  OWNERSHIP_TYPES,
+} from "../category-groups/category-group.schemas";
 
 /**
  * Layout type enum for onboarding category group layout selection.
@@ -12,7 +15,9 @@ export type LayoutType = (typeof LAYOUT_TYPES)[number];
  */
 export const ApplyLayoutRequestSchema = z.object({
   layout: z.enum(LAYOUT_TYPES, {
-    errorMap: () => ({ message: "Layout must be either 'blank' or '50-30-20'" }),
+    errorMap: () => ({
+      message: "Layout must be either 'blank' or '50-30-20'",
+    }),
   }),
 });
 
@@ -28,7 +33,9 @@ export const OnboardingCategoryGroupSchema = z.object({
   kind: z.enum(CATEGORY_GROUP_KINDS),
   idealPercentageBasisPoints: z.number().int().min(0).max(10000).nullable(),
   sortOrder: z.number().int().min(0),
-  isSystem: z.boolean(),
+  ownership: z
+    .enum(OWNERSHIP_TYPES)
+    .describe("Whether this is a user or system-managed category group"),
   createdAt: z.string().datetime(),
   updatedAt: z.string().datetime(),
 });
