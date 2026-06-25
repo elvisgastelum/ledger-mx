@@ -33,6 +33,7 @@ import {
   TransactionResponseSchema,
   ListTransactionsResponseSchema,
   CreateTransactionRequestSchema,
+  CreateReversalRequestSchema,
 } from "./transactions/transaction.schemas";
 import {
   AccountBalanceResponseSchema,
@@ -236,6 +237,26 @@ export const contract = c.router(
           401: ErrorResponseSchema,
         },
         summary: "Create a new transaction (double-entry)",
+        metadata: { implemented: true, auth: true, scopes: ["user:write"] },
+      },
+      reverse: {
+        method: "POST",
+        path: "/transactions/:id/reverse",
+        pathParams: z.object({ id: UuidSchema }),
+        body: CreateReversalRequestSchema,
+        responses: {
+          201: TransactionResponseSchema,
+          400: ErrorResponseSchema,
+          401: ErrorResponseSchema,
+          404: ErrorResponseSchema.describe(
+            "Transaction not found or not owned by user",
+          ),
+          409: ErrorResponseSchema.describe(
+            "Transaction already has a reversal",
+          ),
+        },
+        summary:
+          "Create a reversal transaction to negate an existing transaction",
         metadata: { implemented: true, auth: true, scopes: ["user:write"] },
       },
     }),

@@ -5,6 +5,7 @@ export {
   TransactionSchema,
   CreateTransactionRequestSchema,
   UpdateTransactionRequestSchema,
+  CreateReversalRequestSchema,
   TransactionResponseSchema,
   ListTransactionsResponseSchema,
 } from "./transaction.schemas";
@@ -15,6 +16,7 @@ export type {
   Transaction,
   CreateTransactionRequest,
   UpdateTransactionRequest,
+  CreateReversalRequest,
   TransactionResponse,
   ListTransactionsResponse,
 } from "./transaction.schemas";

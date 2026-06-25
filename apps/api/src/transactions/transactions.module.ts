@@ -12,6 +12,8 @@ import type { TransactionRepository } from "@ledger-mx/domain";
 import {
   CreateTransactionUseCase,
   ListTransactionsUseCase,
+  CreateReversalUseCase,
+  CreateCorrectionUseCase,
 } from "@ledger-mx/application";
 import {
   createDatabase,
@@ -70,6 +72,22 @@ export class TransactionsModule {
           provide: ListTransactionsUseCase,
           useFactory: (transactionRepository: TransactionRepository) => {
             return new ListTransactionsUseCase(transactionRepository);
+          },
+          inject: [TRANSACTIONS_TOKENS.TRANSACTION_REPOSITORY],
+        },
+        {
+          provide: CreateReversalUseCase,
+          useFactory: (transactionRepository: TransactionRepository) => {
+            return new CreateReversalUseCase(transactionRepository);
+          },
+          inject: [TRANSACTIONS_TOKENS.TRANSACTION_REPOSITORY],
+        },
+        // Correction use case: application-level foundation (no API endpoint yet)
+        // TODO: Add POST /transactions/:id/correct endpoint in future MVP iteration
+        {
+          provide: CreateCorrectionUseCase,
+          useFactory: (transactionRepository: TransactionRepository) => {
+            return new CreateCorrectionUseCase(transactionRepository);
           },
           inject: [TRANSACTIONS_TOKENS.TRANSACTION_REPOSITORY],
         },

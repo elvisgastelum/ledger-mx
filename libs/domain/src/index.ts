@@ -78,6 +78,8 @@ export {
   InvalidTransactionLineCountError,
   UnbalancedTransactionError,
   InvalidIdError,
+  FinancialRecordModificationError,
+  FinancialRecordHardDeleteError,
 } from "./ledger/ledger-errors";
 
 // Ledger Models

@@ -4,6 +4,7 @@ import {
   timestamp,
   text,
   index,
+  uniqueIndex,
   type AnyPgColumn,
 } from "drizzle-orm/pg-core";
 import { users } from "./users";
@@ -39,8 +40,10 @@ export const transactions = pgTable(
     transactionsUserIdOccurredAtIdx: index(
       "transactions_user_id_occurred_at_idx",
     ).on(table.userId, table.occurredAt),
-    transactionsReversalOfTransactionIdIdx: index(
-      "transactions_reversal_of_transaction_id_idx",
+    // Unique index on reversalOfTransactionId ensures only one reversal can point to an original transaction
+    // PostgreSQL allows multiple NULLs in unique indexes, so non-reversal transactions won't conflict
+    transactionsReversalOfTransactionIdUniqueIdx: uniqueIndex(
+      "transactions_reversal_of_transaction_id_unique_idx",
     ).on(table.reversalOfTransactionId),
   }),
 );

@@ -254,3 +254,242 @@ describe("Transaction", () => {
     ).toThrow(/must belong to the same transaction/);
   });
 });
+
+describe("Transaction.createReversal", () => {
+  const originalTransactionId = transactionIdFromString(
+    "9f4e5a7b-1234-4d8e-9f1a-2b3c4d5e6f7a",
+  );
+  const reversalTransactionId = transactionIdFromString(
+    "a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d",
+  );
+  const reversalLineId1 = transactionLineIdFromString(
+    "d1e2f3a4-b5c6-4d7e-8f9a-0b1c2d3e4f5a",
+  );
+  const reversalLineId2 = transactionLineIdFromString(
+    "e1f2a3b4-c5d6-4e7f-8a9b-0c1d2e3f4a5b",
+  );
+
+  test("creates reversal with negated lines and reversalOfTransactionId", () => {
+    const originalLine1 = new TransactionLine({
+      id: lineId1,
+      transactionId: originalTransactionId,
+      targetType: "account",
+      targetId: accountId1,
+      amountCents: 10000,
+    });
+    const originalLine2 = new TransactionLine({
+      id: lineId2,
+      transactionId: originalTransactionId,
+      targetType: "account",
+      targetId: accountId2,
+      amountCents: -10000,
+    });
+
+    const originalTransaction = new Transaction({
+      id: originalTransactionId,
+      userId: userId,
+      type: "income" as TransactionType,
+      occurredAt: new Date("2024-01-15"),
+      lines: [originalLine1, originalLine2],
+    });
+
+    const reversal = originalTransaction.createReversal({
+      reversalTransactionId,
+      reversalLineIds: [reversalLineId1, reversalLineId2],
+    });
+
+    expect(reversal.type).toBe("reversal");
+    expect(reversal.reversalOfTransactionId).toBe(originalTransactionId);
+    expect(reversal.lines).toHaveLength(2);
+    expect(reversal.lines[0].amountCents).toBe(-10000); // Negated
+    expect(reversal.lines[1].amountCents).toBe(10000); // Negated
+    expect(reversal.lines[0].targetId).toBe(accountId1);
+    expect(reversal.lines[1].targetId).toBe(accountId2);
+  });
+
+  test("reversal maintains double-entry invariant (sums to zero)", () => {
+    const originalLine1 = new TransactionLine({
+      id: lineId1,
+      transactionId: originalTransactionId,
+      targetType: "account",
+      targetId: accountId1,
+      amountCents: 50000,
+    });
+    const originalLine2 = new TransactionLine({
+      id: lineId2,
+      transactionId: originalTransactionId,
+      targetType: "account",
+      targetId: accountId2,
+      amountCents: -50000,
+    });
+
+    const originalTransaction = new Transaction({
+      id: originalTransactionId,
+      userId: userId,
+      type: "expense" as TransactionType,
+      occurredAt: new Date(),
+      lines: [originalLine1, originalLine2],
+    });
+
+    const reversal = originalTransaction.createReversal({
+      reversalTransactionId,
+      reversalLineIds: [reversalLineId1, reversalLineId2],
+    });
+
+    const sum = reversal.lines.reduce((s, l) => s + l.amountCents, 0);
+    expect(sum).toBe(0); // Reversal is also balanced
+  });
+
+  test("original + reversal nets to zero by target", () => {
+    const originalLine1 = new TransactionLine({
+      id: lineId1,
+      transactionId: originalTransactionId,
+      targetType: "account",
+      targetId: accountId1,
+      amountCents: 10000,
+    });
+    const originalLine2 = new TransactionLine({
+      id: lineId2,
+      transactionId: originalTransactionId,
+      targetType: "account",
+      targetId: accountId2,
+      amountCents: -10000,
+    });
+
+    const originalTransaction = new Transaction({
+      id: originalTransactionId,
+      userId: userId,
+      type: "income" as TransactionType,
+      occurredAt: new Date(),
+      lines: [originalLine1, originalLine2],
+    });
+
+    const reversal = originalTransaction.createReversal({
+      reversalTransactionId,
+      reversalLineIds: [reversalLineId1, reversalLineId2],
+    });
+
+    // Net effect should be zero for each target
+    const netByTarget = new Map<string, number>();
+
+    for (const line of originalTransaction.lines) {
+      const target = line.targetId as string;
+      netByTarget.set(
+        target,
+        (netByTarget.get(target) || 0) + line.amountCents,
+      );
+    }
+    for (const line of reversal.lines) {
+      const target = line.targetId as string;
+      netByTarget.set(
+        target,
+        (netByTarget.get(target) || 0) + line.amountCents,
+      );
+    }
+
+    // All targets should net to zero
+    for (const amount of netByTarget.values()) {
+      expect(amount).toBe(0);
+    }
+  });
+
+  test("throws if reversal line count does not match original", () => {
+    const originalLine1 = new TransactionLine({
+      id: lineId1,
+      transactionId: originalTransactionId,
+      targetType: "account",
+      targetId: accountId1,
+      amountCents: 10000,
+    });
+    const originalLine2 = new TransactionLine({
+      id: lineId2,
+      transactionId: originalTransactionId,
+      targetType: "account",
+      targetId: accountId2,
+      amountCents: -10000,
+    });
+
+    const originalTransaction = new Transaction({
+      id: originalTransactionId,
+      userId: userId,
+      type: "income" as TransactionType,
+      occurredAt: new Date(),
+      lines: [originalLine1, originalLine2],
+    });
+
+    expect(() =>
+      originalTransaction.createReversal({
+        reversalTransactionId,
+        reversalLineIds: [reversalLineId1], // Only 1 line, should be 2
+      }),
+    ).toThrow(InvalidTransactionLineCountError);
+  });
+
+  test("uses custom description if provided", () => {
+    const originalLine1 = new TransactionLine({
+      id: lineId1,
+      transactionId: originalTransactionId,
+      targetType: "account",
+      targetId: accountId1,
+      amountCents: 10000,
+    });
+    const originalLine2 = new TransactionLine({
+      id: lineId2,
+      transactionId: originalTransactionId,
+      targetType: "account",
+      targetId: accountId2,
+      amountCents: -10000,
+    });
+
+    const originalTransaction = new Transaction({
+      id: originalTransactionId,
+      userId: userId,
+      type: "income" as TransactionType,
+      occurredAt: new Date(),
+      lines: [originalLine1, originalLine2],
+    });
+
+    const customDescription = "Custom reversal description";
+    const reversal = originalTransaction.createReversal({
+      reversalTransactionId,
+      reversalLineIds: [reversalLineId1, reversalLineId2],
+      description: customDescription,
+    });
+
+    expect(reversal.description).toBe(customDescription);
+  });
+
+  test("uses default description if not provided", () => {
+    const originalLine1 = new TransactionLine({
+      id: lineId1,
+      transactionId: originalTransactionId,
+      targetType: "account",
+      targetId: accountId1,
+      amountCents: 10000,
+    });
+    const originalLine2 = new TransactionLine({
+      id: lineId2,
+      transactionId: originalTransactionId,
+      targetType: "account",
+      targetId: accountId2,
+      amountCents: -10000,
+    });
+
+    const originalTransaction = new Transaction({
+      id: originalTransactionId,
+      userId: userId,
+      type: "income" as TransactionType,
+      occurredAt: new Date(),
+      lines: [originalLine1, originalLine2],
+    });
+
+    const reversal = originalTransaction.createReversal({
+      reversalTransactionId,
+      reversalLineIds: [reversalLineId1, reversalLineId2],
+    });
+
+    expect(reversal.description).toBe(
+      `Reversal of transaction ${originalTransactionId}`,
+    );
+  });
+});

@@ -16,3 +16,12 @@ export class TransactionNotFoundError extends TransactionApplicationError {
     super(`Transaction not found: ${id}`);
   }
 }
+
+/**
+ * Thrown when attempting to create a duplicate reversal for a transaction.
+ */
+export class DuplicateReversalError extends TransactionApplicationError {
+  constructor(transactionId: string) {
+    super(`Transaction ${transactionId} already has a reversal`);
+  }
+}

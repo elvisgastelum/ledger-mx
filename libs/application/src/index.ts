@@ -102,16 +102,23 @@ export type {
   TransactionLineOutput,
   CreateTransactionOutput,
   ListTransactionsOutput,
+  CreateReversalInput,
+  CreateReversalOutput,
+  CreateCorrectionInput,
+  CreateCorrectionOutput,
 } from "./transactions/transaction.types";
 
 // Transaction Use Cases
 export { CreateTransactionUseCase } from "./transactions/use-cases/create-transaction.use-case";
 export { ListTransactionsUseCase } from "./transactions/use-cases/list-transactions.use-case";
+export { CreateReversalUseCase } from "./transactions/use-cases/create-reversal.use-case";
+export { CreateCorrectionUseCase } from "./transactions/use-cases/create-correction.use-case";
 
 // Transaction Errors
 export {
   TransactionApplicationError,
   TransactionNotFoundError,
+  DuplicateReversalError,
 } from "./transactions/transaction.errors";
 
 // Balance Types

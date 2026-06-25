@@ -92,6 +92,9 @@ export const TransactionSchema = z.object({
   totalAmountCents: MoneySchema.describe(
     "Total transaction amount in cents (absolute value)",
   ),
+  reversalOfTransactionId: UuidSchema.nullable().describe(
+    "ID of the original transaction if this is a reversal",
+  ),
   lines: z
     .array(TransactionLineSchema)
     .min(2)
@@ -158,6 +161,33 @@ export const UpdateTransactionRequestSchema = z
 export type UpdateTransactionRequest = z.infer<
   typeof UpdateTransactionRequestSchema
 >;
+
+/**
+ * Schema for creating a reversal transaction
+ * Client must generate UUID v4 for id and line IDs
+ * The reversal negates all lines of the original transaction
+ */
+export const CreateReversalRequestSchema = z
+  .object({
+    id: UuidSchema.describe(
+      "Client-generated UUID v4 for reversal transaction",
+    ),
+    lineIds: z
+      .array(UuidSchema)
+      .min(2)
+      .describe(
+        "Client-generated UUID v4 array for reversal transaction lines",
+      ),
+    transactionDate: z
+      .string()
+      .datetime()
+      .optional()
+      .describe("Reversal transaction date in UTC (defaults to now)"),
+    note: z.string().max(500).nullable().optional(),
+  })
+  .strict();
+
+export type CreateReversalRequest = z.infer<typeof CreateReversalRequestSchema>;
 
 /**
  * Schema for single transaction response

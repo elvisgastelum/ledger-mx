@@ -28,6 +28,7 @@ export class ListTransactionsUseCase {
           note: tx.description ?? null,
           type: tx.type,
           totalAmountCents: totalAmountCents,
+          reversalOfTransactionId: tx.reversalOfTransactionId ?? null,
           lines: tx.lines.map((line) => {
             // Map targetType and targetId to contract shape
             let accountId: string | null = null;

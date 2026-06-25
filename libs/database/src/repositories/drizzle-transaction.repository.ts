@@ -7,6 +7,7 @@ import type {
   TransactionLineId,
   TransactionLineTargetId,
 } from "@ledger-mx/domain";
+import { FinancialRecordModificationError } from "@ledger-mx/domain";
 import type { Database } from "../connection";
 import { transactions, transactionLines } from "../schema";
 
@@ -17,43 +18,42 @@ export class DrizzleTransactionRepository implements TransactionRepository {
   constructor(private readonly db: Database) {}
 
   async save(transaction: Transaction): Promise<void> {
-    // Save transaction
+    // Lightweight existence check - financial records are immutable
+    // Check if ANY row exists for this id + userId (including soft-deleted)
+    // This prevents ID reuse and ensures true immutability
+    const existingRows = await this.db
+      .select({ id: transactions.id })
+      .from(transactions)
+      .where(
+        and(
+          eq(transactions.id, transaction.id),
+          eq(transactions.userId, transaction.userId),
+        ),
+      )
+      .limit(1);
+
+    if (existingRows.length > 0) {
+      throw new FinancialRecordModificationError(
+        `Transaction ${transaction.id} already exists and cannot be modified. Use reversal pattern instead.`,
+      );
+    }
+
+    // Save transaction with reversalOfTransactionId
     const transactionData = {
       id: transaction.id,
       userId: transaction.userId,
       type: transaction.type,
       occurredAt: transaction.occurredAt,
       description: transaction.description ?? null,
+      reversalOfTransactionId: transaction.reversalOfTransactionId ?? null,
       createdAt: transaction.createdAt,
       updatedAt: transaction.updatedAt,
       deletedAt: null,
     };
 
-    await this.db
-      .insert(transactions)
-      .values(transactionData)
-      .onConflictDoUpdate({
-        target: transactions.id,
-        set: {
-          type: transactionData.type,
-          occurredAt: transactionData.occurredAt,
-          description: transactionData.description,
-          updatedAt: new Date(),
-        },
-        where: eq(transactions.userId, transaction.userId),
-      });
+    await this.db.insert(transactions).values(transactionData);
 
-    // Delete existing lines for this transaction
-    await this.db
-      .delete(transactionLines)
-      .where(
-        and(
-          eq(transactionLines.transactionId, transaction.id),
-          eq(transactionLines.userId, transaction.userId),
-        ),
-      );
-
-    // Save new lines
+    // Save lines (no delete since transactions are immutable)
     for (const line of transaction.lines) {
       // Determine which ID field to set based on targetType
       let accountId: string | null = null;
@@ -130,6 +130,69 @@ export class DrizzleTransactionRepository implements TransactionRepository {
         }),
     );
 
+    // Create Transaction domain object with reversalOfTransactionId
+    return new Transaction({
+      id: txRow.id as TransactionId,
+      userId: txRow.userId as UserId,
+      type: txRow.type as Transaction["type"],
+      occurredAt: txRow.occurredAt,
+      description: txRow.description ?? undefined,
+      lines: lines,
+      createdAt: txRow.createdAt,
+      updatedAt: txRow.updatedAt,
+      reversalOfTransactionId: txRow.reversalOfTransactionId as
+        | TransactionId
+        | undefined,
+    });
+  }
+
+  async findReversalByOriginalId(
+    userId: UserId,
+    originalTransactionId: TransactionId,
+  ): Promise<Transaction | null> {
+    const txRows = await this.db
+      .select()
+      .from(transactions)
+      .where(
+        and(
+          eq(transactions.userId, userId),
+          eq(transactions.reversalOfTransactionId, originalTransactionId),
+          isNull(transactions.deletedAt),
+        ),
+      )
+      .limit(1);
+
+    if (txRows.length === 0) {
+      return null;
+    }
+
+    const txRow = txRows[0];
+    const txId = txRow.id as TransactionId;
+
+    // Get lines for this transaction
+    const lineRows = await this.db
+      .select()
+      .from(transactionLines)
+      .where(
+        and(
+          eq(transactionLines.transactionId, txId),
+          eq(transactionLines.userId, userId),
+          isNull(transactionLines.deletedAt),
+        ),
+      );
+
+    // Map lines to domain objects
+    const lines = lineRows.map(
+      (row) =>
+        new TransactionLine({
+          id: row.id as TransactionLineId,
+          transactionId: row.transactionId as TransactionId,
+          targetType: row.targetType as "account" | "envelope" | "category",
+          targetId: this.getTargetId(row) as TransactionLineTargetId,
+          amountCents: row.amountCents,
+        }),
+    );
+
     // Create Transaction domain object
     return new Transaction({
       id: txRow.id as TransactionId,
@@ -140,6 +203,9 @@ export class DrizzleTransactionRepository implements TransactionRepository {
       lines: lines,
       createdAt: txRow.createdAt,
       updatedAt: txRow.updatedAt,
+      reversalOfTransactionId: txRow.reversalOfTransactionId as
+        | TransactionId
+        | undefined,
     });
   }
 
@@ -199,6 +265,9 @@ export class DrizzleTransactionRepository implements TransactionRepository {
         lines: lines,
         createdAt: txRow.createdAt,
         updatedAt: txRow.updatedAt,
+        reversalOfTransactionId: txRow.reversalOfTransactionId as
+          | TransactionId
+          | undefined,
       });
 
       result.push(tx);

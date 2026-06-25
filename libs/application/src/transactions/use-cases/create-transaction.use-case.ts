@@ -94,6 +94,7 @@ export class CreateTransactionUseCase {
       note: input.note ?? null,
       type: transaction.type as TransactionType,
       totalAmountCents: totalAmountCents,
+      reversalOfTransactionId: transaction.reversalOfTransactionId ?? null,
       lines: input.lines.map((line) => ({
         id: line.id,
         targetType: line.targetType as TransactionLineTargetType,

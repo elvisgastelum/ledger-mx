@@ -47,3 +47,23 @@ export class InvalidIdError extends Error {
     this.name = "InvalidIdError";
   }
 }
+
+/**
+ * Thrown when attempting to modify an immutable financial record (e.g., transaction).
+ */
+export class FinancialRecordModificationError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "FinancialRecordModificationError";
+  }
+}
+
+/**
+ * Thrown when attempting to hard delete a financial record.
+ */
+export class FinancialRecordHardDeleteError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "FinancialRecordHardDeleteError";
+  }
+}

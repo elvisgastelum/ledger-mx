@@ -17,4 +17,13 @@ export interface TransactionRepository {
 
   /** Lists all transactions for a user, ordered by occurredAt descending. */
   listByUserId(userId: UserId): Promise<Transaction[]>;
+
+  /**
+   * Finds a reversal transaction for a given original transaction ID.
+   * Returns null if no reversal exists.
+   */
+  findReversalByOriginalId(
+    userId: UserId,
+    originalTransactionId: TransactionId,
+  ): Promise<Transaction | null>;
 }

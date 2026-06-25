@@ -13,10 +13,14 @@ import { userIdFromString } from "@ledger-mx/domain";
 import {
   CreateTransactionUseCase,
   ListTransactionsUseCase,
+  CreateReversalUseCase,
 } from "@ledger-mx/application";
+import { DuplicateReversalError } from "@ledger-mx/application";
+import { FinancialRecordModificationError } from "@ledger-mx/domain";
 import type {
   CreateTransactionInput,
   ListTransactionsInput,
+  CreateReversalInput,
 } from "@ledger-mx/application";
 import { contract } from "@ledger-mx/contracts";
 import { TsRestHandler, tsRestHandler } from "@ts-rest/nest";
@@ -43,6 +47,8 @@ export class TransactionsController {
     private readonly createTransactionUseCase: CreateTransactionUseCase,
     @Inject(ListTransactionsUseCase)
     private readonly listTransactionsUseCase: ListTransactionsUseCase,
+    @Inject(CreateReversalUseCase)
+    private readonly createReversalUseCase: CreateReversalUseCase,
   ) {}
 
   @TsRestHandler(contract.transactions.list)
@@ -64,6 +70,7 @@ export class TransactionsController {
             note: tx.note,
             type: tx.type as TransactionType,
             totalAmountCents: tx.totalAmountCents,
+            reversalOfTransactionId: tx.reversalOfTransactionId,
             lines: tx.lines.map((line) => ({
               id: line.id,
               targetType: line.targetType as TransactionLineTargetType,
@@ -105,6 +112,7 @@ export class TransactionsController {
             note: result.note,
             type: result.type as TransactionType,
             totalAmountCents: result.totalAmountCents,
+            reversalOfTransactionId: result.reversalOfTransactionId,
             lines: result.lines.map((line) => ({
               id: line.id,
               targetType: line.targetType as TransactionLineTargetType,
@@ -124,12 +132,67 @@ export class TransactionsController {
     });
   }
 
+  @TsRestHandler(contract.transactions.reverse)
+  async reverseTransaction(@Req() req: RequestWithUser): Promise<unknown> {
+    return tsRestHandler(
+      contract.transactions.reverse,
+      async ({ params, body }) => {
+        const user = req.user as { sub: string };
+        const userId = userIdFromString(user.sub);
+        const originalTransactionId = params.id;
+
+        try {
+          const result = await this.createReversalUseCase.execute({
+            userId,
+            originalTransactionId,
+            id: body.id,
+            lineIds: body.lineIds,
+            transactionDate: body.transactionDate,
+            note: body.note,
+          } as CreateReversalInput);
+
+          return {
+            status: 201 as const,
+            body: {
+              id: result.id,
+              transactionDate: toIsoString(result.transactionDate),
+              note: result.note,
+              type: result.type as TransactionType,
+              totalAmountCents: result.totalAmountCents,
+              reversalOfTransactionId: result.reversalOfTransactionId,
+              lines: result.lines.map((line) => ({
+                id: line.id,
+                targetType: line.targetType as TransactionLineTargetType,
+                accountId: line.accountId,
+                categoryId: line.categoryId,
+                envelopeId: line.envelopeId,
+                amountCents: line.amountCents,
+                type: line.type as TransactionType,
+              })),
+              createdAt: toIsoString(result.createdAt),
+              updatedAt: toIsoString(result.updatedAt),
+            },
+          };
+        } catch (error) {
+          if (error instanceof DuplicateReversalError) {
+            throw new ConflictException(error.message);
+          }
+          this.handleError(error);
+        }
+      },
+    );
+  }
+
   private handleError(error: unknown): never {
     if (
       error instanceof NotFoundException ||
       error instanceof ConflictException
     ) {
       throw error;
+    }
+
+    if (error instanceof FinancialRecordModificationError) {
+      throw new ConflictException(error.message);
     }
 
     throw new BadRequestException(
