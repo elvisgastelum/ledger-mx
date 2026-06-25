@@ -8,17 +8,22 @@ import { JwtAccessModule } from "../auth/jwt-access.module";
 import { ConfigModule } from "@nestjs/config";
 import { AccountsController } from "./accounts.controller";
 import { ACCOUNTS_TOKENS } from "./accounts.tokens";
-import type { AccountRepository } from "@ledger-mx/domain";
+import type { AccountRepository, BalanceRepository } from "@ledger-mx/domain";
 import {
   CreateAccountUseCase,
   ListAccountsUseCase,
   UpdateAccountUseCase,
   ArchiveAccountUseCase,
   EnsureSystemAccountsUseCase,
+  GetAccountBalancesUseCase,
 } from "@ledger-mx/application";
 import { UuidIdGenerator } from "../auth/infrastructure/uuid-id-generator";
 import { SystemClock } from "@ledger-mx/application";
-import { createDatabase, DrizzleAccountRepository } from "@ledger-mx/database";
+import {
+  createDatabase,
+  DrizzleAccountRepository,
+  DrizzleBalanceRepository,
+} from "@ledger-mx/database";
 
 // Internal token for shared database connection
 const ACCOUNTS_DATABASE = Symbol("ACCOUNTS_DATABASE");
@@ -44,6 +49,16 @@ function createDefaultAccountRepoProvider(): FactoryProvider {
   };
 }
 
+function createDefaultBalanceRepoProvider(): FactoryProvider {
+  return {
+    provide: ACCOUNTS_TOKENS.BALANCE_REPOSITORY,
+    useFactory: (db: ReturnType<typeof createDatabase>) => {
+      return new DrizzleBalanceRepository(db);
+    },
+    inject: [ACCOUNTS_DATABASE],
+  };
+}
+
 @Module({})
 export class AccountsModule {
   static forRoot(options?: AccountsModuleOptions): DynamicModule {
@@ -53,15 +68,15 @@ export class AccountsModule {
     // Only provide shared database if using default repo provider
     const needsDatabase = !options?.accountRepository;
 
+    const balanceRepoProvider = createDefaultBalanceRepoProvider();
+
     return {
       module: AccountsModule,
       controllers: [AccountsController],
-      imports: [
-        ConfigModule,
-        JwtAccessModule,
-      ],
+      imports: [ConfigModule, JwtAccessModule],
       providers: [
         accountRepoProvider,
+        balanceRepoProvider,
         ...(needsDatabase ? [createDefaultDatabaseProvider()] : []),
         // Infrastructure services
         {
@@ -124,15 +139,9 @@ export class AccountsModule {
             accountRepository: AccountRepository,
             clock: SystemClock,
           ) => {
-            return new UpdateAccountUseCase(
-              accountRepository,
-              clock,
-            );
+            return new UpdateAccountUseCase(accountRepository, clock);
           },
-          inject: [
-            ACCOUNTS_TOKENS.ACCOUNT_REPOSITORY,
-            SystemClock,
-          ],
+          inject: [ACCOUNTS_TOKENS.ACCOUNT_REPOSITORY, SystemClock],
         },
         {
           provide: ArchiveAccountUseCase,
@@ -140,15 +149,17 @@ export class AccountsModule {
             accountRepository: AccountRepository,
             clock: SystemClock,
           ) => {
-            return new ArchiveAccountUseCase(
-              accountRepository,
-              clock,
-            );
+            return new ArchiveAccountUseCase(accountRepository, clock);
           },
-          inject: [
-            ACCOUNTS_TOKENS.ACCOUNT_REPOSITORY,
-            SystemClock,
-          ],
+          inject: [ACCOUNTS_TOKENS.ACCOUNT_REPOSITORY, SystemClock],
+        },
+        // Balance use cases
+        {
+          provide: GetAccountBalancesUseCase,
+          useFactory: (balanceRepository: BalanceRepository) => {
+            return new GetAccountBalancesUseCase(balanceRepository);
+          },
+          inject: [ACCOUNTS_TOKENS.BALANCE_REPOSITORY],
         },
       ],
       exports: [],

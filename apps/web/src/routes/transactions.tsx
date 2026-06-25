@@ -1,5 +1,6 @@
 import { useState, useMemo } from "react";
 import { useForm, Controller } from "react-hook-form";
+import { useQueryClient } from "@tanstack/react-query";
 import { tsr } from "../lib/ts-rest-client";
 import type {
   AccountType,
@@ -114,6 +115,7 @@ export function TransactionsPage() {
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [showCreateForm, setShowCreateForm] = useState(false);
 
+  const queryClient = useQueryClient();
   const idGenerator = useMemo(() => new WebCryptoIdGenerator(), []);
 
   // Use ts-rest query for loading transactions
@@ -135,6 +137,7 @@ export function TransactionsPage() {
     data: accountsData,
     isLoading: isAccountsLoading,
     error: accountsError,
+    refetch: refetchAccounts,
   } = tsr.accounts.list.useQuery({
     queryKey: ["accounts"],
     queryData: { query: {} },
@@ -255,7 +258,7 @@ export function TransactionsPage() {
       });
     } else if (data.type === "income") {
       // Validate destination account ID is an active user account
-        if (!hasActiveStatusAccountId(data.incomeDestinationAccountId)) {
+      if (!hasActiveStatusAccountId(data.incomeDestinationAccountId)) {
         setError("incomeDestinationAccountId", {
           type: "manual",
           message: "Select an active account",
@@ -368,6 +371,13 @@ export function TransactionsPage() {
       setShowCreateForm(false);
       reset();
       refetch();
+      refetchAccounts();
+      // Invalidate balance queries to refetch updated balances
+      queryClient.invalidateQueries({ queryKey: ["balances"] });
+      queryClient.invalidateQueries({
+        queryKey: ["balances", "by-account-type"],
+      });
+      queryClient.invalidateQueries({ queryKey: ["balances", "liabilities"] });
     } catch (err: unknown) {
       setSubmitError(
         err instanceof Error ? err.message : "Failed to create transaction",

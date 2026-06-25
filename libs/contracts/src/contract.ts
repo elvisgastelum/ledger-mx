@@ -34,6 +34,12 @@ import {
   ListTransactionsResponseSchema,
   CreateTransactionRequestSchema,
 } from "./transactions/transaction.schemas";
+import {
+  AccountBalanceResponseSchema,
+  BalancesByAccountTypeResponseSchema,
+  LiabilityBalancesResponseSchema,
+  GeneralBalanceResponseSchema,
+} from "./balances/balance.schemas";
 
 const c = initContract();
 
@@ -139,13 +145,13 @@ export const contract = c.router(
         path: "/category-groups/:id",
         pathParams: z.object({ id: UuidSchema }),
         responses: {
-           204: z.void(),
-           401: ErrorResponseSchema,
-           404: ErrorResponseSchema.describe(
-             "Category group not found or not owned by user",
-           ),
-         },
-         summary: "Delete a category group by ID",
+          204: z.void(),
+          401: ErrorResponseSchema,
+          404: ErrorResponseSchema.describe(
+            "Category group not found or not owned by user",
+          ),
+        },
+        summary: "Delete a category group by ID",
         metadata: { implemented: true, auth: true, scopes: ["user:write"] },
       },
     }),
@@ -196,13 +202,13 @@ export const contract = c.router(
         path: "/accounts/:id",
         pathParams: z.object({ id: UuidSchema }),
         responses: {
-           204: z.void(),
-           401: ErrorResponseSchema,
-           404: ErrorResponseSchema.describe(
-             "Account not found or not owned by user",
-           ),
-         },
-         summary: "Archive an account by ID (soft delete)",
+          204: z.void(),
+          401: ErrorResponseSchema,
+          404: ErrorResponseSchema.describe(
+            "Account not found or not owned by user",
+          ),
+        },
+        summary: "Archive an account by ID (soft delete)",
         metadata: { implemented: true, auth: true, scopes: ["user:write"] },
       },
     }),
@@ -231,6 +237,54 @@ export const contract = c.router(
         },
         summary: "Create a new transaction (double-entry)",
         metadata: { implemented: true, auth: true, scopes: ["user:write"] },
+      },
+    }),
+
+    // BALANCES ENDPOINTS (implemented)
+    balances: c.router({
+      general: {
+        method: "GET",
+        path: "/balances",
+        responses: {
+          200: GeneralBalanceResponseSchema,
+          401: ErrorResponseSchema,
+        },
+        summary: "Get general balance summary (assets, liabilities, net worth)",
+        metadata: { implemented: true, auth: true, scopes: ["user:read"] },
+      },
+      getAccount: {
+        method: "GET",
+        path: "/balances/accounts/:accountId",
+        pathParams: z.object({ accountId: UuidSchema }),
+        responses: {
+          200: AccountBalanceResponseSchema,
+          401: ErrorResponseSchema,
+          404: ErrorResponseSchema.describe(
+            "Account not found or not owned by user",
+          ),
+        },
+        summary: "Get balance for a specific account",
+        metadata: { implemented: true, auth: true, scopes: ["user:read"] },
+      },
+      byAccountType: {
+        method: "GET",
+        path: "/balances/by-account-type",
+        responses: {
+          200: BalancesByAccountTypeResponseSchema,
+          401: ErrorResponseSchema,
+        },
+        summary: "Get balances grouped by account type",
+        metadata: { implemented: true, auth: true, scopes: ["user:read"] },
+      },
+      liabilities: {
+        method: "GET",
+        path: "/balances/liabilities",
+        responses: {
+          200: LiabilityBalancesResponseSchema,
+          401: ErrorResponseSchema,
+        },
+        summary: "Get balances for liability accounts (credit and loan)",
+        metadata: { implemented: true, auth: true, scopes: ["user:read"] },
       },
     }),
 

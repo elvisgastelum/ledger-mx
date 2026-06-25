@@ -1,0 +1,3 @@
+export const BALANCES_TOKENS = {
+  BALANCE_REPOSITORY: Symbol("BALANCE_REPOSITORY"),
+} as const;

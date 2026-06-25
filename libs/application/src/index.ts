@@ -113,3 +113,25 @@ export {
   TransactionApplicationError,
   TransactionNotFoundError,
 } from "./transactions/transaction.errors";
+
+// Balance Types
+export type {
+  GetAccountBalanceInput,
+  GetAccountBalancesInput,
+  GetBalancesByTypeInput,
+  GetLiabilityBalancesInput,
+  GeneralBalanceResult,
+} from "./balances/balance.types";
+
+// Balance Use Cases
+export { GetAccountBalanceUseCase } from "./balances/use-cases/get-account-balance.use-case";
+export { GetAccountBalancesUseCase } from "./balances/use-cases/get-account-balances.use-case";
+export { GetBalancesByTypeUseCase } from "./balances/use-cases/get-balances-by-type.use-case";
+export { GetLiabilityBalancesUseCase } from "./balances/use-cases/get-liability-balances.use-case";
+export { GetGeneralBalanceUseCase } from "./balances/use-cases/get-general-balance.use-case";
+
+// Balance Errors
+export {
+  AccountBalanceNotFoundError,
+  BalanceNotFoundError,
+} from "./balances/balance.errors";

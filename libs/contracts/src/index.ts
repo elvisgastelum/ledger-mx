@@ -42,6 +42,9 @@ export * from "./envelopes";
 // Transactions (planned)
 export * from "./transactions";
 
+// Balances
+export * from "./balances";
+
 // Onboarding
 export * from "./onboarding";
 

@@ -9,4 +9,5 @@ export * from "./repositories/drizzle-category-group.repository";
 export * from "./repositories/drizzle-transaction-export.repository";
 export * from "./repositories/drizzle-account.repository";
 export * from "./repositories/drizzle-transaction.repository";
+export * from "./repositories/drizzle-balance.repository";
 export * from "./seeds";

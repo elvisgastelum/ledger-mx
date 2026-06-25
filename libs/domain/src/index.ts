@@ -122,3 +122,9 @@ export type { SessionRepository } from "./repositories/session-repository";
 export type { AuthAuditLogRepository } from "./repositories/auth-audit-log-repository";
 export type { CategoryGroupRepository } from "./repositories/category-group-repository";
 export type { AccountRepository } from "./repositories/account-repository";
+export type {
+  BalanceRepository,
+  AccountBalance,
+  BalanceByAccountType,
+  LiabilityAccountBalance,
+} from "./repositories/balance-repository";

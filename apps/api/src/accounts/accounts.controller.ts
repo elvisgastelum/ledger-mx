@@ -24,6 +24,7 @@ import type {
   CreateAccountInput,
   UpdateAccountInput,
 } from "@ledger-mx/application";
+import { GetAccountBalancesUseCase } from "@ledger-mx/application";
 import { contract } from "@ledger-mx/contracts";
 import type { AccountType } from "@ledger-mx/contracts";
 import { TsRestHandler, tsRestHandler } from "@ts-rest/nest";
@@ -49,6 +50,8 @@ export class AccountsController {
     private readonly archiveAccountUseCase: ArchiveAccountUseCase,
     @Inject(EnsureSystemAccountsUseCase)
     private readonly ensureSystemAccountsUseCase: EnsureSystemAccountsUseCase,
+    @Inject(GetAccountBalancesUseCase)
+    private readonly getAccountBalancesUseCase: GetAccountBalancesUseCase,
   ) {}
 
   @TsRestHandler(contract.accounts.list)
@@ -64,6 +67,17 @@ export class AccountsController {
         userId,
       });
 
+      // Get balances for all accounts in one batch
+      const accountIds = result.accounts.map((account) => account.id);
+      const balances = await this.getAccountBalancesUseCase.execute({
+        userId,
+        accountIds:
+          accountIds as unknown as import("@ledger-mx/domain").AccountId[],
+      });
+      const balanceMap = new Map(
+        balances.map((b) => [b.accountId, b.balanceCents]),
+      );
+
       return {
         status: 200 as const,
         body: {
@@ -71,7 +85,7 @@ export class AccountsController {
             id: account.id,
             name: account.name,
             type: account.type as AccountType,
-            balanceCents: 0, // TODO: compute from transaction lines
+            balanceCents: balanceMap.get(account.id) ?? 0,
             currency: account.currencyCode,
             status: account.status,
             ownership: account.ownership,
@@ -98,13 +112,22 @@ export class AccountsController {
           currencyCode: body.currency,
         } as CreateAccountInput);
 
+        // Get the balance for the new account (will be 0 for new accounts)
+        const balances = await this.getAccountBalancesUseCase.execute({
+          userId,
+          accountIds: [
+            result.id as unknown as import("@ledger-mx/domain").AccountId,
+          ],
+        });
+        const balanceCents = balances[0]?.balanceCents ?? 0;
+
         return {
           status: 201 as const,
           body: {
             id: result.id,
             name: result.name,
             type: result.type as AccountType,
-            balanceCents: 0, // TODO: compute from transaction lines
+            balanceCents,
             currency: result.currencyCode,
             status: result.status,
             ownership: result.ownership,
@@ -135,13 +158,22 @@ export class AccountsController {
           status: body.status,
         } as UpdateAccountInput);
 
+        // Get the balance for the updated account
+        const balances = await this.getAccountBalancesUseCase.execute({
+          userId,
+          accountIds: [
+            result.id as unknown as import("@ledger-mx/domain").AccountId,
+          ],
+        });
+        const balanceCents = balances[0]?.balanceCents ?? 0;
+
         return {
           status: 200 as const,
           body: {
             id: result.id,
             name: result.name,
             type: result.type as AccountType,
-            balanceCents: 0, // TODO: compute from transaction lines
+            balanceCents,
             currency: result.currencyCode,
             status: result.status,
             ownership: result.ownership,
