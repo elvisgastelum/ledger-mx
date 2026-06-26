@@ -8,6 +8,7 @@ import {
   envelopeIdFromString,
   categoryIdFromString,
 } from "../value-objects/uuid";
+import { TransactionLineBuilder } from "./builders";
 
 // Valid UUID v4 strings for testing
 const LINE_ID = "423e4567-e89b-42d3-a456-426614174003";
@@ -25,13 +26,12 @@ const categoryId = categoryIdFromString(CATEGORY_ID);
 
 describe("TransactionLine", () => {
   test("accepts a valid line", () => {
-    const line = new TransactionLine({
-      id: lineId,
-      transactionId: transactionId,
-      targetType: "account",
-      targetId: accountId,
-      amountCents: 100,
-    });
+    const line = new TransactionLineBuilder()
+      .withId(lineId)
+      .withTransactionId(transactionId)
+      .withAccountTarget(accountId)
+      .withAmountCents(100)
+      .build();
     expect(line.id).toBe(LINE_ID);
     expect(line.transactionId).toBe(TRANSACTION_ID);
     expect(line.targetType).toBe("account");
@@ -40,64 +40,54 @@ describe("TransactionLine", () => {
   });
 
   test("rejects zero amount", () => {
-    expect(
-      () =>
-        new TransactionLine({
-          id: lineId,
-          transactionId: transactionId,
-          targetType: "account",
-          targetId: accountId,
-          amountCents: 0,
-        }),
+    expect(() =>
+      new TransactionLineBuilder()
+        .withId(lineId)
+        .withTransactionId(transactionId)
+        .withAccountTarget(accountId)
+        .withAmountCents(0)
+        .build()
     ).toThrow(InvalidTransactionLineAmountError);
   });
 
   test("rejects non-integer amount", () => {
-    expect(
-      () =>
-        new TransactionLine({
-          id: lineId,
-          transactionId: transactionId,
-          targetType: "account",
-          targetId: accountId,
-          amountCents: 100.5,
-        }),
+    expect(() =>
+      new TransactionLineBuilder()
+        .withId(lineId)
+        .withTransactionId(transactionId)
+        .withAccountTarget(accountId)
+        .withAmountCents(100.5 as unknown as number)
+        .build()
     ).toThrow(InvalidTransactionLineAmountError);
   });
 
   test("rejects negative amount", () => {
-    const line = new TransactionLine({
-      id: lineId,
-      transactionId: transactionId,
-      targetType: "account",
-      targetId: accountId,
-      amountCents: -100,
-    });
+    const line = new TransactionLineBuilder()
+      .withId(lineId)
+      .withTransactionId(transactionId)
+      .withAccountTarget(accountId)
+      .withAmountCents(-100)
+      .build();
     expect(line.amountCents).toBe(-100);
   });
 
   test("accepts envelope target type", () => {
-    const line = new TransactionLine({
-      id: lineId,
-      transactionId: transactionId,
-      targetType: "envelope",
-      targetId: envelopeId,
-      amountCents: 100,
-    });
+    const line = new TransactionLineBuilder()
+      .withId(lineId)
+      .withTransactionId(transactionId)
+      .withEnvelopeTarget(envelopeId)
+      .withAmountCents(100)
+      .build();
     expect(line.targetType).toBe("envelope");
   });
 
   test("accepts category target type", () => {
-    const line = new TransactionLine({
-      id: lineId,
-      transactionId: transactionId,
-      targetType: "category",
-      targetId: categoryId,
-      amountCents: 100,
-    });
+    const line = new TransactionLineBuilder()
+      .withId(lineId)
+      .withTransactionId(transactionId)
+      .withCategoryTarget(categoryId)
+      .withAmountCents(100)
+      .build();
     expect(line.targetType).toBe("category");
   });
 });
-
-// Factory function validation tests moved to uuid.test.ts
-// Invalid ID tests are now tested at the factory level, not the constructor level

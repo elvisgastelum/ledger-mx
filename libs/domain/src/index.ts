@@ -91,6 +91,12 @@ export type { CategoryGroup } from "./ledger/category-group";
 export type { Category } from "./ledger/category";
 export type { Account } from "./ledger/account";
 
+// Ledger Builders
+export {
+  TransactionLineBuilder,
+  TransactionBuilder,
+} from "./ledger/builders";
+
 // Auth Errors
 export {
   InvalidCredentialsError,

@@ -14,7 +14,9 @@ import {
   transactionLineIdFromString,
   accountIdFromString,
   envelopeIdFromString,
+  categoryIdFromString,
 } from "../value-objects/uuid";
+import { TransactionBuilder, TransactionLineBuilder } from "./builders";
 
 // Valid UUID v4 strings for testing
 const TRANSACTION_ID = "9f4e5a7b-1234-4d8e-9f1a-2b3c4d5e6f7a";
@@ -22,9 +24,10 @@ const USER_ID = "8a3b2c1d-5678-4f9e-8a1b-2c3d4e5f6a7b";
 const ACCOUNT_ID_1 = "123e4567-e89b-42d3-a456-426614174000";
 const ACCOUNT_ID_2 = "223e4567-e89b-42d3-a456-426614174001";
 const ENVELOPE_ID = "323e4567-e89b-42d3-a456-426614174002";
-const LINE_ID_1 = "423e4567-e89b-42d3-a456-426614174003";
-const LINE_ID_2 = "523e4567-e89b-42d3-a456-426614174004";
-const LINE_ID_3 = "623e4567-e89b-42d3-a456-426614174005";
+const CATEGORY_ID = "423e4567-e89b-42d3-a456-426614174006";
+const LINE_ID_1 = "523e4567-e89b-42d3-a456-426614174003";
+const LINE_ID_2 = "623e4567-e89b-42d3-a456-426614174004";
+const LINE_ID_3 = "723e4567-e89b-42d3-a456-426614174005";
 
 // Create branded IDs using factory functions
 const transactionId = transactionIdFromString(TRANSACTION_ID);
@@ -32,19 +35,19 @@ const userId = userIdFromString(USER_ID);
 const accountId1 = accountIdFromString(ACCOUNT_ID_1);
 const accountId2 = accountIdFromString(ACCOUNT_ID_2);
 const envelopeId = envelopeIdFromString(ENVELOPE_ID);
+const categoryId = categoryIdFromString(CATEGORY_ID);
 const lineId1 = transactionLineIdFromString(LINE_ID_1);
 const lineId2 = transactionLineIdFromString(LINE_ID_2);
 const lineId3 = transactionLineIdFromString(LINE_ID_3);
 
 describe("Transaction", () => {
   const createValidLine = (props: Partial<TransactionLineProps> = {}) => {
-    return new TransactionLine({
-      id: props.id ?? lineId1,
-      transactionId: props.transactionId ?? transactionId,
-      targetType: props.targetType ?? "account",
-      targetId: props.targetId ?? accountId1,
-      amountCents: props.amountCents ?? 100,
-    });
+    return new TransactionLineBuilder()
+      .withId(props.id ?? lineId1)
+      .withTransactionId(props.transactionId ?? transactionId)
+      .withTarget(props.targetType ?? "account", props.targetId ?? accountId1)
+      .withAmountCents(props.amountCents ?? 100)
+      .build();
   };
 
   test("rejects fewer than 2 lines", () => {
@@ -83,75 +86,84 @@ describe("Transaction", () => {
   });
 
   test("accepts balanced two-line transaction", () => {
-    const line1 = createValidLine({ amountCents: 100 });
-    const line2 = createValidLine({ id: lineId2, amountCents: -100 });
-    const transaction = new Transaction({
-      id: transactionId,
-      userId: userId,
-      type: "income" as TransactionType,
-      occurredAt: new Date(),
-      lines: [line1, line2],
-    });
+    const transaction = new TransactionBuilder()
+      .withId(transactionId)
+      .withUserId(userId)
+      .withType("income")
+      .withOccurredAt(new Date())
+      .withTransactionLine((line) =>
+        line.withId(lineId1).withAmountCents(100).withAccountTarget(accountId1),
+      )
+      .withTransactionLine((line) =>
+        line.withId(lineId2).withAmountCents(-100).withAccountTarget(accountId2),
+      )
+      .build();
     expect(transaction.lines).toHaveLength(2);
     expect(transaction.type).toBe("income");
   });
 
   test("accepts balanced multi-line transaction (3+ lines)", () => {
-    const line1 = createValidLine({ amountCents: 100 });
-    const line2 = createValidLine({ id: lineId2, amountCents: 200 });
-    const line3 = createValidLine({
-      id: lineId3,
-      amountCents: -300,
-      targetType: "envelope",
-      targetId: envelopeId,
-    });
-    const transaction = new Transaction({
-      id: transactionId,
-      userId: userId,
-      type: "transfer" as TransactionType,
-      occurredAt: new Date(),
-      lines: [line1, line2, line3],
-    });
+    const transaction = new TransactionBuilder()
+      .withId(transactionId)
+      .withUserId(userId)
+      .withType("transfer")
+      .withOccurredAt(new Date())
+      .withTransactionLine((line) =>
+        line.withId(lineId1).withAmountCents(100).withAccountTarget(accountId1),
+      )
+      .withTransactionLine((line) =>
+        line.withId(lineId2).withAmountCents(200).withAccountTarget(accountId2),
+      )
+      .withTransactionLine((line) =>
+        line
+          .withId(lineId3)
+          .withEnvelopeTarget(envelopeId)
+          .withAmountCents(-300),
+      )
+      .build();
     expect(transaction.lines).toHaveLength(3);
   });
 
   test("accepts debt_payment transaction and exposes type", () => {
-    const line1 = createValidLine({ amountCents: 500, targetType: "account" });
-    const line2 = createValidLine({
-      id: lineId2,
-      amountCents: -500,
-      targetType: "account",
-      targetId: accountId2,
-    });
-    const transaction = new Transaction({
-      id: transactionId,
-      userId: userId,
-      type: "debt_payment" as TransactionType,
-      occurredAt: new Date(),
-      lines: [line1, line2],
-    });
+    const transaction = new TransactionBuilder()
+      .withId(transactionId)
+      .withUserId(userId)
+      .withType("debt_payment")
+      .withOccurredAt(new Date())
+      .withTransactionLine((line) =>
+        line.withId(lineId1).withAmountCents(500).withAccountTarget(accountId1),
+      )
+      .withTransactionLine((line) =>
+        line
+          .withId(lineId2)
+          .withAmountCents(-500)
+          .withAccountTarget(accountId2),
+      )
+      .build();
     expect(transaction.type).toBe("debt_payment");
   });
 
   describe("transaction type examples", () => {
     test("expense: $100 groceries (account -10000, category +10000)", () => {
-      const expenseLine = createValidLine({
-        amountCents: -10000,
-        targetType: "account",
-        targetId: accountId1,
-      });
-      const categoryLine = createValidLine({
-        id: lineId2,
-        amountCents: 10000,
-        targetType: "category",
-      });
-      const transaction = new Transaction({
-        id: transactionId,
-        userId: userId,
-        type: "expense" as TransactionType,
-        occurredAt: new Date(),
-        lines: [expenseLine, categoryLine],
-      });
+      const categoryId = categoryIdFromString(CATEGORY_ID);
+      const transaction = new TransactionBuilder()
+        .withId(transactionId)
+        .withUserId(userId)
+        .withType("expense")
+        .withOccurredAt(new Date())
+        .withTransactionLine((line) =>
+          line
+            .withId(lineId1)
+            .withAmountCents(-10000)
+            .withAccountTarget(accountId1),
+        )
+        .withTransactionLine((line) =>
+          line
+            .withId(lineId2)
+            .withAmountCents(10000)
+            .withCategoryTarget(categoryId),
+        )
+        .build();
       expect(transaction.type).toBe("expense");
       expect(transaction.lines).toHaveLength(2);
       // Sum must be zero
@@ -160,72 +172,72 @@ describe("Transaction", () => {
     });
 
     test("income: $5000 paycheck (account +500000, source -500000)", () => {
-      const accountLine = createValidLine({
-        amountCents: 500000,
-        targetType: "account",
-        targetId: accountId1,
-      });
-      const sourceLine = createValidLine({
-        id: lineId2,
-        amountCents: -500000,
-        targetType: "account",
-        targetId: accountId2,
-      });
-      const transaction = new Transaction({
-        id: transactionId,
-        userId: userId,
-        type: "income" as TransactionType,
-        occurredAt: new Date(),
-        lines: [accountLine, sourceLine],
-      });
+      const transaction = new TransactionBuilder()
+        .withId(transactionId)
+        .withUserId(userId)
+        .withType("income")
+        .withOccurredAt(new Date())
+        .withTransactionLine((line) =>
+          line
+            .withId(lineId1)
+            .withAmountCents(500000)
+            .withAccountTarget(accountId1),
+        )
+        .withTransactionLine((line) =>
+          line
+            .withId(lineId2)
+            .withAmountCents(-500000)
+            .withAccountTarget(accountId2),
+        )
+        .build();
       expect(transaction.type).toBe("income");
       const sum = transaction.lines.reduce((s, l) => s + l.amountCents, 0);
       expect(sum).toBe(0);
     });
 
     test("transfer: $200 BBVA → Cash (bbva -20000, cash +20000)", () => {
-      const fromLine = createValidLine({
-        amountCents: -20000,
-        targetType: "account",
-        targetId: accountId1,
-      });
-      const toLine = createValidLine({
-        id: lineId2,
-        amountCents: 20000,
-        targetType: "account",
-        targetId: accountId2,
-      });
-      const transaction = new Transaction({
-        id: transactionId,
-        userId: userId,
-        type: "transfer" as TransactionType,
-        occurredAt: new Date(),
-        lines: [fromLine, toLine],
-      });
+      const transaction = new TransactionBuilder()
+        .withId(transactionId)
+        .withUserId(userId)
+        .withType("transfer")
+        .withOccurredAt(new Date())
+        .withTransactionLine((line) =>
+          line
+            .withId(lineId1)
+            .withAmountCents(-20000)
+            .withAccountTarget(accountId1),
+        )
+        .withTransactionLine((line) =>
+          line
+            .withId(lineId2)
+            .withAmountCents(20000)
+            .withAccountTarget(accountId2),
+        )
+        .build();
       expect(transaction.type).toBe("transfer");
       const sum = transaction.lines.reduce((s, l) => s + l.amountCents, 0);
       expect(sum).toBe(0);
     });
 
     test("debt_payment: $300 BBVA → Credit Card (account -30000, debt +30000)", () => {
-      const accountLine = createValidLine({
-        amountCents: -30000,
-        targetType: "account",
-        targetId: accountId1,
-      });
-      const debtLine = createValidLine({
-        id: lineId2,
-        amountCents: 30000,
-        targetType: "account",
-        targetId: accountId2,
-      });
-      const transaction = new Transaction({
-        id: transactionId,
-        userId: userId,
-        type: "debt_payment" as TransactionType,
-        occurredAt: new Date(),
-        lines: [accountLine, debtLine],
-      });
+      const transaction = new TransactionBuilder()
+        .withId(transactionId)
+        .withUserId(userId)
+        .withType("debt_payment")
+        .withOccurredAt(new Date())
+        .withTransactionLine((line) =>
+          line
+            .withId(lineId1)
+            .withAmountCents(-30000)
+            .withAccountTarget(accountId1),
+        )
+        .withTransactionLine((line) =>
+          line
+            .withId(lineId2)
+            .withAmountCents(30000)
+            .withAccountTarget(accountId2),
+        )
+        .build();
       expect(transaction.type).toBe("debt_payment");
       const sum = transaction.lines.reduce((s, l) => s + l.amountCents, 0);
       expect(sum).toBe(0);
