@@ -95,6 +95,9 @@ export type { Account } from "./ledger/account";
 export {
   TransactionLineBuilder,
   TransactionBuilder,
+  AccountBuilder,
+  CategoryBuilder,
+  CategoryGroupBuilder,
 } from "./ledger/builders";
 
 // Auth Errors

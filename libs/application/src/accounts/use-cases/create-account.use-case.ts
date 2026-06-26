@@ -1,4 +1,4 @@
-import { Account } from "@ledger-mx/domain";
+import { AccountBuilder, Account } from "@ledger-mx/domain";
 import type {
   AccountRepository,
   AccountId,
@@ -17,19 +17,21 @@ export class CreateAccountUseCase {
   ) {}
 
   async execute(input: CreateAccountInput): Promise<Account> {
-    const account: Account = {
-      id: this.idGenerator.uuid() as AccountId,
-      userId: input.userId as UserId,
-      name: input.name,
-      type: input.type as Account["type"],
-      currencyCode: input.currencyCode ?? "MXN",
-      status: "active" as AccountStatus,
-      createdAt: this.clock.now(),
-      updatedAt: this.clock.now(),
-      deletedAt: null,
-      ownership: "user" as OwnershipType,
-      systemRole: null,
-    };
+    const now = this.clock.now();
+
+    const account = new AccountBuilder()
+      .withId(this.idGenerator.uuid() as AccountId)
+      .withUserId(input.userId as UserId)
+      .withName(input.name)
+      .withType(input.type as Account["type"])
+      .withCurrencyCode(input.currencyCode ?? "MXN")
+      .withStatus("active" as AccountStatus)
+      .withCreatedAt(now)
+      .withUpdatedAt(now)
+      .withDeletedAt(null)
+      .withOwnership("user" as OwnershipType)
+      .withSystemRole(null)
+      .build();
 
     await this.accountRepository.save(account);
 

@@ -1,5 +1,8 @@
 export { TestTransactionLineBuilder } from "./test-transaction-line-builder";
 export { TestTransactionBuilder } from "./test-transaction-builder";
+export { TestAccountBuilder } from "./test-account-builder";
+export { TestCategoryBuilder } from "./test-category-builder";
+export { TestCategoryGroupBuilder } from "./test-category-group-builder";
 export {
   testUserId,
   testAccountId,

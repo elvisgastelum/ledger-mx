@@ -1,7 +1,7 @@
 import type { CategoryId, CategoryGroupId } from "@ledger-mx/domain";
 import type { CategoryRepository } from "@ledger-mx/domain";
 import type { CategoryGroupRepository } from "@ledger-mx/domain";
-import type { Category } from "@ledger-mx/domain";
+import { CategoryBuilder } from "@ledger-mx/domain";
 import type { IdGenerator } from "../../auth/ports/id-generator.port";
 import type { Clock } from "../../auth/ports/clock.port";
 import type { CreateCategoryInput } from "../category.types";
@@ -91,16 +91,16 @@ export class CreateCategoryUseCase {
       throw new DuplicateCategoryNameError(trimmedName);
     }
 
-    const category: Category = {
-      id: categoryId,
-      userId: input.userId,
-      name: input.name.trim(),
-      parentId: input.parentId ?? null,
-      categoryGroupId: input.categoryGroupId,
-      ownership: "user",
-      createdAt: now,
-      updatedAt: now,
-    };
+    const category = new CategoryBuilder()
+      .withId(categoryId)
+      .withUserId(input.userId)
+      .withName(trimmedName)
+      .withParentId(input.parentId ?? null)
+      .withCategoryGroupId(input.categoryGroupId)
+      .withOwnership("user")
+      .withCreatedAt(now)
+      .withUpdatedAt(now)
+      .build();
 
     await this.categoryRepository.save(category);
 
