@@ -49,6 +49,35 @@ export {
   CategoryGroupHasActiveCategoriesError,
 } from "./category-groups/category-group.errors";
 
+// Categories Types
+export type {
+  CreateCategoryInput,
+  UpdateCategoryInput,
+  ListCategoriesInput,
+  GetCategoryInput,
+  ArchiveCategoryInput,
+  CategoryOutput,
+  CategoryWithUsageOutput,
+} from "./categories/category.types";
+
+// Categories Use Cases
+export { CreateCategoryUseCase } from "./categories/use-cases/create-category.use-case";
+export { ListCategoriesUseCase } from "./categories/use-cases/list-categories.use-case";
+export { GetCategoryUseCase } from "./categories/use-cases/get-category.use-case";
+export { UpdateCategoryUseCase } from "./categories/use-cases/update-category.use-case";
+export { ArchiveCategoryUseCase } from "./categories/use-cases/archive-category.use-case";
+
+// Categories Errors
+export {
+  CategoryApplicationError,
+  CategoryNotFoundError,
+  SystemCategoryModificationError,
+  InvalidParentCategoryError,
+  CategoryInUseError,
+  CategoryHasActiveChildrenError,
+  DuplicateCategoryNameError,
+} from "./categories/category.errors";
+
 // Onboarding Types
 export type {
   ApplyDefaultCategoryGroupLayoutInput,
@@ -119,6 +148,7 @@ export {
   TransactionApplicationError,
   TransactionNotFoundError,
   DuplicateReversalError,
+  TransactionTargetNotFoundError,
 } from "./transactions/transaction.errors";
 
 // Balance Types

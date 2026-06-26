@@ -7,6 +7,7 @@ import type {
   SystemRole,
   AccountStatus,
   OwnershipType,
+  CategoryWithUsage,
 } from "@ledger-mx/contracts";
 import { dateInputToISOString, getTodayString } from "../lib/date-format";
 import { Button } from "../components/ui/button";
@@ -31,17 +32,6 @@ import {
   SelectValue,
 } from "../components/ui/select";
 import { WebCryptoIdGenerator } from "../lib/web-crypto-id-generator";
-
-interface TransactionFormValues {
-  transactionDate: string;
-  note: string;
-  type: "expense" | "income" | "transfer";
-  amount: string;
-  expenseAccountId: string;
-  incomeDestinationAccountId: string;
-  transferFromAccountId: string;
-  transferToAccountId: string;
-}
 
 interface Transaction {
   id: string;
@@ -77,6 +67,75 @@ interface Account {
 
 function formatAccountTypeLabel(type: AccountType): string {
   return type.charAt(0).toUpperCase() + type.slice(1);
+}
+
+interface TransactionFormValues {
+  transactionDate: string;
+  note: string;
+  type: "expense" | "income" | "transfer";
+  amount: string;
+  expenseAccountId: string;
+  incomeDestinationAccountId: string;
+  transferFromAccountId: string;
+  transferToAccountId: string;
+  categoryId: string;
+}
+
+// Helper to organize categories into parent/child hierarchy
+interface CategoryOption {
+  id: string;
+  name: string;
+  usageCount: number;
+  depth: number;
+  isChild: boolean;
+}
+
+function buildCategoryOptions(
+  categories: CategoryWithUsage[],
+): CategoryOption[] {
+  // Separate parents and children
+  const parents = categories.filter((cat) => !cat.parentId);
+  const childrenMap = new Map<string, CategoryWithUsage[]>();
+
+  for (const cat of categories) {
+    if (cat.parentId) {
+      const siblings = childrenMap.get(cat.parentId) ?? [];
+      siblings.push(cat);
+      childrenMap.set(cat.parentId, siblings);
+    }
+  }
+
+  // Sort parents by name
+  parents.sort((a, b) => a.name.localeCompare(b.name));
+
+  const options: CategoryOption[] = [];
+
+  for (const parent of parents) {
+    // Add parent
+    options.push({
+      id: parent.id,
+      name: parent.name,
+      usageCount: parent.usageCount,
+      depth: 0,
+      isChild: false,
+    });
+
+    // Add children sorted by name
+    const children = childrenMap.get(parent.id) ?? [];
+    children.sort((a, b) => a.name.localeCompare(b.name));
+
+    for (const child of children) {
+      options.push({
+        id: child.id,
+        name: child.name,
+        usageCount: child.usageCount,
+        depth: 1,
+        isChild: true,
+      });
+    }
+  }
+
+  return options;
 }
 
 function formatCentsForDisplay(balanceCents: number): string {
@@ -145,6 +204,19 @@ export function TransactionsPage() {
 
   const allAccounts = (accountsData?.body?.accounts ?? []) as Account[];
 
+  // Fetch categories for category selection
+  const {
+    data: categoriesData,
+    isLoading: isCategoriesLoading,
+    error: categoriesError,
+  } = tsr.categories.list.useQuery({
+    queryKey: ["categories"],
+    queryData: { query: {} },
+  });
+
+  const allCategories = (categoriesData?.body?.categories ??
+    []) as CategoryWithUsage[];
+
   // Filter accounts: active non-system accounts for normal selects
   const activeUserAccounts = allAccounts.filter(
     (account) => account.status === "active" && account.ownership === "user",
@@ -155,11 +227,6 @@ export function TransactionsPage() {
     (account) =>
       account.ownership === "system" &&
       (account.systemRole === "income" || account.systemRole === "salary"),
-  );
-
-  const systemExpenseAccount = allAccounts.find(
-    (account) =>
-      account.ownership === "system" && account.systemRole === "expense",
   );
 
   // Get preferred income source (prefer Salary, then Income)
@@ -192,6 +259,7 @@ export function TransactionsPage() {
       incomeDestinationAccountId: "",
       transferFromAccountId: "",
       transferToAccountId: "",
+      categoryId: "",
     },
   });
 
@@ -211,7 +279,7 @@ export function TransactionsPage() {
     // Build exactly two lines based on type
     const lines: Array<{
       id: string;
-      targetType: "account";
+      targetType: "account" | "category";
       accountId: string | null;
       categoryId: string | null;
       envelopeId: string | null;
@@ -229,15 +297,28 @@ export function TransactionsPage() {
         return;
       }
 
-      // Validate system expense account exists
-      if (!systemExpenseAccount) {
-        setSubmitError(
-          "System Expense account not found. Please contact support.",
-        );
+      // Validate category is selected and exists in user's categories
+      if (!data.categoryId) {
+        setError("categoryId", {
+          type: "manual",
+          message: "Select a category",
+        });
         return;
       }
 
-      // Expense: user account (negative) + system Expense account (positive)
+      // Verify category exists in user's categories
+      const selectedCategory = allCategories.find(
+        (cat) => cat.id === data.categoryId,
+      );
+      if (!selectedCategory) {
+        setError("categoryId", {
+          type: "manual",
+          message: "Selected category is not available",
+        });
+        return;
+      }
+
+      // Expense: user account (negative) + selected category (positive)
       lines.push({
         id: idGenerator.uuid(),
         targetType: "account",
@@ -249,9 +330,9 @@ export function TransactionsPage() {
       });
       lines.push({
         id: idGenerator.uuid(),
-        targetType: "account",
-        accountId: systemExpenseAccount.id,
-        categoryId: null,
+        targetType: "category",
+        accountId: null,
+        categoryId: data.categoryId,
         envelopeId: null,
         amountCents: amountCents,
         type: "expense",
@@ -266,20 +347,33 @@ export function TransactionsPage() {
         return;
       }
 
-      // Validate system income source account exists
-      if (!incomeSourceAccount) {
-        setSubmitError(
-          "System income source account not found. Please contact support.",
-        );
+      // Validate category is selected and exists in user's categories
+      if (!data.categoryId) {
+        setError("categoryId", {
+          type: "manual",
+          message: "Select a category",
+        });
         return;
       }
 
-      // Income: system income source (negative) + user account (positive)
+      // Verify category exists in user's categories
+      const selectedCategory = allCategories.find(
+        (cat) => cat.id === data.categoryId,
+      );
+      if (!selectedCategory) {
+        setError("categoryId", {
+          type: "manual",
+          message: "Selected category is not available",
+        });
+        return;
+      }
+
+      // Income: selected category (negative) + user account (positive)
       lines.push({
         id: idGenerator.uuid(),
-        targetType: "account",
-        accountId: incomeSourceAccount.id,
-        categoryId: null,
+        targetType: "category",
+        accountId: null,
+        categoryId: data.categoryId,
         envelopeId: null,
         amountCents: -amountCents,
         type: "income",
@@ -573,6 +667,67 @@ export function TransactionsPage() {
                       </p>
                     )}
                   </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="categoryId">Category</Label>
+                    {categoriesError ? (
+                      <p className="text-sm text-destructive py-2">
+                        Failed to load categories. Please try again.
+                      </p>
+                    ) : isCategoriesLoading ? (
+                      <p className="text-sm text-muted-foreground py-2">
+                        Loading categories…
+                      </p>
+                    ) : allCategories.length === 0 ? (
+                      <p className="text-sm text-muted-foreground py-2">
+                        No categories found. Create a category first.
+                      </p>
+                    ) : (
+                      <Controller
+                        control={control}
+                        name="categoryId"
+                        rules={{ required: "Select a category" }}
+                        render={({ field }) => (
+                          <Select
+                            value={field.value}
+                            onValueChange={field.onChange}
+                            disabled={isSubmitting || !!categoriesError}
+                          >
+                            <SelectTrigger
+                              id="categoryId"
+                              aria-invalid={!!errors.categoryId}
+                              className={
+                                errors.categoryId ? "border-destructive" : ""
+                              }
+                            >
+                              <SelectValue placeholder="Choose a category" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {buildCategoryOptions(allCategories).map(
+                                (option) => (
+                                  <SelectItem key={option.id} value={option.id}>
+                                    <span
+                                      style={{
+                                        paddingLeft: option.depth * 16,
+                                      }}
+                                    >
+                                      {option.isChild ? "↳ " : ""}
+                                      {option.name} ({option.usageCount})
+                                    </span>
+                                  </SelectItem>
+                                ),
+                              )}
+                            </SelectContent>
+                          </Select>
+                        )}
+                      />
+                    )}
+                    {errors.categoryId && (
+                      <p className="text-sm text-destructive">
+                        {errors.categoryId.message || "Category is required"}
+                      </p>
+                    )}
+                  </div>
                 </>
               )}
 
@@ -645,6 +800,67 @@ export function TransactionsPage() {
                       <p className="text-sm text-destructive">
                         {errors.incomeDestinationAccountId.message ||
                           "Destination account is required"}
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="categoryId">Category</Label>
+                    {categoriesError ? (
+                      <p className="text-sm text-destructive py-2">
+                        Failed to load categories. Please try again.
+                      </p>
+                    ) : isCategoriesLoading ? (
+                      <p className="text-sm text-muted-foreground py-2">
+                        Loading categories…
+                      </p>
+                    ) : allCategories.length === 0 ? (
+                      <p className="text-sm text-muted-foreground py-2">
+                        No categories found. Create a category first.
+                      </p>
+                    ) : (
+                      <Controller
+                        control={control}
+                        name="categoryId"
+                        rules={{ required: "Select a category" }}
+                        render={({ field }) => (
+                          <Select
+                            value={field.value}
+                            onValueChange={field.onChange}
+                            disabled={isSubmitting || !!categoriesError}
+                          >
+                            <SelectTrigger
+                              id="categoryId"
+                              aria-invalid={!!errors.categoryId}
+                              className={
+                                errors.categoryId ? "border-destructive" : ""
+                              }
+                            >
+                              <SelectValue placeholder="Choose a category" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {buildCategoryOptions(allCategories).map(
+                                (option) => (
+                                  <SelectItem key={option.id} value={option.id}>
+                                    <span
+                                      style={{
+                                        paddingLeft: option.depth * 16,
+                                      }}
+                                    >
+                                      {option.isChild ? "↳ " : ""}
+                                      {option.name} ({option.usageCount})
+                                    </span>
+                                  </SelectItem>
+                                ),
+                              )}
+                            </SelectContent>
+                          </Select>
+                        )}
+                      />
+                    )}
+                    {errors.categoryId && (
+                      <p className="text-sm text-destructive">
+                        {errors.categoryId.message || "Category is required"}
                       </p>
                     )}
                   </div>

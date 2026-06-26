@@ -66,6 +66,7 @@ const mockReversalTransactionIdString = "e60e8400-e29b-41d4-a716-446655440008";
 const mockReversalTransactionId = transactionIdFromString(
   mockReversalTransactionIdString,
 );
+
 const mockTransaction = new Transaction({
   id: validTransactionId,
   userId: validUserId,
@@ -120,12 +121,34 @@ const mockReversalTransaction = new Transaction({
   reversalOfTransactionId: validTransactionId,
 });
 
-// Mock repository
+// Mock transaction repository
 const mockTransactionRepository = {
   save: vi.fn(),
   findById: vi.fn(),
   listByUserId: vi.fn(),
   findReversalByOriginalId: vi.fn(),
+};
+
+// Mock category repository
+const mockCategoryRepository = {
+  save: vi.fn(),
+  findById: vi.fn(),
+  listByUserId: vi.fn(),
+  listChildren: vi.fn(),
+  hasTransactionLines: vi.fn(),
+  countTransactionLines: vi.fn(),
+  softDelete: vi.fn(),
+  hasActiveChildren: vi.fn(),
+};
+
+// Mock account repository
+const mockAccountRepository = {
+  save: vi.fn(),
+  findById: vi.fn(),
+  listByUserId: vi.fn(),
+  hasTransactionLines: vi.fn(),
+  softDelete: vi.fn(),
+  hasActiveChildren: vi.fn(),
 };
 
 // Mock guard that attaches user to request
@@ -150,6 +173,14 @@ describe("TransactionsController", () => {
           transactionRepository: {
             provide: TRANSACTIONS_TOKENS.TRANSACTION_REPOSITORY,
             useValue: mockTransactionRepository,
+          },
+          categoryRepository: {
+            provide: TRANSACTIONS_TOKENS.CATEGORY_REPOSITORY,
+            useValue: mockCategoryRepository,
+          },
+          accountRepository: {
+            provide: TRANSACTIONS_TOKENS.ACCOUNT_REPOSITORY,
+            useValue: mockAccountRepository,
           },
         }),
       ],
@@ -224,6 +255,25 @@ describe("TransactionsController", () => {
     };
 
     it("should create a balanced transaction with integer-cent lines and return created data", async () => {
+      // Mock account and category repository lookups for target validation
+      mockAccountRepository.findById.mockResolvedValue({
+        id: validAccountId,
+        userId: validUserId,
+        name: "Checking",
+        ownership: "user",
+        createdAt: new Date("2024-01-01"),
+        updatedAt: new Date("2024-01-01"),
+      });
+      mockCategoryRepository.findById.mockResolvedValue({
+        id: mockCategoryId,
+        userId: validUserId,
+        name: "Groceries",
+        categoryGroupId: "770e8400-e29b-41d4-a716-446655440000",
+        ownership: "user",
+        createdAt: new Date("2024-01-01"),
+        updatedAt: new Date("2024-01-01"),
+      });
+
       vi.spyOn(repository, "save").mockResolvedValue(undefined);
       vi.spyOn(repository, "findById").mockResolvedValue(null);
 

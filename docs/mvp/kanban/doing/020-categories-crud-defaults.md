@@ -1,6 +1,6 @@
 # Story: Categories CRUD & Default Categories
 
-**Status**: Todo
+**Status**: Doing
 **Priority**: P0
 **Estimated**: 2 days
 
@@ -18,18 +18,19 @@ Implement full categories CRUD (not just category groups), default/system catego
 
 ## Acceptance Criteria
 
-- [ ] Categories CRUD API endpoints (create, read, update, archive)
-- [ ] Default/system categories seeded on user onboarding
-- [ ] Category selection dropdown/modal in transaction forms
-- [ ] Category archiving (soft delete) preserves historical data
-- [ ] Categories listed by group with hierarchy
-- [ ] User can create custom categories within groups
-- [ ] System categories marked as non-deletable
-- [ ] Category usage counts displayed (how many transactions use it)
+- [x] Categories CRUD API endpoints (create, read, update, archive)
+- [x] Default/system categories seeded on user onboarding
+- [x] Category selection dropdown/modal in transaction forms
+- [x] Category archiving (soft delete) preserves historical data
+- [x] Categories listed by group with hierarchy
+- [x] User can create custom categories within groups
+- [x] System categories marked as non-deletable
+- [x] Category usage counts displayed (how many transactions use it)
 
 ## Technical Notes
 
 API endpoints:
+
 - `POST /api/v1/categories` - Create category
 - `GET /api/v1/categories` - List categories (filter by group, active only)
 - `GET /api/v1/categories/:id` - Get single category
@@ -37,6 +38,7 @@ API endpoints:
 - `POST /api/v1/categories/:id/archive` - Archive category (soft delete)
 
 Default categories to seed:
+
 - Housing: Rent/Mortgage, Property Tax, Home Insurance, Maintenance
 - Transportation: Fuel, Public Transit, Car Payment, Insurance, Maintenance
 - Food: Groceries, Dining Out, Coffee/Snacks
@@ -47,6 +49,7 @@ Default categories to seed:
 - Savings: Emergency Fund, Goals
 
 Files/modules to touch:
+
 - `packages/domain/src/category/category.entity.ts`
 - `packages/application/src/category/category.service.ts`
 - `packages/infra/src/database/repositories/category.repository.ts`

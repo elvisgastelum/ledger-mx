@@ -1,6 +1,6 @@
 # Story: Financial Safety - Reversals & No Hard Deletes
 
-**Status**: Todo
+**Status**: Done
 **Priority**: P0
 **Estimated**: 2 days
 
@@ -33,6 +33,7 @@ Enforce financial safety by eliminating hard deletes for financial records and i
 - Use transaction status enum: `active`, `reversed`, `corrected`, `archived`
 
 Files/modules to touch:
+
 - `packages/infra/src/database/repositories/transaction.repository.ts`
 - `packages/domain/src/transaction/transaction.entity.ts`
 - `packages/application/src/transaction/transaction.service.ts`

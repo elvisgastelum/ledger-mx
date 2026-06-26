@@ -33,6 +33,26 @@ export type {
   CategoryGroupResponse,
 } from "./category-groups/category-group.schemas";
 
+// Categories
+export {
+  CategorySchema,
+  CreateCategoryRequestSchema,
+  UpdateCategoryRequestSchema,
+  CategoryWithUsageSchema,
+  ListCategoriesResponseSchema,
+  GetCategoryResponseSchema,
+  CategoryResponseSchema,
+} from "./categories/category.schemas";
+export type {
+  Category,
+  CreateCategoryRequest,
+  UpdateCategoryRequest,
+  CategoryWithUsage,
+  ListCategoriesResponse,
+  GetCategoryResponse,
+  CategoryResponse,
+} from "./categories/category.schemas";
+
 // Accounts (planned)
 export * from "./accounts";
 

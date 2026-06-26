@@ -3,6 +3,7 @@ import { ConfigModule } from "@nestjs/config";
 import { resolve } from "node:path";
 import { AuthModule } from "./auth/auth.module";
 import { CategoryGroupsModule } from "./category-groups/category-groups.module";
+import { CategoriesModule } from "./categories/categories.module";
 import { AccountsModule } from "./accounts/accounts.module";
 import { TransactionsModule } from "./transactions/transactions.module";
 import { BalancesModule } from "./balances/balances.module";
@@ -22,6 +23,7 @@ import { validateEnv } from "./config/env.validation";
     }),
     AuthModule.forRoot(),
     CategoryGroupsModule.forRoot(),
+    CategoriesModule.forRoot(),
     AccountsModule.forRoot(),
     TransactionsModule.forRoot(),
     BalancesModule.forRoot(),

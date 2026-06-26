@@ -1,9 +1,18 @@
-import type { UserId, OwnershipType } from "@ledger-mx/domain";
+import type {
+  UserId,
+  OwnershipType,
+  CategoryGroupId,
+  CategoryId,
+} from "@ledger-mx/domain";
 import type { CategoryGroupRepository } from "@ledger-mx/domain";
+import type { CategoryRepository } from "@ledger-mx/domain";
 import type { CategoryGroupKind } from "@ledger-mx/domain";
 import type { IdGenerator } from "../../auth/ports/id-generator.port";
 import type { Clock } from "../../auth/ports/clock.port";
-import { categoryGroupIdFromString } from "@ledger-mx/domain";
+import {
+  categoryGroupIdFromString,
+  categoryIdFromString,
+} from "@ledger-mx/domain";
 import { CategoryGroupLayoutConflictError } from "../onboarding.errors";
 
 /**
@@ -18,6 +27,14 @@ interface DefaultCategoryGroupDef {
   name: string;
   kind: CategoryGroupKind;
   idealPercentageBasisPoints: number | null;
+}
+
+/**
+ * Default category definition for seeding.
+ */
+interface DefaultCategoryDef {
+  name: string;
+  parentName?: string; // If defined, this is a child category
 }
 
 const BLANK_LAYOUT_GROUPS: DefaultCategoryGroupDef[] = [
@@ -45,6 +62,65 @@ const FIFTY_THIRTY_TWENTY_LAYOUT_GROUPS: DefaultCategoryGroupDef[] = [
     idealPercentageBasisPoints: 2000,
   },
 ];
+
+/**
+ * Default categories for blank layout (under General group).
+ */
+const BLANK_LAYOUT_CATEGORIES: Record<string, DefaultCategoryDef[]> = {
+  General: [{ name: "Uncategorized" }],
+};
+
+/**
+ * Default categories for 50-30-20 layout.
+ * Organized by category group name.
+ */
+const FIFTY_THIRTY_TWENTY_LAYOUT_CATEGORIES: Record<
+  string,
+  DefaultCategoryDef[]
+> = {
+  Needs: [
+    { name: "Housing", parentName: undefined },
+    { name: "Rent/Mortgage", parentName: "Housing" },
+    { name: "Property Tax", parentName: "Housing" },
+    { name: "Home Insurance", parentName: "Housing" },
+    { name: "Maintenance", parentName: "Housing" },
+    { name: "Transportation", parentName: undefined },
+    { name: "Fuel", parentName: "Transportation" },
+    { name: "Public Transit", parentName: "Transportation" },
+    { name: "Car Payment", parentName: "Transportation" },
+    { name: "Insurance", parentName: "Transportation" },
+    { name: "Maintenance", parentName: "Transportation" },
+    { name: "Food", parentName: undefined },
+    { name: "Groceries", parentName: "Food" },
+    { name: "Utilities", parentName: undefined },
+    { name: "Electricity", parentName: "Utilities" },
+    { name: "Water", parentName: "Utilities" },
+    { name: "Gas", parentName: "Utilities" },
+    { name: "Internet", parentName: "Utilities" },
+    { name: "Phone", parentName: "Utilities" },
+    { name: "Healthcare", parentName: undefined },
+    { name: "Insurance", parentName: "Healthcare" },
+    { name: "Prescriptions", parentName: "Healthcare" },
+    { name: "Doctor Visits", parentName: "Healthcare" },
+    { name: "Debt", parentName: undefined },
+    { name: "Credit Card Payments", parentName: "Debt" },
+    { name: "Loan Payments", parentName: "Debt" },
+  ],
+  Wants: [
+    { name: "Food", parentName: undefined },
+    { name: "Dining Out", parentName: "Food" },
+    { name: "Coffee/Snacks", parentName: "Food" },
+    { name: "Personal", parentName: undefined },
+    { name: "Clothing", parentName: "Personal" },
+    { name: "Grooming", parentName: "Personal" },
+    { name: "Entertainment", parentName: "Personal" },
+  ],
+  Savings: [
+    { name: "Savings", parentName: undefined },
+    { name: "Emergency Fund", parentName: "Savings" },
+    { name: "Goals", parentName: "Savings" },
+  ],
+};
 
 /**
  * Input for applying a default category group layout.
@@ -79,10 +155,12 @@ export interface ApplyDefaultCategoryGroupLayoutResult {
  * - If active system groups already exist that match the requested layout exactly, returns them (idempotent, created=false).
  * - If active category groups exist that don't match the requested layout, throws CategoryGroupLayoutConflictError (409).
  * - All operations are scoped by userId.
+ * - After creating category groups, also seeds default system categories for the layout.
  */
 export class ApplyDefaultCategoryGroupLayoutUseCase {
   constructor(
     private readonly categoryGroupRepository: CategoryGroupRepository,
+    private readonly categoryRepository: CategoryRepository,
     private readonly idGenerator: IdGenerator,
     private readonly clock: Clock,
   ) {}
@@ -104,6 +182,7 @@ export class ApplyDefaultCategoryGroupLayoutUseCase {
       userId,
       existingGroups,
       defaultDefs,
+      layout,
     );
 
     return result;
@@ -115,6 +194,17 @@ export class ApplyDefaultCategoryGroupLayoutUseCase {
         return BLANK_LAYOUT_GROUPS;
       case "50-30-20":
         return FIFTY_THIRTY_TWENTY_LAYOUT_GROUPS;
+    }
+  }
+
+  private getDefaultCategories(
+    layout: LayoutType,
+  ): Record<string, DefaultCategoryDef[]> {
+    switch (layout) {
+      case "blank":
+        return BLANK_LAYOUT_CATEGORIES;
+      case "50-30-20":
+        return FIFTY_THIRTY_TWENTY_LAYOUT_CATEGORIES;
     }
   }
 
@@ -133,10 +223,11 @@ export class ApplyDefaultCategoryGroupLayoutUseCase {
       deletedAt?: Date | null;
     }>,
     defaultDefs: DefaultCategoryGroupDef[],
+    layout: LayoutType,
   ): Promise<ApplyDefaultCategoryGroupLayoutResult> {
-    // If no existing groups, create all default groups
+    // If no existing groups, create all default groups and categories
     if (existingGroups.length === 0) {
-      return this.createDefaultGroups(userId, defaultDefs);
+      return this.createDefaultGroupsAndCategories(userId, defaultDefs, layout);
     }
 
     // Check if existing groups match the requested layout exactly
@@ -148,6 +239,9 @@ export class ApplyDefaultCategoryGroupLayoutUseCase {
       matchingGroups.length === defaultDefs.length &&
       existingGroups.length === defaultDefs.length
     ) {
+      // Check if default categories already exist, if not, create them
+      await this.ensureDefaultCategoriesExist(userId, matchingGroups, layout);
+
       return {
         categoryGroups: matchingGroups.map((group) => ({
           id: group.id,
@@ -218,9 +312,10 @@ export class ApplyDefaultCategoryGroupLayoutUseCase {
     return matches;
   }
 
-  private async createDefaultGroups(
+  private async createDefaultGroupsAndCategories(
     userId: UserId,
     defaultDefs: DefaultCategoryGroupDef[],
+    layout: LayoutType,
   ): Promise<ApplyDefaultCategoryGroupLayoutResult> {
     const now = this.clock.now();
     const createdGroups: Array<{
@@ -234,6 +329,7 @@ export class ApplyDefaultCategoryGroupLayoutUseCase {
       updatedAt: Date;
     }> = [];
 
+    // Create category groups
     for (let i = 0; i < defaultDefs.length; i++) {
       const def = defaultDefs[i];
       const groupId = categoryGroupIdFromString(this.idGenerator.uuid());
@@ -264,9 +360,188 @@ export class ApplyDefaultCategoryGroupLayoutUseCase {
       });
     }
 
+    // Create default categories for the created groups
+    await this.createDefaultCategories(userId, createdGroups, layout);
+
     return {
       categoryGroups: createdGroups,
       created: true,
     };
+  }
+
+  private async ensureDefaultCategoriesExist(
+    userId: UserId,
+    groups: Array<{
+      id: string;
+      name: string;
+    }>,
+    layout: LayoutType,
+  ): Promise<void> {
+    const defaultCategories = this.getDefaultCategories(layout);
+
+    for (const group of groups) {
+      const groupCategories = defaultCategories[group.name];
+      if (!groupCategories) {
+        continue;
+      }
+
+      // Get existing categories for this group (including newly created ones)
+      const existingCategories = await this.categoryRepository.listByUserId(
+        userId,
+        group.id as CategoryGroupId,
+      );
+
+      // Build maps for existing categories by (parentId, name)
+      // parentId can be null for top-level categories
+      const existingCategoryMap = new Map<
+        string,
+        { id: CategoryId; name: string; parentId: CategoryId | null }
+      >();
+      for (const cat of existingCategories) {
+        const key = `${cat.parentId ?? "null"}:${cat.name}`;
+        existingCategoryMap.set(key, {
+          id: cat.id,
+          name: cat.name,
+          parentId: cat.parentId,
+        });
+      }
+
+      // Create parent categories first (those without parentName)
+      const parentCategories = groupCategories.filter((def) => !def.parentName);
+      const childCategories = groupCategories.filter((def) => def.parentName);
+
+      // Track created parents (both existing and newly created)
+      const parentMap = new Map<string, CategoryId>();
+
+      // First, check existing parents
+      for (const def of parentCategories) {
+        const key = `null:${def.name}`;
+        const existing = existingCategoryMap.get(key);
+        if (existing) {
+          parentMap.set(def.name, existing.id);
+        }
+      }
+
+      // Create missing parent categories
+      for (const def of parentCategories) {
+        if (!parentMap.has(def.name)) {
+          const categoryId = categoryIdFromString(this.idGenerator.uuid());
+          const now = this.clock.now();
+
+          await this.categoryRepository.save({
+            id: categoryId,
+            userId,
+            name: def.name,
+            parentId: null,
+            categoryGroupId: group.id as CategoryGroupId,
+            ownership: "system" as OwnershipType,
+            createdAt: now,
+            updatedAt: now,
+          });
+
+          parentMap.set(def.name, categoryId);
+        }
+      }
+
+      // Create child categories
+      for (const def of childCategories) {
+        if (!def.parentName) {
+          continue;
+        }
+
+        // Check if child already exists
+        const parentId = parentMap.get(def.parentName);
+        if (!parentId) {
+          // Parent doesn't exist, skip
+          continue;
+        }
+
+        const key = `${parentId}:${def.name}`;
+        const existing = existingCategoryMap.get(key);
+        if (!existing) {
+          // Create missing child
+          const categoryId = categoryIdFromString(this.idGenerator.uuid());
+          const now = this.clock.now();
+
+          await this.categoryRepository.save({
+            id: categoryId,
+            userId,
+            name: def.name,
+            parentId,
+            categoryGroupId: group.id as CategoryGroupId,
+            ownership: "system" as OwnershipType,
+            createdAt: now,
+            updatedAt: now,
+          });
+        }
+      }
+    }
+  }
+
+  private async createDefaultCategories(
+    userId: UserId,
+    groups: Array<{
+      id: string;
+      name: string;
+    }>,
+    layout: LayoutType,
+  ): Promise<void> {
+    const defaultCategories = this.getDefaultCategories(layout);
+
+    for (const group of groups) {
+      const groupCategories = defaultCategories[group.name];
+      if (!groupCategories) {
+        continue;
+      }
+
+      // Create parent categories first
+      const parentCategories = groupCategories.filter((def) => !def.parentName);
+      const childCategories = groupCategories.filter((def) => def.parentName);
+
+      // Create parent categories
+      const createdParents = new Map<string, CategoryId>();
+      for (const def of parentCategories) {
+        const categoryId = categoryIdFromString(this.idGenerator.uuid());
+        const now = this.clock.now();
+
+        await this.categoryRepository.save({
+          id: categoryId,
+          userId,
+          name: def.name,
+          parentId: null,
+          categoryGroupId: group.id as CategoryGroupId,
+          ownership: "system" as OwnershipType,
+          createdAt: now,
+          updatedAt: now,
+        });
+
+        createdParents.set(def.name, categoryId);
+      }
+
+      // Create child categories
+      for (const def of childCategories) {
+        let parentId: CategoryId | null = null;
+        if (def.parentName) {
+          const parent = createdParents.get(def.parentName);
+          if (parent) {
+            parentId = parent;
+          }
+        }
+
+        const categoryId = categoryIdFromString(this.idGenerator.uuid());
+        const now = this.clock.now();
+
+        await this.categoryRepository.save({
+          id: categoryId,
+          userId,
+          name: def.name,
+          parentId,
+          categoryGroupId: group.id as CategoryGroupId,
+          ownership: "system" as OwnershipType,
+          createdAt: now,
+          updatedAt: now,
+        });
+      }
+    }
   }
 }

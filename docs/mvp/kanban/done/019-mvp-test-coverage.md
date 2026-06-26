@@ -1,6 +1,6 @@
 # Story: MVP Test Coverage
 
-**Status**: Todo
+**Status**: Done
 **Priority**: P0
 **Estimated**: 3 days
 
@@ -35,12 +35,14 @@ Achieve comprehensive test coverage for all MVP-critical paths including transac
 ## Technical Notes
 
 Test categories:
+
 1. **Unit Tests**: Use cases, repositories, domain logic
 2. **Integration Tests**: API endpoints with test database (Testcontainers)
 3. **E2E Tests**: Full stack with seeded data
 4. **Manual Checklist**: Items requiring human verification
 
 Files/modules to create/update:
+
 - `packages/application/src/transaction/__tests__/`
 - `packages/infra/src/database/repositories/__tests__/transaction.repository.test.ts`
 - `apps/api/src/transaction/__tests__/transaction.e2e.test.ts`
@@ -49,10 +51,13 @@ Files/modules to create/update:
 - `docs/mvp/testing/manual-checklist.md`
 
 Cross-user isolation pattern:
+
 ```typescript
-test('user cannot access another user\'s transaction', async () => {
+test("user cannot access another user's transaction", async () => {
   const user1Transaction = await createTransactionAs(user1);
-  const response = await requestAs(user2).get(`/transactions/${user1Transaction.id}`);
+  const response = await requestAs(user2).get(
+    `/transactions/${user1Transaction.id}`,
+  );
   expect(response.status).toBe(403);
 });
 ```

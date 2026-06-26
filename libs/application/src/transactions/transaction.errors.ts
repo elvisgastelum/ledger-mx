@@ -25,3 +25,12 @@ export class DuplicateReversalError extends TransactionApplicationError {
     super(`Transaction ${transactionId} already has a reversal`);
   }
 }
+
+/**
+ * Thrown when a transaction line target (account, category, or envelope) is not found or not accessible by the user.
+ */
+export class TransactionTargetNotFoundError extends TransactionApplicationError {
+  constructor(targetType: string, targetId: string) {
+    super(`${targetType} not found or not accessible: ${targetId}`);
+  }
+}

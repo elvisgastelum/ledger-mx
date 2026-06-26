@@ -1,6 +1,8 @@
 import { Transaction, TransactionLine } from "@ledger-mx/domain";
 import type {
   TransactionRepository,
+  CategoryRepository,
+  AccountRepository,
   UserId,
   TransactionId,
   TransactionLineId,
@@ -15,15 +17,42 @@ import type {
   CreateTransactionInput,
   CreateTransactionOutput,
 } from "../transaction.types";
+import { TransactionTargetNotFoundError } from "../transaction.errors";
 
 export class CreateTransactionUseCase {
-  constructor(private readonly transactionRepository: TransactionRepository) {}
+  constructor(
+    private readonly transactionRepository: TransactionRepository,
+    private readonly categoryRepository: CategoryRepository,
+    private readonly accountRepository: AccountRepository,
+  ) {}
 
   async execute(
     input: CreateTransactionInput,
   ): Promise<CreateTransactionOutput> {
     const userId = input.userId as UserId;
     const transactionId = input.id as TransactionId;
+
+    // Validate line targets belong to the user
+    for (const line of input.lines) {
+      if (line.targetType === "account" && line.accountId) {
+        const account = await this.accountRepository.findById(
+          userId,
+          line.accountId as AccountId,
+        );
+        if (!account) {
+          throw new TransactionTargetNotFoundError("Account", line.accountId);
+        }
+      } else if (line.targetType === "category" && line.categoryId) {
+        const category = await this.categoryRepository.findById(
+          userId,
+          line.categoryId as CategoryId,
+        );
+        if (!category || category.deletedAt) {
+          throw new TransactionTargetNotFoundError("Category", line.categoryId);
+        }
+      }
+      // TODO: Add envelope validation when envelope repository is available
+    }
 
     // Map contract lines to domain TransactionLine objects
     const lines = input.lines.map((line) => {

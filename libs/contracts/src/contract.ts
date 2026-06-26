@@ -41,6 +41,13 @@ import {
   LiabilityBalancesResponseSchema,
   GeneralBalanceResponseSchema,
 } from "./balances/balance.schemas";
+import {
+  CreateCategoryRequestSchema,
+  UpdateCategoryRequestSchema,
+  ListCategoriesResponseSchema,
+  GetCategoryResponseSchema,
+  CategoryResponseSchema,
+} from "./categories/category.schemas";
 
 const c = initContract();
 
@@ -153,6 +160,87 @@ export const contract = c.router(
           ),
         },
         summary: "Delete a category group by ID",
+        metadata: { implemented: true, auth: true, scopes: ["user:write"] },
+      },
+    }),
+
+    // CATEGORIES ENDPOINTS (implemented)
+    categories: c.router({
+      list: {
+        method: "GET",
+        path: "/categories",
+        query: z
+          .object({
+            categoryGroupId: UuidSchema.optional(),
+          })
+          .optional(),
+        responses: {
+          200: ListCategoriesResponseSchema,
+          401: ErrorResponseSchema,
+        },
+        summary:
+          "List all categories for the authenticated user, optionally filtered by group",
+        metadata: { implemented: true, auth: true, scopes: ["user:read"] },
+      },
+      create: {
+        method: "POST",
+        path: "/categories",
+        body: CreateCategoryRequestSchema,
+        responses: {
+          201: CategoryResponseSchema,
+          400: ErrorResponseSchema,
+          401: ErrorResponseSchema,
+          404: ErrorResponseSchema.describe(
+            "Category group not found or not owned by user",
+          ),
+        },
+        summary: "Create a new category for the authenticated user",
+        metadata: { implemented: true, auth: true, scopes: ["user:write"] },
+      },
+      get: {
+        method: "GET",
+        path: "/categories/:id",
+        pathParams: z.object({ id: UuidSchema }),
+        responses: {
+          200: GetCategoryResponseSchema,
+          401: ErrorResponseSchema,
+          404: ErrorResponseSchema.describe(
+            "Category not found or not owned by user",
+          ),
+        },
+        summary: "Get a single category by ID",
+        metadata: { implemented: true, auth: true, scopes: ["user:read"] },
+      },
+      update: {
+        method: "PUT",
+        path: "/categories/:id",
+        pathParams: z.object({ id: UuidSchema }),
+        body: UpdateCategoryRequestSchema,
+        responses: {
+          200: CategoryResponseSchema,
+          400: ErrorResponseSchema,
+          401: ErrorResponseSchema,
+          404: ErrorResponseSchema.describe(
+            "Category not found or not owned by user",
+          ),
+        },
+        summary: "Update an existing category by ID",
+        metadata: { implemented: true, auth: true, scopes: ["user:write"] },
+      },
+      archive: {
+        method: "POST",
+        path: "/categories/:id/archive",
+        pathParams: z.object({ id: UuidSchema }),
+        body: z.void(),
+        responses: {
+          204: z.void(),
+          400: ErrorResponseSchema,
+          401: ErrorResponseSchema,
+          404: ErrorResponseSchema.describe(
+            "Category not found or not owned by user",
+          ),
+        },
+        summary: "Archive a category by ID (soft delete)",
         metadata: { implemented: true, auth: true, scopes: ["user:write"] },
       },
     }),
