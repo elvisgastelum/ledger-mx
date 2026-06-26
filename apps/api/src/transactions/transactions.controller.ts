@@ -15,7 +15,10 @@ import {
   ListTransactionsUseCase,
   CreateReversalUseCase,
 } from "@ledger-mx/application";
-import { DuplicateReversalError } from "@ledger-mx/application";
+import {
+  DuplicateReversalError,
+  TransactionNotFoundError,
+} from "@ledger-mx/application";
 import { FinancialRecordModificationError } from "@ledger-mx/domain";
 import type {
   CreateTransactionInput,
@@ -193,6 +196,10 @@ export class TransactionsController {
 
     if (error instanceof FinancialRecordModificationError) {
       throw new ConflictException(error.message);
+    }
+
+    if (error instanceof TransactionNotFoundError) {
+      throw new NotFoundException(error.message);
     }
 
     throw new BadRequestException(
