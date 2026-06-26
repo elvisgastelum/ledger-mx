@@ -25,7 +25,6 @@ import {
   SystemCategoryModificationError,
   CategoryGroupNotFoundError,
   InvalidParentCategoryError,
-  CategoryInUseError,
   CategoryHasActiveChildrenError,
   DuplicateCategoryNameError,
 } from "@ledger-mx/application";
@@ -230,10 +229,6 @@ export class CategoriesController {
 
     if (error instanceof InvalidParentCategoryError) {
       throw new BadRequestException(error.message);
-    }
-
-    if (error instanceof CategoryInUseError) {
-      throw new ConflictException(error.message);
     }
 
     if (error instanceof CategoryHasActiveChildrenError) {

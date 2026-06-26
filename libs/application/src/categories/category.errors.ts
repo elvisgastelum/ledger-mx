@@ -37,17 +37,6 @@ export class InvalidParentCategoryError extends CategoryApplicationError {
 }
 
 /**
- * Thrown when attempting to archive a category that has transaction lines.
- */
-export class CategoryInUseError extends CategoryApplicationError {
-  constructor() {
-    super(
-      "Cannot archive category that has transactions. Reassign or delete all transactions first.",
-    );
-  }
-}
-
-/**
  * Thrown when attempting to archive a category that has active children.
  */
 export class CategoryHasActiveChildrenError extends CategoryApplicationError {

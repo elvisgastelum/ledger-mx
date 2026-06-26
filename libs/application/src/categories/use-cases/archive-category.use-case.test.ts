@@ -358,4 +358,42 @@ describe("ArchiveCategoryUseCase", () => {
       ).rejects.toThrow(CategoryHasActiveChildrenError);
     });
   });
+
+  describe("transaction lines check removed", () => {
+    it("should succeed when archiving category even if it has transaction lines", async () => {
+      const categoryId = categoryIdFromString(
+        "00000000-0000-4000-8000-000000000201",
+      );
+
+      await categoryRepo.addCategory({
+        id: categoryId,
+        userId: USER_ID,
+        name: "Groceries",
+        parentId: null,
+        categoryGroupId: categoryGroupIdFromString(
+          "00000000-0000-4000-8000-000000000301",
+        ),
+        ownership: "user",
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      });
+
+      // Document that even if hasTransactionLines returns true,
+      // the use case allows archiving (no guard)
+      vi.spyOn(categoryRepo, "hasTransactionLines").mockResolvedValue(true);
+
+      await expect(
+        useCase.execute({
+          userId: USER_ID,
+          id: categoryId,
+        }),
+      ).resolves.not.toThrow();
+
+      // Verify the category was soft-deleted
+      const archived = await categoryRepo.findById(USER_ID, categoryId);
+      expect(archived).not.toBeNull();
+      expect(archived!.deletedAt).toBeDefined();
+      expect(archived!.deletedAt).toBeInstanceOf(Date);
+    });
+  });
 });

@@ -82,7 +82,7 @@ interface TransactionFormValues {
 }
 
 // Helper to organize categories into parent/child hierarchy
-interface CategoryOption {
+export interface CategoryOption {
   id: string;
   name: string;
   usageCount: number;
@@ -90,7 +90,7 @@ interface CategoryOption {
   isChild: boolean;
 }
 
-function buildCategoryOptions(
+export function buildCategoryOptions(
   categories: CategoryWithUsage[],
 ): CategoryOption[] {
   // Separate parents and children

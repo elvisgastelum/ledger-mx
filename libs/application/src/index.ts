@@ -73,7 +73,6 @@ export {
   CategoryNotFoundError,
   SystemCategoryModificationError,
   InvalidParentCategoryError,
-  CategoryInUseError,
   CategoryHasActiveChildrenError,
   DuplicateCategoryNameError,
 } from "./categories/category.errors";

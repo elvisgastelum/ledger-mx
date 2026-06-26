@@ -3,7 +3,6 @@ import type { Clock } from "../../auth/ports/clock.port";
 import type { ArchiveCategoryInput } from "../category.types";
 import { CategoryNotFoundError } from "../category.errors";
 import { SystemCategoryModificationError } from "../category.errors";
-import { CategoryInUseError } from "../category.errors";
 import { CategoryHasActiveChildrenError } from "../category.errors";
 
 export class ArchiveCategoryUseCase {
@@ -38,16 +37,6 @@ export class ArchiveCategoryUseCase {
 
     if (hasChildren) {
       throw new CategoryHasActiveChildrenError();
-    }
-
-    // Check if category has transaction lines
-    const hasTransactions = await this.categoryRepository.hasTransactionLines(
-      input.userId,
-      input.id,
-    );
-
-    if (hasTransactions) {
-      throw new CategoryInUseError();
     }
 
     // Soft delete

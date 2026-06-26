@@ -335,14 +335,14 @@ describe("CategoriesController", () => {
         .expect(409);
     });
 
-    it("should return 409 if category has transaction lines", async () => {
+    it("should return 204 when archiving category even if it has transaction lines", async () => {
       vi.spyOn(categoryRepo, "findById").mockResolvedValue(mockCategory);
       vi.spyOn(categoryRepo, "hasActiveChildren").mockResolvedValue(false);
       vi.spyOn(categoryRepo, "hasTransactionLines").mockResolvedValue(true);
 
       await request(app.getHttpServer())
         .post(`/api/v1/categories/${validCategoryId}/archive`)
-        .expect(409);
+        .expect(204);
     });
   });
 });

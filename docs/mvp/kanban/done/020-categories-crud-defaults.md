@@ -1,6 +1,6 @@
 # Story: Categories CRUD & Default Categories
 
-**Status**: Doing
+**Status**: Done
 **Priority**: P0
 **Estimated**: 2 days
 
@@ -59,13 +59,13 @@ Files/modules to touch:
 
 ## Tests Required
 
-- [ ] Unit tests: category creation with group validation
-- [ ] Unit tests: prevent deletion of system categories
-- [ ] Integration tests: category CRUD API
-- [ ] Integration tests: category archiving preserves transactions
-- [ ] E2E tests: category selection in transaction form
-- [ ] E2E tests: default categories seeded on onboarding
-- [ ] Cross-user isolation: categories not shared between users
+- [x] Unit tests: category creation with group validation
+- [x] Unit tests: prevent deletion of system categories
+- [x] Integration tests: category CRUD API
+- [x] Integration tests: category archiving preserves transactions
+- [x] E2E tests: category selection in transaction form
+- [x] E2E tests: default categories seeded on onboarding
+- [x] Cross-user isolation: categories not shared between users
 
 ## Dependencies
 
@@ -75,9 +75,9 @@ Files/modules to touch:
 
 ## Done Checklist
 
-- [ ] All acceptance criteria met
-- [ ] Default categories visible after onboarding
-- [ ] Transaction form includes category selector
-- [ ] Archived categories hidden from active lists
-- [ ] Tests pass for all CRUD operations
-- [ ] User scoping verified (no cross-user category leakage)
+- [x] All acceptance criteria met
+- [x] Default categories visible after onboarding
+- [x] Transaction form includes category selector
+- [x] Archived categories hidden from active lists
+- [x] Tests pass for all CRUD operations
+- [x] User scoping verified (no cross-user category leakage)
