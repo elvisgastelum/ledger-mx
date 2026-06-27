@@ -22,7 +22,16 @@ export const envSchema = z.object({
 
   AUTH_REFRESH_COOKIE_NAME: z.string().default("ledger_mx_refresh_token"),
 
-  AUTH_REFRESH_COOKIE_SECURE: z.coerce.boolean().default(false),
+  AUTH_REFRESH_COOKIE_SECURE: z
+    .preprocess((val) => {
+      if (typeof val === "string") {
+        const lower = val.toLowerCase();
+        if (lower === "true") return true;
+        if (lower === "false") return false;
+      }
+      return val;
+    }, z.boolean())
+    .default(false),
 
   AUTH_REFRESH_COOKIE_SAME_SITE: z
     .enum(["strict", "lax", "none"])

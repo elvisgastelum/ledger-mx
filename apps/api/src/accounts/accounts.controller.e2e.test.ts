@@ -1,23 +1,50 @@
-import { Test } from "@nestjs/testing";
+import { describe, it, expect, beforeAll, afterAll } from "vitest";
+import { Test, TestingModule } from "@nestjs/testing";
 import { INestApplication } from "@nestjs/common";
 import request from "supertest";
-import { AppModule } from "../app.module";
-import { describe, it, expect, beforeAll, afterAll } from "vitest";
+import { PostgreSqlContainer } from "@testcontainers/postgresql";
+
+// Set environment variables BEFORE module imports (ConfigModule reads at import time)
+process.env.NODE_ENV = "test";
+process.env.JWT_SECRET = "test-jwt-secret-for-e2e-tests-minimum-32-chars!";
+process.env.AUTH_REFRESH_COOKIE_NAME = "ledger_mx_refresh_token";
+process.env.AUTH_REFRESH_COOKIE_SECURE = "false";
+process.env.AUTH_REFRESH_COOKIE_SAME_SITE = "lax";
+process.env.JWT_ACCESS_TOKEN_TTL = "15m";
 
 describe("AccountsController (e2e)", () => {
   let app: INestApplication;
+  let container: any = null;
 
   beforeAll(async () => {
-    const moduleRef = await Test.createTestingModule({
+    // Start PostgreSQL container
+    container = await new PostgreSqlContainer("postgres:16-alpine")
+      .withDatabase("test_db")
+      .withUsername("test_user")
+      .withPassword("test_password")
+      .start();
+
+    // Set DATABASE_URL after container starts
+    process.env.DATABASE_URL = container.getConnectionUri();
+
+    // Dynamic import of AppModule AFTER env vars are set
+    const { AppModule } = await import("../app.module");
+
+    const moduleRef: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
     }).compile();
 
     app = moduleRef.createNestApplication();
     await app.init();
-  });
+  }, 120000); // 2 minute timeout for container startup
 
   afterAll(async () => {
-    await app?.close();
+    if (app) {
+      await app.close();
+    }
+    if (container) {
+      await container.stop();
+    }
   });
 
   describe("authentication", () => {
