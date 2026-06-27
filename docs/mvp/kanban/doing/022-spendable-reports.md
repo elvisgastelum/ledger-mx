@@ -1,6 +1,6 @@
 # Story: Spendable Balance & Reports
 
-**Status**: Todo
+**Status**: Doing
 **Priority**: P0
 **Estimated**: 3 days
 
@@ -31,30 +31,35 @@ Implement reports endpoints and UI for spendable balance, expenses by category, 
 ## Technical Notes
 
 Reports API endpoints:
+
 - `GET /api/v1/reports/spendable?date=` - Spendable balance
 - `GET /api/v1/reports/expenses-by-category?start=&end=` - Expenses by category
 - `GET /api/v1/reports/debt-progress?date=` - Debt payoff progress
 - `GET /api/v1/reports/balance-history?start=&end=` - Balance over time
 
 Spendable balance formula:
+
 ```
-spendable = 
-  sum(account_balances) 
-  - sum(envelope_allocations) 
+spendable =
+  sum(account_balances)
+  - sum(envelope_allocations)
   - sum(upcoming_obligations)
 ```
 
 Balance sign convention:
+
 - Assets (checking, savings): positive balance
 - Liabilities (credit cards, loans): negative balance
 - Net worth = sum(all account balances)
 
 Runtime derivation:
+
 - Calculate from transaction lines, not stored balances
 - Use efficient queries with date filters
 - Cache invalidation via TanStack Query
 
 Files/modules to touch:
+
 - `packages/application/src/reports/reports.service.ts`
 - `apps/api/src/reports/reports.controller.ts` (ts-rest contract)
 - `apps/web/src/reports/` (components, hooks, pages)

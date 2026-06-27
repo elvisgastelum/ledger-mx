@@ -17,6 +17,7 @@ export function MobileNav({ isOpen, onClose }: MobileNavProps) {
     { name: "Dashboard", to: "/" },
     { name: "Accounts", to: "/accounts" },
     { name: "Transactions", to: "/transactions" },
+    { name: "Reports", to: "/reports" },
     { name: "Onboarding", to: "/onboarding" },
   ];
 

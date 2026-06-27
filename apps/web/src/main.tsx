@@ -22,6 +22,7 @@ import { ExportForm } from "./components/export-form";
 import AccountsPage from "./routes/accounts";
 import TransactionsPage from "./routes/transactions";
 import EnvelopesPage from "./routes/envelopes";
+import ReportsPage from "./routes/reports";
 
 // Home component for the '/' route
 function Home() {
@@ -127,6 +128,19 @@ const envelopesRoute = createRoute({
   ),
 });
 
+// Create the reports route ('/reports')
+const reportsRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/reports",
+  component: () => (
+    <AuthGuard>
+      <AppShell>
+        <ReportsPage />
+      </AppShell>
+    </AuthGuard>
+  ),
+});
+
 // Build the route tree
 const routeTree = rootRoute.addChildren([
   indexRoute,
@@ -136,6 +150,7 @@ const routeTree = rootRoute.addChildren([
   accountsRoute,
   transactionsRoute,
   envelopesRoute,
+  reportsRoute,
 ]);
 
 // Create the router

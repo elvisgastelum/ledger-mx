@@ -206,3 +206,20 @@ export { GetEnvelopeBalanceUseCase } from "./envelopes/use-cases/get-envelope-ba
 export { GetEnvelopeBalancesUseCase } from "./envelopes/use-cases/get-envelope-balances.use-case";
 export { GetEnvelopeTransactionsUseCase } from "./envelopes/use-cases/get-envelope-transactions.use-case";
 export { ApplyDefaultEnvelopesUseCase } from "./envelopes/use-cases/apply-default-envelopes.use-case";
+
+// Reports Types
+export type {
+  GetSpendableBalanceInput,
+  SpendableBalanceResult,
+  GetExpensesByCategoryInput,
+  ExpensesByCategoryResult,
+  CategoryGroupExpense,
+  GetDebtProgressInput,
+  DebtProgressResult,
+  LiabilityAccountData,
+} from "./reports/report.types";
+
+// Reports Use Cases
+export { GetSpendableBalanceUseCase } from "./reports/use-cases/get-spendable-balance.use-case";
+export { GetExpensesByCategoryUseCase } from "./reports/use-cases/get-expenses-by-category.use-case";
+export { GetDebtProgressUseCase } from "./reports/use-cases/get-debt-progress.use-case";

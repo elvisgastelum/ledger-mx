@@ -1,4 +1,4 @@
-import { eq, and, isNull, inArray } from "drizzle-orm";
+import { eq, and, isNull, inArray, gte, lte } from "drizzle-orm";
 import { Transaction, TransactionLine } from "@ledger-mx/domain";
 import type {
   TransactionRepository,
@@ -227,6 +227,93 @@ export class DrizzleTransactionRepository implements TransactionRepository {
       .where(
         and(
           eq(transactionLines.userId, userId),
+          isNull(transactionLines.deletedAt),
+        ),
+      );
+
+    // Group lines by transactionId
+    const linesByTxId = new Map<string, typeof allLineRows>();
+    for (const lineRow of allLineRows) {
+      const txId = lineRow.transactionId;
+      if (!linesByTxId.has(txId)) {
+        linesByTxId.set(txId, []);
+      }
+      linesByTxId.get(txId)!.push(lineRow);
+    }
+
+    // Build Transaction objects
+    const result: Transaction[] = [];
+    for (const txRow of txRows) {
+      const lineRows = linesByTxId.get(txRow.id) ?? [];
+
+      const lines = lineRows.map(
+        (row) =>
+          new TransactionLine({
+            id: row.id as TransactionLineId,
+            transactionId: row.transactionId as TransactionId,
+            targetType: row.targetType as "account" | "envelope" | "category",
+            targetId: this.getTargetId(row) as TransactionLineTargetId,
+            amountCents: row.amountCents,
+          }),
+      );
+
+      const tx = new Transaction({
+        id: txRow.id as TransactionId,
+        userId: txRow.userId as UserId,
+        type: txRow.type as Transaction["type"],
+        occurredAt: txRow.occurredAt,
+        description: txRow.description ?? undefined,
+        lines: lines,
+        createdAt: txRow.createdAt,
+        updatedAt: txRow.updatedAt,
+        reversalOfTransactionId: txRow.reversalOfTransactionId as
+          | TransactionId
+          | undefined,
+      });
+
+      result.push(tx);
+    }
+
+    return result;
+  }
+
+  async findByUserIdAndDateRange(
+    userId: UserId,
+    dateRange?: { startDate?: Date; endDate?: Date },
+  ): Promise<Transaction[]> {
+    // Build where conditions with date filters
+    const dateConditions = [
+      eq(transactions.userId, userId),
+      isNull(transactions.deletedAt),
+    ];
+
+    if (dateRange?.startDate) {
+      dateConditions.push(gte(transactions.occurredAt, dateRange.startDate));
+    }
+
+    if (dateRange?.endDate) {
+      dateConditions.push(lte(transactions.occurredAt, dateRange.endDate));
+    }
+
+    const txRows = await this.db
+      .select()
+      .from(transactions)
+      .where(and(...dateConditions))
+      .orderBy(transactions.occurredAt);
+
+    if (txRows.length === 0) {
+      return [];
+    }
+
+    // Get all lines for these transactions
+    const txIds = txRows.map((row) => row.id);
+    const allLineRows = await this.db
+      .select()
+      .from(transactionLines)
+      .where(
+        and(
+          eq(transactionLines.userId, userId),
+          inArray(transactionLines.transactionId, txIds),
           isNull(transactionLines.deletedAt),
         ),
       );

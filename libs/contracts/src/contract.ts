@@ -4,6 +4,7 @@ import {
   ErrorResponseSchema,
   UuidSchema,
   MoneySchema,
+  SignedMoneySchema,
   DateRangeQuerySchema,
   PaginationQuerySchema,
 } from "./common.schemas";
@@ -312,7 +313,7 @@ export const contract = c.router(
       },
     }),
 
-     // ENVELOPES ENDPOINTS (implemented)
+    // ENVELOPES ENDPOINTS (implemented)
     envelopes: c.router({
       list: {
         method: "GET",
@@ -554,7 +555,7 @@ export const contract = c.router(
       },
     }),
 
-    // REPORTS ENDPOINTS (planned, not yet implemented)
+    // REPORTS ENDPOINTS (implemented)
     reports: c.router({
       getSpendableBalance: {
         method: "GET",
@@ -563,46 +564,62 @@ export const contract = c.router(
         responses: {
           200: z
             .object({
-              totalIncome: MoneySchema,
-              totalExpenses: MoneySchema,
-              spendableBalance: MoneySchema,
+              accountBalance: SignedMoneySchema.describe(
+                "Total balance across all accounts (can be negative for liabilities)",
+              ),
+              envelopeAllocations: MoneySchema.describe(
+                "Total allocated to envelopes (non-negative)",
+              ),
+              upcomingObligations: MoneySchema.describe(
+                "Placeholder for upcoming obligations (MVP card 028 not yet implemented) - currently always 0",
+              ),
+              spendableBalance: SignedMoneySchema.describe(
+                "Available spendable balance = accountBalance - envelopeAllocations - upcomingObligations",
+              ),
+              asOfDate: z
+                .string()
+                .datetime({ offset: true })
+                .nullable()
+                .describe("Point-in-time date for the balance calculation"),
             })
             .describe("Spendable balance calculation"),
           401: ErrorResponseSchema,
-          501: ErrorResponseSchema.describe("Endpoint not yet implemented"),
         },
         summary: "Get spendable balance for a date range",
         metadata: {
-          implemented: false,
+          implemented: true,
           auth: true,
           scopes: ["user:read"],
-          planned: true,
         },
       },
       getExpensesByCategory: {
         method: "GET",
         path: "/reports/expenses-by-category",
-        query: DateRangeQuerySchema,
+        query: DateRangeQuerySchema.optional(),
         responses: {
           200: z
             .array(
               z.object({
                 categoryGroupId: UuidSchema,
                 categoryGroupName: z.string(),
-                totalExpenses: MoneySchema,
-                percentageOfTotal: z.number().min(0).max(100),
+                totalExpenses: MoneySchema.describe(
+                  "Total expenses for this category group (absolute value in cents)",
+                ),
+                percentageOfTotal: z
+                  .number()
+                  .min(0)
+                  .max(100)
+                  .describe("Percentage of total expenses"),
               }),
             )
             .describe("Expenses grouped by category"),
           401: ErrorResponseSchema,
-          501: ErrorResponseSchema.describe("Endpoint not yet implemented"),
         },
         summary: "Get expenses grouped by category for a date range",
         metadata: {
-          implemented: false,
+          implemented: true,
           auth: true,
           scopes: ["user:read"],
-          planned: true,
         },
       },
       getDebtProgress: {
@@ -612,21 +629,53 @@ export const contract = c.router(
         responses: {
           200: z
             .object({
-              totalDebt: MoneySchema,
-              paidDebt: MoneySchema,
-              remainingDebt: MoneySchema,
-              progressPercentage: z.number().min(0).max(100),
+              totalDebt: MoneySchema.describe(
+                "Total outstanding debt (non-negative)",
+              ),
+              paidDebt: MoneySchema.describe(
+                "Placeholder - no reliable basis for paid debt yet - currently always 0",
+              ),
+              remainingDebt: MoneySchema.describe(
+                "Remaining debt to pay off (non-negative)",
+              ),
+              progressPercentage: z
+                .number()
+                .min(0)
+                .max(100)
+                .describe(
+                  "Placeholder - no reliable basis yet - currently always 0",
+                ),
+              interest: MoneySchema.describe(
+                "Placeholder - no interest calculation yet - currently always 0",
+              ),
+              payoffDate: z
+                .string()
+                .datetime({ offset: true })
+                .nullable()
+                .describe("Placeholder - no payoff calculation yet"),
+              liabilityAccounts: z
+                .array(
+                  z.object({
+                    accountId: UuidSchema,
+                    accountName: z.string(),
+                    accountType: z
+                      .enum(["credit", "loan"])
+                      .describe("Liability account type"),
+                    currentBalance: SignedMoneySchema.describe(
+                      "Current balance (negative for outstanding debt)",
+                    ),
+                  }),
+                )
+                .describe("Liability account details"),
             })
             .describe("Debt payoff progress"),
           401: ErrorResponseSchema,
-          501: ErrorResponseSchema.describe("Endpoint not yet implemented"),
         },
         summary: "Get debt payoff progress for a date range",
         metadata: {
-          implemented: false,
+          implemented: true,
           auth: true,
           scopes: ["user:read"],
-          planned: true,
         },
       },
     }),

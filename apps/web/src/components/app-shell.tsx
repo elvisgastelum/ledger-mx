@@ -24,6 +24,7 @@ export function AppShell({ children }: AppShellProps) {
     { name: "Accounts", to: "/accounts" },
     { name: "Transactions", to: "/transactions" },
     { name: "Envelopes", to: "/envelopes" },
+    { name: "Reports", to: "/reports" },
     { name: "Onboarding", to: "/onboarding" },
   ];
 

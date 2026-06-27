@@ -12,25 +12,27 @@ import { BalancesModule } from "./balances/balances.module";
 import { ExportModule } from "./export/export.module";
 import { OnboardingModule } from "./onboarding/onboarding.module";
 import { EnvelopesModule } from "./envelopes/envelopes.module";
+import { ReportsModule } from "./reports/reports.module";
 
 const appModuleDir = dirname(fileURLToPath(import.meta.url));
 
 @Module({
-  imports: [
-    ConfigModule.forRoot({
-      isGlobal: true,
-      validate: validateEnv,
-      envFilePath: join(appModuleDir, "../../../.env"),
-    }),
-    AuthModule,
-    CategoryGroupsModule.forRoot(),
-    CategoriesModule.forRoot(),
-    AccountsModule.forRoot(),
-    TransactionsModule.forRoot(),
-    BalancesModule.forRoot(),
-    ExportModule.forRoot(),
-    OnboardingModule.forRoot(),
-    EnvelopesModule.forRoot(),
-  ],
+	imports: [
+		ConfigModule.forRoot({
+			isGlobal: true,
+			validate: validateEnv,
+			envFilePath: join(appModuleDir, "../../../.env"),
+		}),
+		AuthModule.forRoot(),
+		CategoryGroupsModule.forRoot(),
+		CategoriesModule.forRoot(),
+		AccountsModule.forRoot(),
+		TransactionsModule.forRoot(),
+		BalancesModule.forRoot(),
+		ExportModule.forRoot(),
+		OnboardingModule.forRoot(),
+		EnvelopesModule.forRoot(),
+		ReportsModule.forRoot(),
+	],
 })
-export class AppModule {}
+export class AppModule { }
