@@ -16,6 +16,7 @@ export const TRANSACTION_TYPES = [
   "adjustment",
   "reversal",
   "debt_payment",
+  "envelope_allocation",
 ] as const;
 export type TransactionType = (typeof TRANSACTION_TYPES)[number];
 
@@ -90,6 +91,7 @@ export type { TransactionProps } from "./ledger/transaction";
 export type { CategoryGroup } from "./ledger/category-group";
 export type { Category } from "./ledger/category";
 export type { Account } from "./ledger/account";
+export type { Envelope } from "./ledger/envelope";
 
 // Ledger Builders
 export {
@@ -98,6 +100,7 @@ export {
   AccountBuilder,
   CategoryBuilder,
   CategoryGroupBuilder,
+  EnvelopeBuilder,
 } from "./ledger/builders";
 
 // Auth Errors
@@ -135,6 +138,7 @@ export type { AuthAuditLogRepository } from "./repositories/auth-audit-log-repos
 export type { CategoryGroupRepository } from "./repositories/category-group-repository";
 export type { CategoryRepository } from "./repositories/category-repository";
 export type { AccountRepository } from "./repositories/account-repository";
+export type { EnvelopeRepository } from "./repositories/envelope-repository";
 export type {
   BalanceRepository,
   AccountBalance,

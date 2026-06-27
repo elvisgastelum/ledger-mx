@@ -237,4 +237,56 @@ describe("DrizzleTransactionRepository", () => {
       expect(mockSelectChain.where).toHaveBeenCalled();
     });
   });
+
+  describe("findByEnvelopeId", () => {
+    it("should scope query to userId and envelopeId", async () => {
+      const envelopeId = "823e4567-e89b-42d3-a456-426614174002" as unknown as AccountId;
+
+      // Mock the transactionLines select to return matching lines
+      const mockLineSelectChain = createMockChain();
+      mockLineSelectChain.where.mockReturnValue({
+        then: (resolve: (value: unknown) => void) => resolve([
+          { transactionId: "test-tx-id" },
+        ]),
+      });
+
+      // Mock the transactions select to return transactions
+      const mockTxSelectChain = createMockChain();
+      mockTxSelectChain.where.mockReturnValue({
+        orderBy: vi.fn().mockResolvedValue([]),
+        then: (resolve: (value: unknown) => void) => resolve([]),
+      });
+
+      // Setup select to return different chains for different calls
+      let selectCall = 0;
+      mockDb.select.mockImplementation(() => {
+        selectCall++;
+        if (selectCall === 1) {
+          return mockLineSelectChain;
+        }
+        return mockTxSelectChain;
+      });
+
+      await repo.findByEnvelopeId(userId, envelopeId as never);
+
+      // Verify where was called for user scoping
+      expect(mockLineSelectChain.where).toHaveBeenCalled();
+    });
+
+    it("should return empty array if no transactions match envelopeId", async () => {
+      const envelopeId = "823e4567-e89b-42d3-a456-426614174002" as unknown as AccountId;
+
+      // Mock the transactionLines select to return empty array
+      const mockLineSelectChain = createMockChain();
+      mockLineSelectChain.where.mockReturnValue({
+        then: (resolve: (value: unknown) => void) => resolve([]),
+      });
+
+      mockDb.select.mockReturnValue(mockLineSelectChain);
+
+      const result = await repo.findByEnvelopeId(userId, envelopeId as never);
+
+      expect(result).toEqual([]);
+    });
+  });
 });

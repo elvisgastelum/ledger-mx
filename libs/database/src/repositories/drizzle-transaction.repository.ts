@@ -1,4 +1,4 @@
-import { eq, and, isNull } from "drizzle-orm";
+import { eq, and, isNull, inArray } from "drizzle-orm";
 import { Transaction, TransactionLine } from "@ledger-mx/domain";
 import type {
   TransactionRepository,
@@ -6,6 +6,7 @@ import type {
   TransactionId,
   TransactionLineId,
   TransactionLineTargetId,
+  EnvelopeId,
 } from "@ledger-mx/domain";
 import { FinancialRecordModificationError } from "@ledger-mx/domain";
 import type { Database } from "../connection";
@@ -226,6 +227,101 @@ export class DrizzleTransactionRepository implements TransactionRepository {
       .where(
         and(
           eq(transactionLines.userId, userId),
+          isNull(transactionLines.deletedAt),
+        ),
+      );
+
+    // Group lines by transactionId
+    const linesByTxId = new Map<string, typeof allLineRows>();
+    for (const lineRow of allLineRows) {
+      const txId = lineRow.transactionId;
+      if (!linesByTxId.has(txId)) {
+        linesByTxId.set(txId, []);
+      }
+      linesByTxId.get(txId)!.push(lineRow);
+    }
+
+    // Build Transaction objects
+    const result: Transaction[] = [];
+    for (const txRow of txRows) {
+      const lineRows = linesByTxId.get(txRow.id) ?? [];
+
+      const lines = lineRows.map(
+        (row) =>
+          new TransactionLine({
+            id: row.id as TransactionLineId,
+            transactionId: row.transactionId as TransactionId,
+            targetType: row.targetType as "account" | "envelope" | "category",
+            targetId: this.getTargetId(row) as TransactionLineTargetId,
+            amountCents: row.amountCents,
+          }),
+      );
+
+      const tx = new Transaction({
+        id: txRow.id as TransactionId,
+        userId: txRow.userId as UserId,
+        type: txRow.type as Transaction["type"],
+        occurredAt: txRow.occurredAt,
+        description: txRow.description ?? undefined,
+        lines: lines,
+        createdAt: txRow.createdAt,
+        updatedAt: txRow.updatedAt,
+        reversalOfTransactionId: txRow.reversalOfTransactionId as
+          | TransactionId
+          | undefined,
+      });
+
+      result.push(tx);
+    }
+
+    return result;
+  }
+
+  async findByEnvelopeId(
+    userId: UserId,
+    envelopeId: EnvelopeId,
+  ): Promise<Transaction[]> {
+    // Find transaction IDs that have lines with targetType='envelope' and envelopeId
+    const lineRows = await this.db
+      .select({ transactionId: transactionLines.transactionId })
+      .from(transactionLines)
+      .where(
+        and(
+          eq(transactionLines.userId, userId),
+          eq(transactionLines.targetType, "envelope"),
+          eq(transactionLines.envelopeId, envelopeId),
+          isNull(transactionLines.deletedAt),
+        ),
+      );
+
+    if (lineRows.length === 0) {
+      return [];
+    }
+
+    // Get unique transaction IDs
+    const txIds = Array.from(new Set(lineRows.map((row) => row.transactionId)));
+
+    // Get transactions
+    const txRows = await this.db
+      .select()
+      .from(transactions)
+      .where(
+        and(
+          eq(transactions.userId, userId),
+          inArray(transactions.id, txIds),
+          isNull(transactions.deletedAt),
+        ),
+      )
+      .orderBy(transactions.occurredAt);
+
+    // Get all lines for these transactions
+    const allLineRows = await this.db
+      .select()
+      .from(transactionLines)
+      .where(
+        and(
+          eq(transactionLines.userId, userId),
+          inArray(transactionLines.transactionId, txIds),
           isNull(transactionLines.deletedAt),
         ),
       );

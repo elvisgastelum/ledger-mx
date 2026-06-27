@@ -23,6 +23,7 @@ export function AppShell({ children }: AppShellProps) {
     { name: "Dashboard", to: "/" },
     { name: "Accounts", to: "/accounts" },
     { name: "Transactions", to: "/transactions" },
+    { name: "Envelopes", to: "/envelopes" },
     { name: "Onboarding", to: "/onboarding" },
   ];
 

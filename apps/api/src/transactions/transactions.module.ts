@@ -12,6 +12,7 @@ import type {
   TransactionRepository,
   CategoryRepository,
   AccountRepository,
+  EnvelopeRepository,
 } from "@ledger-mx/domain";
 import {
   CreateTransactionUseCase,
@@ -24,6 +25,7 @@ import {
   DrizzleTransactionRepository,
   DrizzleCategoryRepository,
   DrizzleAccountRepository,
+  DrizzleEnvelopeRepository,
 } from "@ledger-mx/database";
 
 // Internal token for shared database connection
@@ -33,6 +35,7 @@ export interface TransactionsModuleOptions {
   transactionRepository?: Provider<TransactionRepository>;
   categoryRepository?: Provider<CategoryRepository>;
   accountRepository?: Provider<AccountRepository>;
+  envelopeRepository?: Provider<EnvelopeRepository>;
 }
 
 function createDefaultDatabaseProvider(): FactoryProvider {
@@ -72,6 +75,16 @@ function createDefaultAccountRepoProvider(): FactoryProvider {
   };
 }
 
+function createDefaultEnvelopeRepoProvider(): FactoryProvider {
+  return {
+    provide: TRANSACTIONS_TOKENS.ENVELOPE_REPOSITORY,
+    useFactory: (db: ReturnType<typeof createDatabase>) => {
+      return new DrizzleEnvelopeRepository(db);
+    },
+    inject: [TRANSACTIONS_DATABASE],
+  };
+}
+
 @Module({})
 export class TransactionsModule {
   static forRoot(options?: TransactionsModuleOptions): DynamicModule {
@@ -84,11 +97,15 @@ export class TransactionsModule {
     const accountRepoProvider =
       options?.accountRepository ?? createDefaultAccountRepoProvider();
 
+    const envelopeRepoProvider =
+      options?.envelopeRepository ?? createDefaultEnvelopeRepoProvider();
+
     // Only provide shared database if using default repo providers
     const needsDatabase =
       !options?.transactionRepository ||
       !options?.categoryRepository ||
-      !options?.accountRepository;
+      !options?.accountRepository ||
+      !options?.envelopeRepository;
 
     return {
       module: TransactionsModule,
@@ -98,6 +115,7 @@ export class TransactionsModule {
         transactionRepoProvider,
         categoryRepoProvider,
         accountRepoProvider,
+        envelopeRepoProvider,
         ...(needsDatabase ? [createDefaultDatabaseProvider()] : []),
         // Use cases
         {
@@ -106,17 +124,20 @@ export class TransactionsModule {
             transactionRepository: TransactionRepository,
             categoryRepository: CategoryRepository,
             accountRepository: AccountRepository,
+            envelopeRepository: EnvelopeRepository,
           ) => {
             return new CreateTransactionUseCase(
               transactionRepository,
               categoryRepository,
               accountRepository,
+              envelopeRepository,
             );
           },
           inject: [
             TRANSACTIONS_TOKENS.TRANSACTION_REPOSITORY,
             TRANSACTIONS_TOKENS.CATEGORY_REPOSITORY,
             TRANSACTIONS_TOKENS.ACCOUNT_REPOSITORY,
+            TRANSACTIONS_TOKENS.ENVELOPE_REPOSITORY,
           ],
         },
         {

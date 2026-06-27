@@ -171,3 +171,38 @@ export {
   AccountBalanceNotFoundError,
   BalanceNotFoundError,
 } from "./balances/balance.errors";
+
+// Envelope errors and types
+export {
+  EnvelopeApplicationError,
+  EnvelopeNotFoundError,
+  ProtectedEnvelopeOverspendError,
+  InsufficientAccountBalanceError,
+  EnvelopeOnboardingConflictError,
+} from "./envelopes/envelope.errors";
+export type {
+  CreateEnvelopeInput,
+  UpdateEnvelopeInput,
+  ListEnvelopesInput,
+  GetEnvelopeInput,
+  ArchiveEnvelopeInput,
+  FundEnvelopeInput,
+  AllocateEnvelopeInput,
+  GetEnvelopeBalanceInput,
+  GetEnvelopeTransactionsInput,
+  ApplyDefaultEnvelopesInput,
+  ApplyDefaultEnvelopesResult,
+} from "./envelopes/envelope.types";
+
+// Envelope use cases
+export { CreateEnvelopeUseCase } from "./envelopes/use-cases/create-envelope.use-case";
+export { ListEnvelopesUseCase } from "./envelopes/use-cases/list-envelopes.use-case";
+export { GetEnvelopeUseCase } from "./envelopes/use-cases/get-envelope.use-case";
+export { UpdateEnvelopeUseCase } from "./envelopes/use-cases/update-envelope.use-case";
+export { ArchiveEnvelopeUseCase } from "./envelopes/use-cases/archive-envelope.use-case";
+export { FundEnvelopeUseCase } from "./envelopes/use-cases/fund-envelope.use-case";
+export { AllocateEnvelopeUseCase } from "./envelopes/use-cases/allocate-envelope.use-case";
+export { GetEnvelopeBalanceUseCase } from "./envelopes/use-cases/get-envelope-balance.use-case";
+export { GetEnvelopeBalancesUseCase } from "./envelopes/use-cases/get-envelope-balances.use-case";
+export { GetEnvelopeTransactionsUseCase } from "./envelopes/use-cases/get-envelope-transactions.use-case";
+export { ApplyDefaultEnvelopesUseCase } from "./envelopes/use-cases/apply-default-envelopes.use-case";

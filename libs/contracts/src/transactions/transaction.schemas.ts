@@ -11,6 +11,7 @@ export const TRANSACTION_TYPES = [
   "adjustment",
   "reversal",
   "debt_payment",
+  "envelope_allocation",
 ] as const;
 export type TransactionType = (typeof TRANSACTION_TYPES)[number];
 

@@ -1,5 +1,5 @@
 import { Transaction } from "../ledger/transaction";
-import type { UserId, TransactionId } from "../value-objects/uuid";
+import type { UserId, TransactionId, EnvelopeId } from "../value-objects/uuid";
 
 /**
  * Repository interface for persisting and retrieving Transactions.
@@ -26,4 +26,13 @@ export interface TransactionRepository {
     userId: UserId,
     originalTransactionId: TransactionId,
   ): Promise<Transaction | null>;
+
+  /**
+   * Finds transactions that involve a specific envelope.
+   * Returns transactions where any line has targetType='envelope' and matches the envelopeId.
+   */
+  findByEnvelopeId(
+    userId: UserId,
+    envelopeId: EnvelopeId,
+  ): Promise<Transaction[]>;
 }

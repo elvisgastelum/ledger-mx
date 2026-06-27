@@ -3,6 +3,7 @@ import type {
   TransactionRepository,
   CategoryRepository,
   AccountRepository,
+  EnvelopeRepository,
   UserId,
   TransactionId,
   TransactionLineId,
@@ -18,12 +19,14 @@ import type {
   CreateTransactionOutput,
 } from "../transaction.types";
 import { TransactionTargetNotFoundError } from "../transaction.errors";
+import { ProtectedEnvelopeOverspendError } from "../../envelopes/envelope.errors";
 
 export class CreateTransactionUseCase {
   constructor(
     private readonly transactionRepository: TransactionRepository,
     private readonly categoryRepository: CategoryRepository,
     private readonly accountRepository: AccountRepository,
+    private readonly envelopeRepository: EnvelopeRepository,
   ) {}
 
   async execute(
@@ -50,8 +53,15 @@ export class CreateTransactionUseCase {
         if (!category || category.deletedAt) {
           throw new TransactionTargetNotFoundError("Category", line.categoryId);
         }
+      } else if (line.targetType === "envelope" && line.envelopeId) {
+        const envelope = await this.envelopeRepository.findById(
+          userId,
+          line.envelopeId as EnvelopeId,
+        );
+        if (!envelope || envelope.deletedAt) {
+          throw new TransactionTargetNotFoundError("Envelope", line.envelopeId);
+        }
       }
-      // TODO: Add envelope validation when envelope repository is available
     }
 
     // Map contract lines to domain TransactionLine objects
@@ -89,6 +99,40 @@ export class CreateTransactionUseCase {
         amountCents: line.amountCents,
       });
     });
+
+    // Check for protected envelope overspend
+    for (const line of lines) {
+      if (line.targetType === "envelope" && line.amountCents < 0) {
+        // This is spending from an envelope (negative amount)
+        const envelopeId = line.targetId as EnvelopeId;
+        
+        // Get envelope to check if protected
+        const envelope = await this.envelopeRepository.findById(userId, envelopeId);
+        if (!envelope) {
+          throw new TransactionTargetNotFoundError("Envelope", envelopeId as string);
+        }
+
+        // Skip check if envelope is not protected
+        if (!envelope.isProtected) {
+          continue;
+        }
+
+        // Get current envelope balance
+        const currentBalance = await this.envelopeRepository.getBalance(userId, envelopeId);
+
+        // Calculate resulting balance
+        const resultingBalance = currentBalance + line.amountCents; // amountCents is negative
+
+        // Reject if resulting balance would be negative
+        if (resultingBalance < 0) {
+          throw new ProtectedEnvelopeOverspendError(
+            envelopeId as string,
+            currentBalance,
+            Math.abs(line.amountCents),
+          );
+        }
+      }
+    }
 
     // Create Transaction (validates invariants: 2+ lines, sum to zero)
     const transaction = new Transaction({

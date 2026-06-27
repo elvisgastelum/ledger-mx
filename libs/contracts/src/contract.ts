@@ -48,6 +48,16 @@ import {
   GetCategoryResponseSchema,
   CategoryResponseSchema,
 } from "./categories/category.schemas";
+import {
+  EnvelopeResponseSchema,
+  ListEnvelopesResponseSchema,
+  CreateEnvelopeRequestSchema,
+  UpdateEnvelopeRequestSchema,
+  FundEnvelopeRequestSchema,
+  AllocateEnvelopeRequestSchema,
+  EnvelopeBalanceResponseSchema,
+  EnvelopeTransactionsResponseSchema,
+} from "./envelopes";
 
 const c = initContract();
 
@@ -299,6 +309,137 @@ export const contract = c.router(
         },
         summary: "Archive an account by ID (soft delete)",
         metadata: { implemented: true, auth: true, scopes: ["user:write"] },
+      },
+    }),
+
+     // ENVELOPES ENDPOINTS (implemented)
+    envelopes: c.router({
+      list: {
+        method: "GET",
+        path: "/envelopes",
+        query: PaginationQuerySchema.optional(),
+        responses: {
+          200: ListEnvelopesResponseSchema,
+          401: ErrorResponseSchema,
+        },
+        summary: "List all envelopes for the authenticated user",
+        metadata: { implemented: true, auth: true, scopes: ["user:read"] },
+      },
+      create: {
+        method: "POST",
+        path: "/envelopes",
+        body: CreateEnvelopeRequestSchema,
+        responses: {
+          201: EnvelopeResponseSchema,
+          400: ErrorResponseSchema,
+          401: ErrorResponseSchema,
+        },
+        summary: "Create a new envelope for the authenticated user",
+        metadata: { implemented: true, auth: true, scopes: ["user:write"] },
+      },
+      get: {
+        method: "GET",
+        path: "/envelopes/:id",
+        pathParams: z.object({ id: UuidSchema }),
+        responses: {
+          200: EnvelopeResponseSchema,
+          401: ErrorResponseSchema,
+          404: ErrorResponseSchema.describe(
+            "Envelope not found or not owned by user",
+          ),
+        },
+        summary: "Get a single envelope by ID",
+        metadata: { implemented: true, auth: true, scopes: ["user:read"] },
+      },
+      update: {
+        method: "PATCH",
+        path: "/envelopes/:id",
+        pathParams: z.object({ id: UuidSchema }),
+        body: UpdateEnvelopeRequestSchema,
+        responses: {
+          200: EnvelopeResponseSchema,
+          400: ErrorResponseSchema,
+          401: ErrorResponseSchema,
+          404: ErrorResponseSchema.describe(
+            "Envelope not found or not owned by user",
+          ),
+        },
+        summary: "Update an existing envelope by ID",
+        metadata: { implemented: true, auth: true, scopes: ["user:write"] },
+      },
+      archive: {
+        method: "DELETE",
+        path: "/envelopes/:id",
+        pathParams: z.object({ id: UuidSchema }),
+        responses: {
+          204: z.void(),
+          401: ErrorResponseSchema,
+          404: ErrorResponseSchema.describe(
+            "Envelope not found or not owned by user",
+          ),
+        },
+        summary: "Archive an envelope by ID (soft delete)",
+        metadata: { implemented: true, auth: true, scopes: ["user:write"] },
+      },
+      fund: {
+        method: "POST",
+        path: "/envelopes/:id/fund",
+        pathParams: z.object({ id: UuidSchema }),
+        body: FundEnvelopeRequestSchema,
+        responses: {
+          200: EnvelopeResponseSchema,
+          400: ErrorResponseSchema,
+          401: ErrorResponseSchema,
+          404: ErrorResponseSchema.describe(
+            "Envelope or account not found or not owned by user",
+          ),
+        },
+        summary: "Fund an envelope from an account",
+        metadata: { implemented: true, auth: true, scopes: ["user:write"] },
+      },
+      allocate: {
+        method: "POST",
+        path: "/envelopes/:id/allocate",
+        pathParams: z.object({ id: UuidSchema }),
+        body: AllocateEnvelopeRequestSchema,
+        responses: {
+          200: EnvelopeResponseSchema,
+          400: ErrorResponseSchema,
+          401: ErrorResponseSchema,
+          404: ErrorResponseSchema.describe(
+            "Envelope or account not found or not owned by user",
+          ),
+        },
+        summary: "Allocate budget to an envelope from an account",
+        metadata: { implemented: true, auth: true, scopes: ["user:write"] },
+      },
+      getBalance: {
+        method: "GET",
+        path: "/envelopes/:id/balance",
+        pathParams: z.object({ id: UuidSchema }),
+        responses: {
+          200: EnvelopeBalanceResponseSchema,
+          401: ErrorResponseSchema,
+          404: ErrorResponseSchema.describe(
+            "Envelope not found or not owned by user",
+          ),
+        },
+        summary: "Get balance for a specific envelope",
+        metadata: { implemented: true, auth: true, scopes: ["user:read"] },
+      },
+      getTransactions: {
+        method: "GET",
+        path: "/envelopes/:id/transactions",
+        pathParams: z.object({ id: UuidSchema }),
+        responses: {
+          200: EnvelopeTransactionsResponseSchema,
+          401: ErrorResponseSchema,
+          404: ErrorResponseSchema.describe(
+            "Envelope not found or not owned by user",
+          ),
+        },
+        summary: "Get transactions for a specific envelope",
+        metadata: { implemented: true, auth: true, scopes: ["user:read"] },
       },
     }),
 

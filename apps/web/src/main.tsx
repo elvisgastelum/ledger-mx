@@ -21,6 +21,7 @@ import OnboardingWizard from "./routes/onboarding";
 import { ExportForm } from "./components/export-form";
 import AccountsPage from "./routes/accounts";
 import TransactionsPage from "./routes/transactions";
+import EnvelopesPage from "./routes/envelopes";
 
 // Home component for the '/' route
 function Home() {
@@ -113,6 +114,19 @@ const transactionsRoute = createRoute({
   ),
 });
 
+// Create the envelopes route ('/envelopes')
+const envelopesRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/envelopes",
+  component: () => (
+    <AuthGuard>
+      <AppShell>
+        <EnvelopesPage />
+      </AppShell>
+    </AuthGuard>
+  ),
+});
+
 // Build the route tree
 const routeTree = rootRoute.addChildren([
   indexRoute,
@@ -121,6 +135,7 @@ const routeTree = rootRoute.addChildren([
   onboardingRoute,
   accountsRoute,
   transactionsRoute,
+  envelopesRoute,
 ]);
 
 // Create the router
