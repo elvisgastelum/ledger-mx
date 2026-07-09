@@ -42,16 +42,143 @@ Recommended setup:
 - [devenv](https://devenv.sh/)
 - Docker, if using the Docker-based database commands
 
-Install `devenv` if needed:
+## Installing devenv
+
+This project uses `devenv` to provide a reproducible development environment with Node.js, pnpm, and PostgreSQL tooling.
+
+### Declarative Nix configuration
+
+If you manage your system declaratively, add `devenv` to your system or user packages.
+
+#### NixOS
+
+In `configuration.nix`:
+
+```nix
+{ pkgs, ... }:
+
+{
+  environment.systemPackages = with pkgs; [
+    devenv
+  ];
+}
+```
+
+Then rebuild:
+
+```sh
+sudo nixos-rebuild switch
+```
+
+#### nix-darwin
+
+In `darwin-configuration.nix`:
+
+```nix
+{ pkgs, ... }:
+
+{
+  environment.systemPackages = with pkgs; [
+    devenv
+  ];
+}
+```
+
+Then rebuild:
+
+```sh
+darwin-rebuild switch
+```
+
+#### Home Manager
+
+In `home.nix`:
+
+```nix
+{ pkgs, ... }:
+
+{
+  home.packages = with pkgs; [
+    devenv
+  ];
+}
+```
+
+Then apply:
+
+```sh
+home-manager switch
+```
+
+For flake-based configurations, add `pkgs.devenv` to either `environment.systemPackages` or `home.packages` using your pinned `nixpkgs` input.
+
+### Ubuntu
+
+Install Nix first:
+
+```sh
+sh <(curl -L https://nixos.org/nix/install) --daemon
+```
+
+Restart your shell, then install `devenv`:
 
 ```sh
 nix-env --install --attr devenv -f https://github.com/NixOS/nixpkgs/tarball/nixpkgs-unstable
 ```
 
-Or with Nix profiles:
+Alternatively, if you use Nix profiles:
 
 ```sh
 nix profile install nixpkgs#devenv
+```
+
+### Arch Linux
+
+Install Nix from the official repositories or AUR, then enable and start the daemon if your setup uses multi-user Nix:
+
+```sh
+sudo pacman -S nix
+sudo systemctl enable --now nix-daemon.service
+```
+
+Install `devenv`:
+
+```sh
+nix-env --install --attr devenv -f https://github.com/NixOS/nixpkgs/tarball/nixpkgs-unstable
+```
+
+Alternatively, if you use Nix profiles:
+
+```sh
+nix profile install nixpkgs#devenv
+```
+
+### macOS
+
+Install Nix. The Determinate Systems installer is recommended on macOS:
+
+```sh
+curl -sSfL https://install.determinate.systems/nix | sh -s -- install
+```
+
+Restart your shell, then install `devenv`:
+
+```sh
+nix-env --install --attr devenv -f https://github.com/NixOS/nixpkgs/tarball/nixpkgs-unstable
+```
+
+Alternatively, if you use Nix profiles:
+
+```sh
+nix profile install nixpkgs#devenv
+```
+
+### GitHub API rate limits
+
+The Nix ecosystem downloads many sources from GitHub. If you hit rate limits, create a GitHub token with no extra permissions and add it to `~/.config/nix/nix.conf`:
+
+```txt
+access-tokens = github.com=<GITHUB_TOKEN>
 ```
 
 ## Getting started with devenv
